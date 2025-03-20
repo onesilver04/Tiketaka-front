@@ -1,0 +1,24 @@
+img {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    margin-top: 30%;
+}
+
+/* 예매하기 버튼*/
+button.reservation {
+    margin-top: 80%;
+    margin-left: 20px;
+    width: 390px;
+    height: 76px;
+    font-size: 32px;
+}
+
+/* 조회하기 버튼 */
+button.look-up {
+    margin-top: 10%;
+    margin-left: 20px;
+    width: 390px;
+    height: 76px;
+    font-size: 32px;
+}
