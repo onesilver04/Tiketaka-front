@@ -1,7 +1,7 @@
 /* Pretendard 글꼴 가져오기 */
 @import url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.css");
 
-/* Start, End 페이지는 버튼 크기 따로 조정 필요 */
+/* Start, End 페이지와 Resrvation페이지는 버튼 크기 따로 조정 필요 */
 .button {
     width: 186px;
     height: 54px;
@@ -16,6 +16,6 @@
     transition: 0.3s ease;
 }
 .button:hover {
-    background-color: #d9d9dd;
+    background-color: #9194cf;
     cursor: pointer;
 }
