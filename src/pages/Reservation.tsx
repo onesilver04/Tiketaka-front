@@ -1,3 +1,4 @@
+// Reservation.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
@@ -43,14 +44,14 @@ const Reservation = () => {
         <h2>승차권 예매</h2>
 
         <div>
-            <label>출발역</label>
+            <label>출발</label>
             <select value={departure} onChange={(e) => setDeparture(e.target.value)}>
             {stations.map((station) => (
                 <option key={station} value={station}>{station}</option>
             ))}
             </select>
 
-            <label>도착역</label>
+            <label>도착</label>
             <select value={arrival} onChange={(e) => setArrival(e.target.value)}>
             {stations.map((station) => (
                 <option key={station} value={station}>{station}</option>
