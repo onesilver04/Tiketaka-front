@@ -61,13 +61,13 @@ const Reservation = () => {
 
         <div>
             <h4>출발일 선택: {date.toLocaleDateString()}</h4>
-            {/* <Calendar 
+            <Calendar 
                 onChange={setDate} 
                 value={date} 
                 tileClassName={({ date: tileDate }) => 
                     tileDate.toDateString() === date.toDateString() ? 'selected-date' : ''
                 }
-            /> */}
+            />
         </div>
 
         <div>
