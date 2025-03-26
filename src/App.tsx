@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
 import Start from "./pages/Start";
 import Reservation from "./pages/Reservation";
 import TrainList from "./pages/TrainList";
@@ -14,7 +15,6 @@ import RefundModalDetail from "./components/RefundModalDetail";
 import BookingDetail from "./pages/BookingDetail";
 import RefundSuccess from "./pages/RefundSuccess";
 import End from "./pages/End";
-import "./App.css";
 import HistoryNone from "./pages/HistoryNone";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -50,7 +50,10 @@ const App = () => {
                     <Route path="/history" element={<History />} />
                     <Route path="/history-none" element={<HistoryNone />} />
                     <Route path="/history" element={<RefundModal />} />
-                    <Route path="/history" element={<RefundModalDetail />} />
+                    <Route
+                        path="/history/refund-modal-detail"
+                        element={<RefundModalDetail />}
+                    />
                     <Route
                         path="/history/booking-detail"
                         element={<BookingDetail />}

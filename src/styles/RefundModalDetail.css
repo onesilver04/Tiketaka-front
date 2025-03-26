@@ -1,0 +1,45 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-box {
+    background: white;
+    border: 2px solid #5c5cfe;
+    border-radius: 12px;
+    padding: 20px 30px;
+    text-align: center;
+    width: 260px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    width: 100px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.modal-buttons .yes {
+    background-color: #5c5cfe;
+    color: white;
+}
+
+.modal-buttons .no {
+    background-color: white;
+    border: 1px solid #5c5cfe;
+    color: #5c5cfe;
+}

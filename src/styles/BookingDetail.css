@@ -1,0 +1,52 @@
+.detail-box {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    font-family: sans-serif;
+}
+
+.route-box {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.route-detail {
+    text-align: center;
+}
+
+.route-detail h2 {
+    margin: 4px 0;
+}
+
+.passenger-info,
+.card-info {
+    margin: 20px 0;
+}
+
+.price-info {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.card-number {
+    font-weight: bold;
+}
+
+.refund-button {
+    width: 100%;
+    padding: 10px;
+    background: #5c5cfe;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.blurred {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
