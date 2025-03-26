@@ -1,0 +1,10 @@
+.refund-success {
+    display: flex;
+    flex-direction: column;
+}
+
+.ment {
+    color: black;
+    margin-top: 50%;
+    text-align: center;
+}
