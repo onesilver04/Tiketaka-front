@@ -1,0 +1,88 @@
+.title {
+    font-size: 20px;
+}
+
+.user-id {
+    color: red;
+    font-weight: bold;
+}
+
+.date-section {
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.period {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #5c5cfe;
+}
+
+.calendar-wrapper {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.calendar-close {
+    margin-top: 10px;
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.selection-header {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0 10px;
+}
+
+.ticket-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-right: 20px;
+}
+
+.ticket-box {
+    display: flex;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    align-items: flex-start;
+}
+
+.ticket-info {
+    margin-left: 10px;
+}
+
+.route {
+    font-weight: bold;
+}
+
+.times {
+    color: gray;
+}
+
+.details p {
+    margin: 4px 0;
+}
+
+.refund-button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background: #5c5cfe;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}

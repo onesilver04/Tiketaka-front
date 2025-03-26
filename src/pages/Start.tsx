@@ -17,7 +17,12 @@ const Start = () => {
             >
                 예매하기
             </button>
-            <button className={`${styles.button} look-up`}>조회하기</button>
+            <button
+                className={`${styles.button} look-up`}
+                onClick={() => navigate("/phonenumber")} // ✅ 이동 경로 추가
+            >
+                조회하기
+            </button>
         </div>
     );
 };

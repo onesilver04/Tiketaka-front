@@ -1,0 +1,20 @@
+.refund-success {
+    display: flex;
+    flex-direction: column;
+}
+
+.ment {
+    color: black;
+    margin-top: 350px;
+    text-align: center;
+}
+
+button.go-main {
+    margin: auto;
+    margin-top: 40px;
+}
+
+img {
+    margin: auto;
+    margin-top: 250px;
+}

@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
 import Start from "./pages/Start";
 import Reservation from "./pages/Reservation";
 import TrainList from "./pages/TrainList";
@@ -14,7 +15,7 @@ import RefundModalDetail from "./components/RefundModalDetail";
 import BookingDetail from "./pages/BookingDetail";
 import RefundSuccess from "./pages/RefundSuccess";
 import End from "./pages/End";
-import "./App.css";
+import HistoryNone from "./pages/HistoryNone";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -32,17 +33,36 @@ const App = () => {
                 <Routes>
                     <Route path="/" element={<Start />} />
                     <Route path="/reservation" element={<Reservation />} />
-                    <Route path="/reservation/train-list" element={<TrainList />}/>
-                    <Route path="/reservation/select-seat" element={<SelectSeat />} />
+                    <Route
+                        path="/reservation/train-list"
+                        element={<TrainList />}
+                    />
+                    <Route
+                        path="/reservation/select-seat"
+                        element={<SelectSeat />}
+                    />
                     <Route path="/reservation/payment" element={<Payment />} />
-                    <Route path="/reservation/payment/addcard" element={<AddCard />} />
+                    <Route
+                        path="/reservation/payment/addcard"
+                        element={<AddCard />}
+                    />
                     <Route path="/phonenumber" element={<PhoneNumber />} />
-                    <Route path="/history" element={<History />}/>
-                    <Route path="/history" element={<RefundModal />}/>
-                    <Route path="/history" element={<RefundModalDetail />}/>
-                    <Route path="/history" element={<BookingDetail />}/>
-                    <Route path="/history" element={<RefundSuccess />}/>
-                    <Route path="/history" element={<End />}/>
+                    <Route path="/history" element={<History />} />
+                    <Route path="/history-none" element={<HistoryNone />} />
+                    <Route path="/history" element={<RefundModal />} />
+                    <Route
+                        path="/history/refund-modal-detail"
+                        element={<RefundModalDetail />}
+                    />
+                    <Route
+                        path="/history/booking-detail"
+                        element={<BookingDetail />}
+                    />
+                    <Route
+                        path="/history/refund-success"
+                        element={<RefundSuccess />}
+                    />
+                    <Route path="/history" element={<End />} />
                 </Routes>
             </Layout>
         </Router>
