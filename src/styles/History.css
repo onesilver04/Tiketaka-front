@@ -23,6 +23,25 @@
     color: #5c5cfe;
 }
 
+.react-calendar_navigation {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/*prev2 버튼 사용 안되게*/
+.react-calendar__navigation__prev2-button {
+    display: none;
+}
+
+/*next2 버튼 사용 안되게*/
+.react-calendar__navigation__next2-button {
+    display: none;
+}
+
 .calendar-wrapper {
     margin-top: 10px;
     display: flex;

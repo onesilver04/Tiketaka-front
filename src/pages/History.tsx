@@ -5,7 +5,7 @@ import "react-calendar/dist/Calendar.css";
 import "../styles/History.css";
 import styleb from "../styles/Box.module.css";
 import HistoryTicket from "./HistoryTicket";
-import { Reservation } from "../types/reservation"; // 위에서 만든 타입 import
+import { Reservation } from "../types/reservation";
 
 const sampleReservations: Reservation[] = [
     {
