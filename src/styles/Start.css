@@ -4,11 +4,18 @@ img {
     left: 50%;
     margin-top: 30%;
 }
-
+.button-container {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 50%;
+}
 /* 예매하기 버튼*/
 button.reservation {
     margin-top: 80%;
-    margin-left: 20px;
     width: 390px;
     height: 76px;
     font-size: 32px;
@@ -18,7 +25,6 @@ button.reservation {
 /* 조회하기 버튼 */
 button.look-up {
     margin-top: 10%;
-    margin-left: 20px;
     width: 390px;
     height: 76px;
     font-size: 32px;

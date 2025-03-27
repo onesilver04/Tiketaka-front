@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    useLocation,
+} from "react-router-dom";
 import "./App.css";
 import Start from "./pages/Start";
 import Reservation from "./pages/Reservation";
@@ -18,9 +23,14 @@ import End from "./pages/End";
 import HistoryNone from "./pages/HistoryNone";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
+    const location = useLocation();
+
+    const hideHeaderRoutes = ["/"]; // 헤더 숨길 경로들
+    const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
+
     return (
         <>
-            <Header />
+            {!shouldHideHeader && <Header />}
             <div className="App">{children}</div>
         </>
     );
