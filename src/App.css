@@ -20,8 +20,20 @@ body {
     background-color: #fff;
     font-family: "Pretendard", sans-serif;
 }
-h3 {
-    padding: 20px;
+
+.page-title {
+    margin-top: 21px;
+    margin-left: 36px; 
     font-size: 18px;
-    font-weight: medium;
+    font-weight: 500;
+    display: inline-block;
 }
+
+.page-title-bar {
+    width: 350px;
+    color: #E8EBED;
+    margin: 0 auto;
+}
+
+
+
