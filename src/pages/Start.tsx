@@ -11,18 +11,20 @@ const Start = () => {
             <div className="logo">
                 <img src={logoMain} alt="main-logo" />
             </div>
-            <button
-                className={`${styles.button} reservation`}
-                onClick={() => navigate("/reservation")}
-            >
-                예매하기
-            </button>
-            <button
-                className={`${styles.button} look-up`}
-                onClick={() => navigate("/phonenumber")} // ✅ 이동 경로 추가
-            >
-                조회하기
-            </button>
+            <div className="button-container">
+                <button
+                    className={`${styles.button} reservation`}
+                    onClick={() => navigate("/reservation")}
+                >
+                    예매하기
+                </button>
+                <button
+                    className={`${styles.button} look-up`}
+                    onClick={() => navigate("/phonenumber")}
+                >
+                    조회하기
+                </button>
+            </div>
         </div>
     );
 };

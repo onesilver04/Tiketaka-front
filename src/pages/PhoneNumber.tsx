@@ -12,11 +12,11 @@ const PhoneNumber = () => {
 
     // 숫자 버튼 입력
     const handleNumberClick = (num: string) => {
-        if (inputDigits.length >= 8) return;
+        if (inputDigits.length >= 11) return;
         setInputDigits((prev) => prev + num);
     };
 
-    // 삭제 버튼
+    // 지우기 버튼
     const handleDelete = () => {
         setInputDigits((prev) => prev.slice(0, -1));
     };
@@ -24,15 +24,15 @@ const PhoneNumber = () => {
     // 포맷: 010-XXXX-XXXX
     const getFormattedPhone = () => {
         const d = inputDigits;
-        if (d.length <= 4) return `010-${d}`;
-        return `010-${d.slice(0, 4)}-${d.slice(4, 8)}`;
+        if (d.length <= 3) return d;
+        if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+        return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
     };
 
     // 다음 버튼
     const handleNextClick = () => {
-        if (inputDigits.length === 8) {
-            const fullNumber = "010" + inputDigits; // 👉 하이픈 없이 11자리
-            navigate("/history", { state: { phoneNumber: fullNumber } });
+        if (inputDigits.length === 11) {
+            navigate("/history", { state: { phoneNumber: inputDigits } });
         } else {
             setIsModalOpen(true);
         }
@@ -40,13 +40,14 @@ const PhoneNumber = () => {
 
     return (
         <div className="phone-number">
-            <h1>전화번호 입력</h1>
+            <p className="phone-number-title">전화번호 입력</p>
 
             <input
+                className="phone-number-input"
                 type="text"
-                value={getFormattedPhone()}
+                value={inputDigits.length === 0 ? "" : getFormattedPhone()}
                 readOnly
-                placeholder="010-1234-5678"
+                placeholder="전화번호를 입력해주세요."
             />
 
             <div className="keypad">
@@ -61,36 +62,37 @@ const PhoneNumber = () => {
                             if (key === "empty") {
                                 return (
                                     <button
+                                        className="phone-key"
                                         key={`empty-${i}-${j}`}
                                         disabled
                                         style={{ visibility: "hidden" }}
-                                    >
-                                        {/* 공간 유지용 */}
-                                    </button>
+                                    ></button>
                                 );
                             }
 
                             if (key === "del") {
                                 return (
                                     <button
+                                        className="phone-key"
                                         key={`del-${i}-${j}`}
                                         onClick={handleDelete}
                                     >
-                                        취소
-                                        {/* <img
+                                        <img
+                                            className="delete-img"
                                             src={deleteIcon}
                                             alt="delete"
                                             style={{
                                                 width: "24px",
                                                 height: "24px",
                                             }}
-                                        /> */}
+                                        />
                                     </button>
                                 );
                             }
 
                             return (
                                 <button
+                                    className="phone-key"
                                     key={`num-${i}-${j}`}
                                     onClick={() => handleNumberClick(key)}
                                 >
