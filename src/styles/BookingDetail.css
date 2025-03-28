@@ -1,14 +1,13 @@
-.detail-box {
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    font-family: sans-serif;
-}
-
 .route-box {
     display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
+    gap: 50px;
+    margin-top: 55px;
+    margin-left: 43px;
+}
+
+p.booking-detail-station {
+    font-weight: bold;
+    font-size: 32px;
 }
 
 .route-detail {
@@ -18,33 +17,33 @@
 .route-detail h2 {
     margin: 4px 0;
 }
-
-.passenger-info,
-.card-info {
-    margin: 20px 0;
+.passenger-info {
+    margin-top: 34px;
+    margin-left: 34px;
 }
 
 .price-info {
-    margin-top: 10px;
+    margin-top: 17px;
+    margin-left: 48px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.title-card-info {
+    font-weight: regular;
+    margin-top: 52px;
+    margin-left: 34px;
     font-size: 18px;
-    font-weight: bold;
 }
-
 .card-number {
-    font-weight: bold;
+    margin-left: 34px;
+    margin-bottom: 95px;
 }
 
-.refund-button {
-    width: 100%;
-    padding: 10px;
-    background: #5c5cfe;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    margin-top: 20px;
-    cursor: pointer;
+button.detail-refund {
+    margin-top: 31px;
+    margin-left: 25%;
 }
-
 .blurred {
     filter: blur(4px);
     pointer-events: none;

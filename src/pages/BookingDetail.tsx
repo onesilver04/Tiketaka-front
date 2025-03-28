@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import RefundModalDetail from "../components/RefundModalDetail";
 import { Reservation } from "../types/reservation";
-// import "../styles/BookingDetail.css";
+import "../styles/BookingDetail.css";
+import styles from "../styles/Button.module.css";
+import styleb from "../styles/Box.module.css";
 
 interface LocationState {
     reservations: Reservation[];
@@ -41,26 +43,38 @@ const BookingDetail = () => {
 
     return (
         <>
-            <div className={`detail-box ${isModalOpen ? "blurred" : ""}`}>
-                <h3>티켓 상세 내역</h3>
+            <div
+                className={`${styleb.box} detail-box ${
+                    isModalOpen ? "blurred" : ""
+                }`}
+            >
+                <h3 className="page-title">티켓 상세 내역</h3>
+                <hr className="page-title-bar"></hr>
 
                 {reservations.map((res) => (
                     <div key={res.reservationId} className="route-box">
                         <div className="route-detail">
                             <p>출발</p>
-                            <h2>{res.departure}</h2>
+                            <p className="booking-detail-station">
+                                {res.departure}역
+                            </p>
                             <span>{res.departureTime}</span>
                         </div>
+                        <span className="arrow">→</span>
                         <div className="route-detail">
                             <p>도착</p>
-                            <h2>{res.arrival}</h2>
+                            <p className="booking-detail-station">
+                                {res.arrival}역
+                            </p>
                             <span>{res.arrivalTime}</span>
                         </div>
                     </div>
                 ))}
 
                 <div className="passenger-info">
-                    <p>총 인원 수: {totalPassengers}명</p>
+                    <p>
+                        <strong>총 인원 수: {totalPassengers}명</strong>
+                    </p>
                     <p>
                         성인:{" "}
                         {reservations.reduce(
@@ -84,21 +98,27 @@ const BookingDetail = () => {
                     </p>
                 </div>
 
-                <hr />
+                <hr className="page-title-bar"></hr>
 
                 <div className="price-info">
                     <strong>총액: {totalPrice.toLocaleString()}원</strong>
                 </div>
 
-                <div className="card-info">
-                    <p>카드 정보</p>
-                    <p className="card-number">1111 2222 3333 ****</p>
+                <p className="title-card-info">카드 정보</p>
+                <hr className="page-title-bar"></hr>
+                <div className="card-number">
+                    <p>카드 번호</p>
+                    <p className="card-number-info">
+                        <strong>1111 2222 3333 ****</strong>
+                    </p>
                 </div>
-
-                <button className="refund-button" onClick={handleRefund}>
-                    환불하기
-                </button>
             </div>
+            <button
+                className={`${styles.button} detail-refund`}
+                onClick={handleRefund}
+            >
+                환불하기
+            </button>
 
             {isModalOpen && (
                 <RefundModalDetail
