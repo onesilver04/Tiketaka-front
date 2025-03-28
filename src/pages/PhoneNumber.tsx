@@ -43,6 +43,7 @@ const PhoneNumber = () => {
             <p className="phone-number-title">전화번호 입력</p>
 
             <input
+                className="phone-number-input"
                 type="text"
                 value={inputDigits.length === 0 ? "" : getFormattedPhone()}
                 readOnly

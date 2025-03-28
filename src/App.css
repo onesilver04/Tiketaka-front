@@ -23,7 +23,7 @@ body {
 
 .page-title {
     margin-top: 21px;
-    margin-left: 36px; 
+    margin-left: 36px;
     font-size: 18px;
     font-weight: 500;
     display: inline-block;
@@ -31,9 +31,6 @@ body {
 
 .page-title-bar {
     width: 350px;
-    color: #E8EBED;
+    color: #e8ebed;
     margin: 0 auto;
 }
-
-
-

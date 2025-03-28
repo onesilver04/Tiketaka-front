@@ -1,6 +1,6 @@
 import React from "react";
 import "../styles/History.css";
-import styleb from "../styles/Box.module.css";
+import "../styles/HistoryTicket.css";
 import { Reservation } from "../types/reservation";
 
 interface HistoryTicketProps {
@@ -26,26 +26,47 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
     } = reservation;
 
     return (
-        <div className={styleb.box}>
+        <div className={`ticket-container ${isSelected ? "selected" : ""}`}>
             <input
+                className="history-ticket-checkbox"
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => onToggle(reservationId)}
             />
-            <div className="ticket-info">
-                <div className="route">
-                    <strong>출발</strong> {departure} → <strong>도착</strong>{" "}
-                    {arrival}
-                </div>
-                <div className="times">
-                    {departureTime} → {arrivalTime}
-                </div>
-                <div className="details">
-                    <p>출발일: {departureDate}</p>
-                    <p>성인: {passengerCount.adult}</p>
-                    <p>노약자: {passengerCount.senior}</p>
-                    <p>어린이: {passengerCount.youth}</p>
-                    {seat && <p>좌석: {seat}</p>}
+            <div className="ticket-content">
+                <div className="ticket-left-bar"></div>
+
+                <div className="ticket-info">
+                    <div className="route-row">
+                        <span className="label">출발</span>
+                        <div className="station-block">
+                            <span className="station">{departure}역</span>
+                            <span>{departureTime}</span>
+                        </div>
+                        <span className="arrow">→</span>
+                        <span className="label">도착</span>
+                        <div className="station-block">
+                            <span className="station">{arrival}역</span>
+                            <span>{arrivalTime}</span>
+                        </div>
+                    </div>
+
+                    <div className="details">
+                        <p>출발일 {departureDate}</p>
+                        <p>
+                            예약자{" "}
+                            {passengerCount.adult
+                                ? `성인 ${passengerCount.adult}명`
+                                : ""}
+                            {passengerCount.senior
+                                ? ` 노약자 ${passengerCount.senior}명`
+                                : ""}
+                            {passengerCount.youth
+                                ? ` 청소년 ${passengerCount.youth}명`
+                                : ""}
+                        </p>
+                        {seat && <p>예약좌석 {seat}</p>}
+                    </div>
                 </div>
             </div>
         </div>
