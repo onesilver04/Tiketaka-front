@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -7,118 +7,93 @@ import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 
 const stations = [
-    "선택",
-    "서울",
-    "광명",
-    "수원",
-    "천안아산",
-    "오송",
-    "대전",
-    "마산",
-    "밀양",
-    "구포",
-    "평창",
-    "강릉",
-    "전주",
-    "목포",
-    "청량리",
-    "용산",
-    "원주",
-    "평택",
-    "천안",
-    "조치원",
-    "서대전",
-    "대구",
-    "동해",
-    "진부",
-    "익산",
-    "부산",
-    "순천",
-    "울산",
-    "정동진",
+    "선택", "서울", "광명", "수원", "천안아산", "오송", "대전", "마산", "밀양", "구포",
+    "평창", "강릉", "전주", "목포", "청량리", "용산", "원주", "평택", "천안", "조치원",
+    "서대전", "대구", "동해", "진부", "익산", "부산", "순천", "울산", "정동진",
 ];
 
-const Reservation = () => {
-    const [departure, setDeparture] = useState<string | null>(null);
-    const [arrival, setArrival] = useState<string | null>(null);
-    const [date, setDate] = useState<Date | null>(null);
-    const [adultCount, setAdultCount] = useState(0);
-    const [seniorCount, setSeniorCount] = useState(0);
-    const [teenCount, setTeenCount] = useState(0);
+interface ReservationData {
+    departure: string | null;
+    arrival: string | null;
+    date: Date | null;
+    adultCount: number;
+    seniorCount: number;
+    teenCount: number;
+}
 
+const STORAGE_KEY = "reservationData";
+
+const Reservation = () => {
     const navigate = useNavigate();
 
-    // let sessionValue = sessionStorage.getItem('departure')
-    // const parseValue=JSON.parse(sessionValue);
-
-    const handleStationChange = (
-        type: "departure" | "arrival",
-        value: string
-    ) => {
-        const newValue = value === "선택" ? null : value; // 선택을 택하면 null로 처리해서 alert 창 뜨게, 선택을 제외한 나머지 선택을 했을 경우 value로 처리.
-        if (type === "departure") setDeparture(newValue);
-        if (type === "arrival") setArrival(newValue);
+    const loadStoredData = () => {
+        const storedData = sessionStorage.getItem(STORAGE_KEY);
+        return storedData ? JSON.parse(storedData) : null;
     };
 
+    const [reservationData, setReservationData] = useState<ReservationData>(() => {
+        return loadStoredData() || {
+            departure: null,
+            arrival: null,
+            date: null,
+            adultCount: 0,
+            seniorCount: 0,
+            teenCount: 0,
+        };
+    });
+
+    const { departure, arrival, date, adultCount, seniorCount, teenCount } =
+        reservationData;
+
+    // 데이터 변경 시 세션 스토리지에 저장
+    useEffect(() => {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
+    }, [reservationData]);
+
+    // 출발역, 도착역 변경
+    const handleStationChange = (type: "departure" | "arrival", value: string) => {
+        setReservationData((prev) => ({
+            ...prev,
+            [type]: value === "선택" ? null : value,
+        }));
+    };
+
+    // 날짜 변경
+    const handleDateChange = (value: Date | Date[] | null) => {
+        setReservationData((prev) => ({
+            ...prev,
+            date: value instanceof Date ? value : value?.[0] || null,
+        }));
+    };
+
+    // 인원 변경
+    const handleCountChange = (type: "adultCount" | "seniorCount" | "teenCount", delta: number) => {
+        setReservationData((prev) => ({
+            ...prev,
+            [type]: Math.max(0, prev[type] + delta),
+        }));
+    };
+
+    // 조회 버튼 클릭 시
     const handleSearch = () => {
-        if (!departure) {
-            alert("출발역은 필수입니다.");
-            return;
-        }
-        if (!arrival) {
-            alert("도착역은 필수입니다.");
-            return;
-        }
-        if (!date) {
-            alert("날짜는 필수입니다.");
-            return;
-        }
+        if (!departure) return alert("출발역은 필수입니다.");
+        if (!arrival) return alert("도착역은 필수입니다.");
+        if (!date) return alert("날짜는 필수입니다.");
+        if (adultCount + seniorCount + teenCount < 1) return alert("최소 1명 이상의 인원이 필요합니다.");
 
-        if (adultCount + seniorCount + teenCount < 1) {
-            alert("최소 1명 이상의 인원이 필요합니다.");
-            return;
-        }
+        console.log("조회 정보:", reservationData);
 
-        console.log("조회 정보:", {
-            departure,
-            arrival,
-            date,
-            adultCount,
-            seniorCount,
-            teenCount,
-        });
-
-        navigate("/reservation/train-list", {
-            state: {
-                departure,
-                arrival,
-                date,
-                adultCount,
-                seniorCount,
-                teenCount,
-            }, // 네비게이션으로 해당 페이지의 정보 넘겨줌. useLocation().state 다음 페이지에서 이거 사용하면 이 페이지에서 선택한 내용이
-        });
-    };
-
-    const handleCountChange = (type: string, delta: number) => {
-        if (type === "adult")
-            setAdultCount((prev) => Math.max(0, prev + delta));
-        if (type === "senior")
-            setSeniorCount((prev) => Math.max(0, prev + delta));
-        if (type === "teen") setTeenCount((prev) => Math.max(0, prev + delta));
+        navigate("/reservation/train-list", { state: reservationData });
     };
 
     return (
         <div className={styleb.box}>
-            <h2>승차권 예매</h2>
+            <h2 className="page-title">승차권 예매</h2>
+            <hr className="page-title-bar"></hr>
+
             <div>
                 <label>출발</label>
-                <select
-                    value={departure ?? "선택"}
-                    onChange={(e) =>
-                        handleStationChange("departure", e.target.value)
-                    }
-                >
+                <select value={departure ?? "선택"} onChange={(e) => handleStationChange("departure", e.target.value)}>
                     {stations.map((station) => (
                         <option key={station} value={station}>
                             {station}
@@ -127,12 +102,7 @@ const Reservation = () => {
                 </select>
 
                 <label>도착</label>
-                <select
-                    value={arrival ?? "선택"}
-                    onChange={(e) =>
-                        handleStationChange("arrival", e.target.value)
-                    }
-                >
+                <select value={arrival ?? "선택"} onChange={(e) => handleStationChange("arrival", e.target.value)}>
                     {stations.map((station) => (
                         <option key={station} value={station}>
                             {station}
@@ -142,147 +112,42 @@ const Reservation = () => {
             </div>
 
             <div>
-                <h4>
-                    출발일 {date ? date.toLocaleDateString() : "날짜 선택 안됨"}
-                </h4>
+                <h4>출발일 {date ? new Date(date).toLocaleDateString() : "날짜 선택 안됨"}</h4>
                 <Calendar
-                    onChange={(value) => {
-                        if (value instanceof Date) {
-                            setDate(value);
-                        } else if (
-                            Array.isArray(value) &&
-                            value[0] instanceof Date
-                        ) {
-                            setDate(value[0]);
-                        } else {
-                            setDate(null);
-                        }
-                    }}
-                    value={date}
+                    onChange={(value) => handleDateChange(value as Date | Date[] | null)}
+                    value={date ? new Date(date) : null}
                     selectRange={false}
                     tileClassName={({ date: tileDate }) =>
-                        date && tileDate.toDateString() === date.toDateString()
-                            ? "selected-date"
-                            : ""
+                        date && tileDate.toDateString() === new Date(date).toDateString() ? "selected-date" : ""
                     }
                 />
             </div>
 
+            {/* 인원 선택 */}
             <div>
                 <h4>인원 선택</h4>
                 <div>
-                    <div>성인</div>
-                    <div>(만 19세 이상)</div>
-                    <button onClick={() => handleCountChange("adult", -1)}>
-                        -
-                    </button>
+                    <div>성인 (만 19세 이상)</div>
+                    <button onClick={() => handleCountChange("adultCount", -1)}>-</button>
                     <span>{adultCount}</span>
-                    <button onClick={() => handleCountChange("adult", 1)}>
-                        +
-                    </button>
+                    <button onClick={() => handleCountChange("adultCount", 1)}>+</button>
                 </div>
                 <div>
-                    <div>노약자</div>
-                    <div>(만 65세 이상)</div>
-                    <button onClick={() => handleCountChange("senior", -1)}>
-                        -
-                    </button>
+                    <div>노약자 (만 65세 이상)</div>
+                    <button onClick={() => handleCountChange("seniorCount", -1)}>-</button>
                     <span>{seniorCount}</span>
-                    <button onClick={() => handleCountChange("senior", 1)}>
-                        +
-                    </button>
+                    <button onClick={() => handleCountChange("seniorCount", 1)}>+</button>
                 </div>
                 <div>
-                    <div>청소년</div>
-                    <div>(만 13~18세)</div>
-                    <button onClick={() => handleCountChange("teen", -1)}>
-                        -
-                    </button>
+                    <div>청소년 (만 13~18세)</div>
+                    <button onClick={() => handleCountChange("teenCount", -1)}>-</button>
                     <span>{teenCount}</span>
-                    <button onClick={() => handleCountChange("teen", 1)}>
-                        +
-                    </button>
+                    <button onClick={() => handleCountChange("teenCount", 1)}>+</button>
                 </div>
             </div>
 
             <div>
-                <label>출발</label>
-                <select
-                    value={departure}
-                    onChange={(e) => setDeparture(e.target.value)}
-                >
-                    {stations.map((station) => (
-                        <option key={station} value={station}>
-                            {station}
-                        </option>
-                    ))}
-                </select>
-
-                <label>도착</label>
-                <select
-                    value={arrival}
-                    onChange={(e) => setArrival(e.target.value)}
-                >
-                    {stations.map((station) => (
-                        <option key={station} value={station}>
-                            {station}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <h4>출발일 선택: {date.toLocaleDateString()}</h4>
-                <Calendar
-                    onChange={setDate}
-                    value={date}
-                    tileClassName={({ date: tileDate }) =>
-                        tileDate.toDateString() === date.toDateString()
-                            ? "selected-date"
-                            : ""
-                    }
-                />
-            </div>
-
-            <div>
-                <h4>인원 선택</h4>
-                <div>
-                    <span>성인 (만 19세 이상): </span>
-                    <button onClick={() => handleCountChange("adult", -1)}>
-                        -
-                    </button>
-                    <span>{adultCount}</span>
-                    <button onClick={() => handleCountChange("adult", 1)}>
-                        +
-                    </button>
-                </div>
-                <div>
-                    <span>노약자 (만 65세 이상): </span>
-                    <button onClick={() => handleCountChange("senior", -1)}>
-                        -
-                    </button>
-                    <span>{seniorCount}</span>
-                    <button onClick={() => handleCountChange("senior", 1)}>
-                        +
-                    </button>
-                </div>
-                <div>
-                    <span>청소년 (만 13~18세): </span>
-                    <button onClick={() => handleCountChange("teen", -1)}>
-                        -
-                    </button>
-                    <span>{teenCount}</span>
-                    <button onClick={() => handleCountChange("teen", 1)}>
-                        +
-                    </button>
-                </div>
-            </div>
-
-            <div>
-                <button
-                    className={`${styles.button} look-up2`}
-                    onClick={handleSearch}
-                >
+                <button className={`${styles.button} look-up2`} onClick={handleSearch}>
                     조회
                 </button>
             </div>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 
 const cars = ["1호차", "2호차", "3호차"];
@@ -11,21 +11,42 @@ const seatMap: Record<string, { rows: string[]; cols: string[] }> = {
 };
 
 const SelectSeat = () => {
-    const [selectedCar, setSelectedCar] = useState("1호차");
-    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
     const navigate = useNavigate();
-    // const maxSeats = location.state?.totalPassengers || 1; // 앞에서 선택한 인원 수를 여기에 넘겨서 인원 수에 맞게 선택
+    const location = useLocation();
+    const totalPassengers = location.state?.totalPassengers || 1;
+
+    const [selectedCar, setSelectedCar] = useState<string>(() => {
+        return sessionStorage.getItem("selectedCar") || "1호차";
+    });
+
+    const [selectedSeats, setSelectedSeats] = useState<string[]>(() => {
+        const storedSeats = sessionStorage.getItem("selectedSeats");
+        return storedSeats ? JSON.parse(storedSeats) : [];
+    });
+
+    useEffect(() => {
+        sessionStorage.setItem("selectedCar", selectedCar);
+        sessionStorage.setItem("selectedSeats", JSON.stringify(selectedSeats));
+    }, [selectedCar, selectedSeats]);
 
     const toggleSeat = (seat: string) => {
-        setSelectedSeats((prevSeats) =>
-            prevSeats.includes(seat)
-                ? prevSeats.filter((s) => s !== seat)
-                : [...prevSeats, seat]
-        );
+        setSelectedSeats((prevSeats) => {
+            if (prevSeats.includes(seat)) {
+                return prevSeats.filter((s) => s !== seat);
+            } else if (prevSeats.length < totalPassengers) {
+                return [...prevSeats, seat];
+            } else {
+                alert(`최대 ${totalPassengers}개의 좌석만 선택할 수 있습니다.`);
+                return prevSeats;
+            }
+        });
     };
 
     const handleNext = () => {
-        console.log("선택된 좌석:", selectedSeats);
+        if (selectedSeats.length === 0) {
+            alert("좌석을 선택해주세요.");
+            return;
+        }
         navigate("/reservation/payment", {
             state: { selectedCar, selectedSeats },
         });
@@ -47,7 +68,7 @@ const SelectSeat = () => {
                         value={selectedCar}
                         onChange={(e) => {
                             setSelectedCar(e.target.value);
-                            // setSelectedSeats([]); // 호차 바꿀 때 초기화 할말..?
+                            setSelectedSeats([]); // 호차 변경 시 선택 좌석 초기화
                         }}
                     >
                         {cars.map((car) => (
@@ -83,14 +104,12 @@ const SelectSeat = () => {
                 </div>
 
                 <div className="selected-seats">
-                    <h4>선택한 좌석:</h4>
+                    <h4>선택한 좌석 ({selectedSeats.length} / {totalPassengers}):</h4>
                     {selectedSeats.length > 0 ? (
                         selectedSeats.map((seat) => (
                             <span key={seat} className="selected-seat">
                                 {seat}{" "}
-                                <button onClick={() => toggleSeat(seat)}>
-                                    X
-                                </button>
+                                <button onClick={() => toggleSeat(seat)}>X</button>
                             </span>
                         ))
                     ) : (
@@ -99,10 +118,7 @@ const SelectSeat = () => {
                 </div>
 
                 <button onClick={handleBack}>이전</button>
-                <button
-                    onClick={handleNext}
-                    disabled={selectedSeats.length === 0}
-                >
+                <button onClick={handleNext} disabled={selectedSeats.length === 0}>
                     다음
                 </button>
             </div>
