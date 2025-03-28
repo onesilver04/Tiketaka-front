@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const cardCompanies = ["배농업", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
+const cardCompanies = ["NH농업", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
 
 const AddCard: React.FC = () => {
     const navigate = useNavigate();
@@ -16,6 +16,10 @@ const AddCard: React.FC = () => {
         console.log({ selectedCompany, cardNumber, cvc, expiry, password });
         navigate(-1); // 이전 페이지로 이동
     };
+
+    const handleback = () => {
+        navigate(-1);
+    }
 
     return (
         <div className="add-card-container">
@@ -35,7 +39,8 @@ const AddCard: React.FC = () => {
         <input type="text" placeholder="CVC" value={cvc} onChange={(e) => setCvc(e.target.value)} />
         <input type="text" placeholder="유효 기간 (MM/YY)" value={expiry} onChange={(e) => setExpiry(e.target.value)} />
         <input type="password" placeholder="비밀번호 앞 2자리" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button onClick={handleSubmit}>결제하기</button>
+        <button onClick={handleback}>이전</button>
+        <button onClick={handleSubmit}>등록하기</button>
         </div>
     );
 };
