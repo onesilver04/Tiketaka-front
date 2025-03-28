@@ -88,69 +88,79 @@ const Reservation = () => {
 
     return (
         <div className={styleb.box}>
+            <title>Reservation</title>
             <h2 className="page-title">승차권 예매</h2>
             <hr className="page-title-bar"></hr>
 
-            <div>
-                <label>출발</label>
-                <select value={departure ?? "선택"} onChange={(e) => handleStationChange("departure", e.target.value)}>
-                    {stations.map((station) => (
-                        <option key={station} value={station}>
-                            {station}
-                        </option>
-                    ))}
-                </select>
+            <div className="content-container">
+                <div className="station-box">
+                    <div className="station-selection">
+                        <div className="depature-station">출발</div>
+                        <select value={departure ?? "선택"} onChange={(e) => handleStationChange("departure", e.target.value)}>
+                            {stations.map((station) => (
+                                <option key={station} value={station}>
+                                    {station}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <label>도착</label>
-                <select value={arrival ?? "선택"} onChange={(e) => handleStationChange("arrival", e.target.value)}>
-                    {stations.map((station) => (
-                        <option key={station} value={station}>
-                            {station}
-                        </option>
-                    ))}
-                </select>
-            </div>
+                    <div className="station-selection">
+                        <div className="arrival-station">도착</div>
+                        <select value={arrival ?? "선택"} onChange={(e) => handleStationChange("arrival", e.target.value)}>
+                            {stations.map((station) => (
+                                <option key={station} value={station}>
+                                    {station}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-            <div>
-                <h4>출발일 {date ? new Date(date).toLocaleDateString() : "날짜 선택 안됨"}</h4>
-                <Calendar
-                    onChange={(value) => handleDateChange(value as Date | Date[] | null)}
-                    value={date ? new Date(date) : null}
-                    selectRange={false}
-                    tileClassName={({ date: tileDate }) =>
-                        date && tileDate.toDateString() === new Date(date).toDateString() ? "selected-date" : ""
-                    }
-                />
-            </div>
-
-            {/* 인원 선택 */}
-            <div>
-                <h4>인원 선택</h4>
-                <div>
-                    <div>성인 (만 19세 이상)</div>
-                    <button onClick={() => handleCountChange("adultCount", -1)}>-</button>
-                    <span>{adultCount}</span>
-                    <button onClick={() => handleCountChange("adultCount", 1)}>+</button>
                 </div>
+
                 <div>
-                    <div>노약자 (만 65세 이상)</div>
-                    <button onClick={() => handleCountChange("seniorCount", -1)}>-</button>
-                    <span>{seniorCount}</span>
-                    <button onClick={() => handleCountChange("seniorCount", 1)}>+</button>
+                    <h4>출발일 {date ? new Date(date).toLocaleDateString() : "날짜 선택 안됨"}</h4>
+                    <Calendar
+                        calendarType="gregory" 
+                        onChange={(value) => handleDateChange(value as Date | Date[] | null)}
+                        value={date ? new Date(date) : null}
+                        selectRange={false}
+                        tileClassName={({ date: tileDate }) =>
+                            date && tileDate.toDateString() === new Date(date).toDateString() ? "selected-date" : ""
+                        }
+                    />
                 </div>
+
+                {/* 인원 선택 */}
                 <div>
-                    <div>청소년 (만 13~18세)</div>
-                    <button onClick={() => handleCountChange("teenCount", -1)}>-</button>
-                    <span>{teenCount}</span>
-                    <button onClick={() => handleCountChange("teenCount", 1)}>+</button>
+                    <h4>인원 선택</h4>
+                    <div>
+                        <div>성인 (만 19세 이상)</div>
+                        <button onClick={() => handleCountChange("adultCount", -1)}>-</button>
+                        <span>{adultCount}</span>
+                        <button onClick={() => handleCountChange("adultCount", 1)}>+</button>
+                    </div>
+                    <div>
+                        <div>노약자 (만 65세 이상)</div>
+                        <button onClick={() => handleCountChange("seniorCount", -1)}>-</button>
+                        <span>{seniorCount}</span>
+                        <button onClick={() => handleCountChange("seniorCount", 1)}>+</button>
+                    </div>
+                    <div>
+                        <div>청소년 (만 13~18세)</div>
+                        <button onClick={() => handleCountChange("teenCount", -1)}>-</button>
+                        <span>{teenCount}</span>
+                        <button onClick={() => handleCountChange("teenCount", 1)}>+</button>
+                    </div>
+                </div>
+
+                <div>
+                    <button className={`${styles.button} look-up2`} onClick={handleSearch}>
+                        조회
+                    </button>
                 </div>
             </div>
 
-            <div>
-                <button className={`${styles.button} look-up2`} onClick={handleSearch}>
-                    조회
-                </button>
-            </div>
         </div>
     );
 };

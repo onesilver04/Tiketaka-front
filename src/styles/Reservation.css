@@ -17,15 +17,74 @@ button.look-up2 {
     margin-left: 36px;
 }
 
+.react-calendar {
+    border: 1.5px solid #2B32B2;
+    border-radius: 18px;
+    font-family: 'Pretendard', sans-serif;
+}
+
 .react-calendar__navigation__label {
-    font-size: 12px;
+    height: 43px;
+    font-size: 18px;
+    font-family: 'Pretendard', sans-serif;
     pointer-events: none;
 }
 
-.react-calendar__navigation__next2-button {
+.react-calendar__navigation__next2-button, .react-calendar__navigation__prev2-button {
     display: none;
 }
 
-.react-calendar__navigation__prev2-button {
-    display: none;
+.react-calendar__navigation__arrow .react-calendar__navigation__next-button:hover {
+    background-color: none;
+}
+
+.react-calendar__navigation__arrow {
+    height: 33px;
+}
+
+.react-calendar__month-view__weekdays abbr {
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.react-calendar__month-view__weekdays__weekday--weekend abbr[title="일요일"] {
+    color: #FF1744;
+}
+
+.react-calendar__month-view__weekdays__weekday--weekend abbr[title="토요일"] {
+    color: #2B32B2;
+}
+
+.react-calendar__month-view__days__day--weekend:nth-child(7n) abbr {
+    color: #2B32B2;
+}
+
+.react-calendar button:hover {
+    background-color: #00000000;
+}
+.react-calender__navigation button:enabled:hover {
+    background-color: none;
+}
+
+.station-box {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+}
+
+.station-selection {
+    display: flex;
+    flex-direction: column;
+}
+
+.content-container {
+    margin: 30px 20px;
+}
+
+.station-selection select {
+    border: none;
+}
+
+.station-selection select:hover {
+    outline: 0;
 }
