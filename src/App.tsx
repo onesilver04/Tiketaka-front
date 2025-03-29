@@ -25,7 +25,7 @@ import HistoryNone from "./pages/HistoryNone";
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const location = useLocation();
 
-    const hideHeaderRoutes = ["/"]; // 헤더 숨길 경로들
+    const hideHeaderRoutes = ["/", "/reservation/payment/end"]; // 헤더 숨길 경로들
     const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
 
     return (
@@ -72,7 +72,7 @@ const App = () => {
                         path="/history/refund-success"
                         element={<RefundSuccess />}
                     />
-                    <Route path="/history" element={<End />} />
+                    <Route path="/reservation/payment/end" element={<End />} />
                 </Routes>
             </Layout>
         </Router>
