@@ -73,7 +73,7 @@ const PhoneNumber = () => {
                             if (key === "del") {
                                 return (
                                     <button
-                                        className="phone-key"
+                                        className="phone-key-delete"
                                         key={`del-${i}-${j}`}
                                         onClick={handleDelete}
                                     >
@@ -81,10 +81,6 @@ const PhoneNumber = () => {
                                             className="delete-img"
                                             src={deleteIcon}
                                             alt="delete"
-                                            style={{
-                                                width: "24px",
-                                                height: "24px",
-                                            }}
                                         />
                                     </button>
                                 );

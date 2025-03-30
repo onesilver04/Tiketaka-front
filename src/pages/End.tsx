@@ -7,6 +7,7 @@ const End = () => {
 
     return (
         <div>
+            <title>End</title>
             <div className="logo">
                 <img src={logoMain} alt="main-logo" />
             </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 import StationSelector from "./StationSelector";
@@ -14,9 +13,9 @@ const stations = [
 ];
 
 interface ReservationData {
-    departure: string | null;
-    arrival: string | null;
-    date: Date | null;
+    departureStation: string | null;
+    destinationStation: string | null;
+    departureDate: Date | null;
     adultCount: number;
     seniorCount: number;
     teenCount: number;
@@ -29,26 +28,26 @@ const Reservation = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const loadStoredData = () => {
-        const storedData = sessionStorage.getItem(STORAGE_KEY);
+        const storedData = localStorage.getItem(STORAGE_KEY);
         return storedData ? JSON.parse(storedData) : null;
     };
 
     const [reservationData, setReservationData] = useState<ReservationData>(() => {
         return loadStoredData() || {
-            departure: null,
-            arrival: null,
-            date: null,
+            departureStation: null,
+            destinationStation: null,
+            departureDate: null,
             adultCount: 0,
             seniorCount: 0,
             teenCount: 0,
         };
     });
 
-    const { departure, arrival, date, adultCount, seniorCount, teenCount } = reservationData;
+    const { departureStation, destinationStation, departureDate, adultCount, seniorCount, teenCount } = reservationData;
     const [showStationSelector, setShowStationSelector] = useState<"departure" | "arrival" | null>(null);
 
     useEffect(() => {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
     }, [reservationData]);
 
     useEffect(() => {
@@ -68,14 +67,14 @@ const Reservation = () => {
     const handleStationChange = (type: "departure" | "arrival", value: string) => {
         setReservationData((prev) => ({
             ...prev,
-            [type]: value,
+            [type === "departure" ? "departureStation" : "destinationStation"]: value,
         }));
     };
 
     const handleDateChange = (value: Date | Date[] | null) => {
         setReservationData((prev) => ({
             ...prev,
-            date: value instanceof Date ? value : value?.[0] || null,
+            departureDate: value instanceof Date ? value : value?.[0] || null,
         }));
     };
 
@@ -87,9 +86,9 @@ const Reservation = () => {
     };
 
     const handleSearch = () => {
-        if (!departure) return alert("출발역은 필수입니다.");
-        if (!arrival) return alert("도착역은 필수입니다.");
-        if (!date) return alert("날짜는 필수입니다.");
+        if (!departureStation) return alert("출발역은 필수입니다.");
+        if (!destinationStation) return alert("도착역은 필수입니다.");
+        if (!departureDate) return alert("날짜는 필수입니다.");
         if (adultCount + seniorCount + teenCount < 1) return alert("최소 1명 이상의 인원이 필요합니다.");
 
         navigate("/reservation/train-list", { state: reservationData });
@@ -113,7 +112,7 @@ const Reservation = () => {
                             <button
                                 onClick={() => setShowStationSelector(showStationSelector === "departure" ? null : "departure")}
                                 className="station-select-button">
-                                <span className="button-label">{departure ?? "출발역 선택"}</span>
+                                {departureStation ?? "출발역"} ▾
                                 {/* <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" /> */} 
                                 {/* 이미지 전역에다가 준 css 수정 후 추가 */}
                             </button>
@@ -123,7 +122,7 @@ const Reservation = () => {
                             <div className="arrival-station">도착</div>
                             <button onClick={() => setShowStationSelector(showStationSelector === "arrival" ? null : "arrival")}
                                 className="station-select-button">
-                                {arrival ?? "도착역 선택"} ▾
+                                {destinationStation ?? "도착역"} ▾
                             </button>
                         </div>
                     </div>
@@ -150,15 +149,15 @@ const Reservation = () => {
                     )}
 
                     <div>
-                        <h4>출발일<br></br>{date ? new Date(date).toLocaleDateString() : "날짜를 선택해주세요."}</h4>
+                        <h4>출발일<br></br>{departureDate ? new Date(departureDate).toLocaleDateString() : "날짜를 선택해주세요."}</h4>
                         <Calendar
                             calendarType="gregory"
                             onChange={(value) => handleDateChange(value as Date | Date[] | null)}
-                            value={date ? new Date(date) : null}
+                            value={departureDate ? new Date(departureDate) : null}
                             selectRange={false}
                             minDate={new Date()} // 지나간 날 막기
                             tileClassName={({ date: tileDate }) =>
-                                date && tileDate.toDateString() === new Date(date).toDateString() ? "selected-date" : ""
+                                departureDate && tileDate.toDateString() === new Date(departureDate).toDateString() ? "selected-date" : ""
                             }
                         />
                     </div>

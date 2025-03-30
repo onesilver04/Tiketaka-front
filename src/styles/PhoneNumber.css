@@ -59,7 +59,16 @@ input.phone-number-input {
     font-weight: bold;
     cursor: pointer;
 }
+
+.phone-key-delete {
+    border: none;
+    background-color: #00000000;
+    width: 100px;
+    height: 64px;
+}
+
+
 .delete-img {
-    margin-top: auto;
-    margin-left: 110px;
+    width: 60px;
+    height: 60px;
 }

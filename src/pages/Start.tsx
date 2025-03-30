@@ -9,7 +9,7 @@ const Start = () => {
     return (
         <div>
             <div className="logo">
-                <img src={logoMain} alt="main-logo" />
+                <img className="main-logo" src={logoMain} alt="메인로고" />
             </div>
             <div className="button-container">
                 <button
