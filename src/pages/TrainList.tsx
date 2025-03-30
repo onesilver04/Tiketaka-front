@@ -57,59 +57,67 @@ const TrainList = () => {
     };
 
     return (
-        <div className={styleb.box}>
-            <h2>시간대 선택</h2>
+        <div>
+            <title>TimeTable</title>
+            <div className={styleb.box}>
+                <h2 className="page-title">시간대 선택</h2>
+                <hr className="page-title-bar" />
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>출발</th>
-                        <th>도착</th>
-                        <th>가격</th>
-                        <th>남은 좌석 수</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {dummyTrains.map((train) => (
-                        <tr
-                            key={train.id}
-                            onClick={() => handleSelect(train)}
-                            style={{
-                                opacity: train.disabled ? 0.3 : 1,
-                                border:
-                                    train.id === selectedTrainId
-                                        ? "3px solid #4A90E2"
-                                        : "1px solid transparent",
-                                backgroundColor:
-                                    train.id === selectedTrainId
-                                        ? "#E3F2FD"
-                                        : "transparent",
-                                cursor: train.disabled
-                                    ? "not-allowed"
-                                    : "pointer",
-                                transition: "0.3s ease-in-out",
-                            }}
-                        >
-                            <td>{train.departure}</td>
-                            <td>{train.arrival}</td>
-                            <td>{train.price}</td>
-                            <td
-                                style={{
-                                    color: train.seatsLeft < 20 ? "#FF1744" : "#111111",
-                                }}
-                            >
-                                {train.seatsLeft}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                <div className="content-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>출발</th>
+                                <th>도착</th>
+                                <th>가격</th>
+                                <th>남은 좌석 수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {dummyTrains.map((train) => (
+                                <tr
+                                    key={train.id}
+                                    onClick={() => handleSelect(train)}
+                                    style={{
+                                        opacity: train.disabled ? 0.3 : 1,
+                                        border:
+                                            train.id === selectedTrainId
+                                                ? "3px solid #4A90E2"
+                                                : "1px solid transparent",
+                                        backgroundColor:
+                                            train.id === selectedTrainId
+                                                ? "#E3F2FD"
+                                                : "transparent",
+                                        cursor: train.disabled
+                                            ? "not-allowed"
+                                            : "pointer",
+                                        transition: "0.3s ease-in-out",
+                                    }}
+                                >
+                                    <td>{train.departure}</td>
+                                    <td>{train.arrival}</td>
+                                    <td>{train.price}</td>
+                                    <td
+                                        style={{
+                                            color: train.seatsLeft < 20 ? "#FF1744" : "#111111",
+                                        }}
+                                    >
+                                        {train.seatsLeft}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                
+            </div>
 
-            <div>
-                <button onClick={handleBack}>이전</button>
-                <button onClick={handleNext}>다음</button>
+            <div className="display-button">
+                <button className ="goback-button" onClick={handleBack}>이전</button>
+                <button className ="search-button" onClick={handleNext}>다음</button>
             </div>
         </div>
+        
     );
 };
 

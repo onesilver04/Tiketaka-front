@@ -59,70 +59,76 @@ const SelectSeat = () => {
     const { rows, cols } = seatMap[selectedCar];
 
     return (
-        <div className={styleb.box}>
-            <div className="seat-container">
-                <h3>좌석 선택</h3>
+        <div>
+            <title>Seats</title>
+            <div className={styleb.box}>
+                <div className="seat-container">
+                    <h2 className="page-title">좌석 선택</h2>
+                    <hr className="page-title-bar" />
 
-                <div>
-                    <select
-                        value={selectedCar}
-                        onChange={(e) => {
-                            setSelectedCar(e.target.value);
-                            setSelectedSeats([]); // 호차 변경 시 선택 좌석 초기화
-                        }}
-                    >
-                        {cars.map((car) => (
-                            <option key={car} value={car}>
-                                {car}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="seat-grid">
-                    {rows.map((row) => (
-                        <div key={row} className="seat-row">
-                            {cols.map((col) => {
-                                const seatId = `${selectedCar}-${row}${col}`;
-                                return (
-                                    <button
-                                        key={seatId}
-                                        className={`seat ${
-                                            selectedSeats.includes(seatId)
-                                                ? "selected"
-                                                : ""
-                                        }`}
-                                        onClick={() => toggleSeat(seatId)}
-                                    >
-                                        {row}
-                                        {col}
-                                    </button>
-                                );
-                            })}
+                    <div className="content-container">
+                        <div>
+                            <select
+                                value={selectedCar}
+                                onChange={(e) => {
+                                    setSelectedCar(e.target.value);
+                                    setSelectedSeats([]); // 호차 변경 시 선택 좌석 초기화
+                                }}
+                            >
+                                {cars.map((car) => (
+                                    <option key={car} value={car}>
+                                        {car}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    ))}
-                </div>
 
-                <div className="selected-seats">
-                    <h4>선택한 좌석 ({selectedSeats.length} / {totalPassengers}):</h4>
-                    {selectedSeats.length > 0 ? (
-                        selectedSeats.map((seat) => (
-                            <span key={seat} className="selected-seat">
-                                {seat}{" "}
-                                <button onClick={() => toggleSeat(seat)}>X</button>
-                            </span>
-                        ))
-                    ) : (
-                        <p>선택한 좌석이 없습니다.</p>
-                    )}
-                </div>
+                        <div className="seat-grid">
+                            {rows.map((row) => (
+                                <div key={row} className="seat-row">
+                                    {cols.map((col) => {
+                                        const seatId = `${selectedCar}-${row}${col}`;
+                                        return (
+                                            <button
+                                                key={seatId}
+                                                className={`seat ${
+                                                    selectedSeats.includes(seatId)
+                                                        ? "selected"
+                                                        : ""
+                                                }`}
+                                                onClick={() => toggleSeat(seatId)}
+                                            >
+                                                {row}
+                                                {col}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                        </div>
 
-                <button onClick={handleBack}>이전</button>
-                <button onClick={handleNext} disabled={selectedSeats.length === 0}>
-                    다음
-                </button>
+                        <div className="selected-seats">
+                            <h4>선택한 좌석 ({selectedSeats.length} / {totalPassengers}):</h4>
+                            {selectedSeats.length > 0 ? (
+                                selectedSeats.map((seat) => (
+                                    <span key={seat} className="selected-seat">
+                                        {seat}{" "}
+                                        <button onClick={() => toggleSeat(seat)}>X</button>
+                                    </span>
+                                ))
+                            ) : (
+                                <p>선택한 좌석이 없습니다.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="display-button">
+                <button className="goback-button" onClick={handleBack}>이전</button>
+                <button className="search-button" onClick={handleNext} disabled={selectedSeats.length === 0}>다음</button>
             </div>
         </div>
+        
     );
 };
 
