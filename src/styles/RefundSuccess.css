@@ -5,7 +5,6 @@
 
 .ment {
     color: black;
-    margin-top: 350px;
     text-align: center;
 }
 
@@ -14,7 +13,11 @@ button.go-main {
     margin-top: 40px;
 }
 
-img {
-    margin: auto;
-    margin-top: 250px;
+.success-image {
+    width: 106px;
+    height: 106px;
+    margin-top: 430px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
 }

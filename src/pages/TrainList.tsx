@@ -3,38 +3,36 @@ import { useNavigate } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 
 interface Train {
-    id: number;
-    departure: string;
-    arrival: string;
-    price: string;
-    seatsLeft: number;
+    trainId: string;
+    departureTime: string;
+    arrivalTime: string;
+    price: number;
+    availableSeats: number;
     disabled?: boolean;
 }
 
 const dummyTrains: Train[] = [
-    { id: 1, departure: "05:13", arrival: "07:14", price: "69,000원", seatsLeft: 36 },
-    { id: 2, departure: "06:21", arrival: "08:20", price: "69,000원", seatsLeft: 10 },
-    { id: 3, departure: "08:36", arrival: "10:02", price: "71,600원", seatsLeft: 0, disabled: true },
-    { id: 4, departure: "11:03", arrival: "13:14", price: "69,000원", seatsLeft: 29 },
-    { id: 5, departure: "12:27", arrival: "15:20", price: "69,000원", seatsLeft: 12 },
-    { id: 6, departure: "15:13", arrival: "17:14", price: "54,000원", seatsLeft: 97 },
-    { id: 7, departure: "16:21", arrival: "18:20", price: "69,000원", seatsLeft: 23 },
-    { id: 8, departure: "18:36", arrival: "20:02", price: "71,600원", seatsLeft: 0, disabled: true },
-    { id: 9, departure: "21:03", arrival: "23:14", price: "32,000원", seatsLeft: 17 },
-    { id: 10, departure: "22:27", arrival: "01:20", price: "69,000원", seatsLeft: 8 },
+    { trainId: "DUMMY1", departureTime: "05:13", arrivalTime: "07:14", price: 69000, availableSeats: 36 },
+    { trainId: "DUMMY2", departureTime: "06:21", arrivalTime: "08:20", price: 69000, availableSeats: 10 },
+    { trainId: "DUMMY3", departureTime: "08:36", arrivalTime: "10:02", price: 71600, availableSeats: 0, disabled: true },
+    { trainId: "DUMMY4", departureTime: "11:03", arrivalTime: "13:14", price: 69000, availableSeats: 29 },
+    { trainId: "DUMMY5", departureTime: "12:27", arrivalTime: "15:20", price: 69000, availableSeats: 12 },
+    { trainId: "DUMMY6", departureTime: "15:13", arrivalTime: "17:14", price: 54000, availableSeats: 97 },
+    { trainId: "DUMMY7", departureTime: "16:21", arrivalTime: "18:20", price: 69000, availableSeats: 23 },
+    { trainId: "DUMMY8", departureTime: "18:36", arrivalTime: "20:02", price: 71600, availableSeats: 0, disabled: true },
+    { trainId: "DUMMY9", departureTime: "21:03", arrivalTime: "23:14", price: 32000, availableSeats: 17 },
+    { trainId: "DUMMY10", departureTime: "22:27", arrivalTime: "01:20", price: 69000, availableSeats: 8 },
 ];
 
 const TrainList = () => {
     const navigate = useNavigate();
-    const [selectedTrainId, setSelectedTrainId] = useState<number | null>(() => {
-        return sessionStorage.getItem("selectedTrainId")
-            ? Number(sessionStorage.getItem("selectedTrainId"))
-            : null;
+    const [selectedTrainId, setSelectedTrainId] = useState<string | null>(() => {
+        return localStorage.getItem("selectedTrainId") || null;
     });
 
     useEffect(() => {
         if (selectedTrainId !== null) {
-            sessionStorage.setItem("selectedTrainId", selectedTrainId.toString());
+            localStorage.setItem("selectedTrainId", selectedTrainId);
         }
     }, [selectedTrainId]);
 
@@ -44,7 +42,7 @@ const TrainList = () => {
 
     const handleSelect = (train: Train) => {
         if (!train.disabled) {
-            setSelectedTrainId(train.id);
+            setSelectedTrainId(train.trainId);
         }
     };
 
@@ -76,16 +74,16 @@ const TrainList = () => {
                         <tbody>
                             {dummyTrains.map((train) => (
                                 <tr
-                                    key={train.id}
+                                    key={train.trainId}
                                     onClick={() => handleSelect(train)}
                                     style={{
                                         opacity: train.disabled ? 0.3 : 1,
                                         border:
-                                            train.id === selectedTrainId
+                                            train.trainId === selectedTrainId
                                                 ? "3px solid #4A90E2"
                                                 : "1px solid transparent",
                                         backgroundColor:
-                                            train.id === selectedTrainId
+                                            train.trainId === selectedTrainId
                                                 ? "#E3F2FD"
                                                 : "transparent",
                                         cursor: train.disabled
@@ -94,30 +92,28 @@ const TrainList = () => {
                                         transition: "0.3s ease-in-out",
                                     }}
                                 >
-                                    <td>{train.departure}</td>
-                                    <td>{train.arrival}</td>
-                                    <td>{train.price}</td>
+                                    <td>{train.departureTime}</td>
+                                    <td>{train.arrivalTime}</td>
+                                    <td>{train.price.toLocaleString()}원</td>
                                     <td
                                         style={{
-                                            color: train.seatsLeft < 20 ? "#FF1744" : "#111111",
+                                            color: train.availableSeats < 20 ? "#FF1744" : "#111111",
                                         }}
                                     >
-                                        {train.seatsLeft}
+                                        {train.availableSeats}
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-                
             </div>
 
             <div className="display-button">
-                <button className ="goback-button" onClick={handleBack}>이전</button>
-                <button className ="search-button" onClick={handleNext}>다음</button>
+                <button className="goback-button" onClick={handleBack}>이전</button>
+                <button className="search-button" onClick={handleNext}>다음</button>
             </div>
         </div>
-        
     );
 };
 
