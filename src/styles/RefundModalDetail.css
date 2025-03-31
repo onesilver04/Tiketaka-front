@@ -11,35 +11,27 @@
 
 .modal-box {
     background: white;
-    border: 2px solid #5c5cfe;
+    border: 2px solid #2B32B2;
     border-radius: 12px;
     padding: 20px 30px;
     text-align: center;
-    width: 260px;
+    height: 192px;
+    width: 298px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    gap: 20px;
 }
 
-.modal-buttons button {
-    width: 100px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.modal-buttons .yes {
-    background-color: #5c5cfe;
-    color: white;
-}
-
-.modal-buttons .no {
-    background-color: white;
-    border: 1px solid #5c5cfe;
-    color: #5c5cfe;
+button.refund-yes,
+button.refund-no{
+    width: 150px;
+    height: 44px;
 }

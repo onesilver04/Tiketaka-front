@@ -173,7 +173,6 @@ const History = () => {
                     value={selectingDate === "start" ? startDate : endDate}
                     selectRange={false}
                     minDate={selectingDate === "start" ? threeMonthsAgo : undefined}
-                    maxDate={selectingDate === "end" ? today : undefined}
                 />
             </div>
 

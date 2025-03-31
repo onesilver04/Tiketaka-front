@@ -44,18 +44,18 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                 onChange={() => onToggle(reservationId)}
             />
 
-            <div className="ticket-content" onClick={handleTicketClick} style={{ cursor: "pointer" }}>
+            <div className="ticket-content">
                 <div className="ticket-left-bar"></div>
 
-                <div className="ticket-info">
+                <div className="ticket-info" onClick={handleTicketClick} style={{ cursor: "pointer" }}>
                     <div className="route-row">
-                        <span className="label">출발</span>
+                        <span className="start-label">출발</span>
                         <div className="station-block">
                             <span className="station">{departure}역</span>
                             <span>{departureTime}</span>
                         </div>
                         <span className="arrow">→</span>
-                        <span className="label">도착</span>
+                        <span className="arrive-label">도착</span>
                         <div className="station-block">
                             <span className="station">{arrival}역</span>
                             <span>{arrivalTime}</span>
