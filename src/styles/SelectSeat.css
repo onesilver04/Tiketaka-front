@@ -1,6 +1,5 @@
 .seat-grid {
     width: 350px;
-
 }
 
 .seat-number {
@@ -12,4 +11,11 @@
     margin-left: 20px;
     display: flex;
     gap: 65px;
+}
+
+button.select-seat-back,
+button.select-seat-next {
+    margin-top: 34px;
+    margin-left: 20px;
+    margin-bottom: 85px;
 }

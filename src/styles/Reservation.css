@@ -3,10 +3,9 @@
 
 .display-button {
     display: flex;
-    
 }
 /* 조회 버튼*/
-.goback-button, .search-button {
+/* .goback-button, .search-button {
     margin-top: 20px;
     margin-left: 20px;
     margin-bottom: 40px;
@@ -17,7 +16,7 @@
     background-color: #2B32B2;
     color: #FFFFFF;
     font-size: 20px;
-}
+} */
 
 .box-name {
     font-family: "Pretendard", sans-serif;
@@ -27,23 +26,25 @@
 }
 
 .react-calendar {
-    border: 1.5px solid #2B32B2;
+    border: 1.5px solid #2b32b2;
     border-radius: 18px;
-    font-family: 'Pretendard', sans-serif;
+    font-family: "Pretendard", sans-serif;
 }
 
 .react-calendar__navigation__label {
     height: 43px;
     font-size: 18px;
-    font-family: 'Pretendard', sans-serif;
+    font-family: "Pretendard", sans-serif;
     pointer-events: none;
 }
 
-.react-calendar__navigation__next2-button, .react-calendar__navigation__prev2-button {
+.react-calendar__navigation__next2-button,
+.react-calendar__navigation__prev2-button {
     display: none;
 }
 
-.react-calendar__navigation__arrow .react-calendar__navigation__next-button:hover {
+.react-calendar__navigation__arrow
+    .react-calendar__navigation__next-button:hover {
     background-color: none;
 }
 
@@ -57,15 +58,15 @@
 }
 
 .react-calendar__month-view__weekdays__weekday--weekend abbr[title="일요일"] {
-    color: #FF1744;
+    color: #ff1744;
 }
 
 .react-calendar__month-view__weekdays__weekday--weekend abbr[title="토요일"] {
-    color: #2B32B2;
+    color: #2b32b2;
 }
 
 .react-calendar__month-view__days__day--weekend:nth-child(7n) abbr {
-    color: #2B32B2;
+    color: #2b32b2;
 }
 
 .react-calendar button:hover {
@@ -78,9 +79,9 @@
 
 /* 오늘 날짜 스타일 */
 .react-calendar__tile--now {
-    background-color: #2B32B2;
+    background-color: #2b32b2;
     border-radius: 50%;
-    color: #F7F8F9;
+    color: #f7f8f9;
 }
 
 /* 선택된 날짜 스타일 */
@@ -97,7 +98,7 @@
 }
 
 .react-calendar__tile:enabled:focus {
-    border: 1px solid #2B32B2;
+    border: 1px solid #2b32b2;
     border-radius: 50%;
 }
 
@@ -130,12 +131,12 @@
     font-family: "Pretendard", sans-serif;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .station-selection select:focus {
     outline: none;
-    border-color: #2B32B2;
+    border-color: #2b32b2;
 }
 
 .station-selection select:hover {
@@ -164,3 +165,9 @@
     cursor: pointer;
 }
 
+button.reservation-back,
+button.reservation-search {
+    margin-top: 34px;
+    margin-left: 20px;
+    margin-bottom: 85px;
+}
