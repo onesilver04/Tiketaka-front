@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
+import RefundModalDetail from "../components/RefundModalDetail";
+
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
 import "../styles/History.css";
@@ -73,6 +75,7 @@ const History = () => {
     const [selected, setSelected] = useState<string[]>([]);
     const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false); // ✅ 모달 상태
 
     const navigate = useNavigate();
 
@@ -87,6 +90,16 @@ const History = () => {
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     };
 
+    const handleSearch = () => {
+        const result = sampleReservations.filter((res) => {
+            const depDate = new Date(res.departureDate);
+            return depDate >= startDate && depDate <= endDate;
+        });
+        setFilteredReservations(result);
+        setSelected([]);
+        setHasSearched(true);
+    };
+
     const handleRefundClick = () => {
         const selectedRes = filteredReservations.filter((res) =>
             selected.includes(res.reservationId)
@@ -97,19 +110,22 @@ const History = () => {
             return;
         }
 
-        navigate("/history/booking-detail", {
+        setIsModalOpen(true); // ✅ 모달 열기
+    };
+
+    const confirmRefund = () => {
+        const selectedRes = filteredReservations.filter((res) =>
+            selected.includes(res.reservationId)
+        );
+
+        setIsModalOpen(false);
+        navigate("/history/refund-success", {
             state: { reservations: selectedRes },
         });
     };
 
-    const handleSearch = () => {
-        const result = sampleReservations.filter((res) => {
-            const depDate = new Date(res.departureDate);
-            return depDate >= startDate && depDate <= endDate;
-        });
-        setFilteredReservations(result);
-        setSelected([]);
-        setHasSearched(true);
+    const cancelRefund = () => {
+        setIsModalOpen(false);
     };
 
     return (
@@ -217,6 +233,14 @@ const History = () => {
                     </>
                 )}
             </div>
+
+            {/* ✅ 모달 컴포넌트 */}
+            {isModalOpen && (
+                <RefundModalDetail
+                    onConfirm={confirmRefund}
+                    onCancel={cancelRefund}
+                />
+            )}
         </div>
     );
 };
