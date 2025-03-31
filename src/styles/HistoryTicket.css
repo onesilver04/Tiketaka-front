@@ -115,3 +115,14 @@
     gap: 4px;
     margin-top: 21px;
 }
+.detail-item {
+    display: flex;
+    justify-content: space-between; /* 왼쪽과 오른쪽 항목 간격을 띄움 */
+    align-items: center; /* 세로 가운데 정렬 */
+}
+
+
+.value {
+    flex: 1; /* 값이 가능한 공간을 채움 */
+    text-align: right; /* 오른쪽 정렬 */
+}
