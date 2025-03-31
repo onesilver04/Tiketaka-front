@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/History.css";
 import "../styles/HistoryTicket.css";
 import { Reservation } from "../types/reservation";
@@ -25,6 +26,14 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
         seat,
     } = reservation;
 
+    const navigate = useNavigate();
+
+    const handleTicketClick = () => {
+        navigate("/history/booking-detail", {
+            state: { reservations: [reservation] }, // 배열 형태로 넘김
+        });
+    };
+
     return (
         <div className={`ticket-container ${isSelected ? "selected" : ""}`}>
             <input
@@ -33,7 +42,8 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                 checked={isSelected}
                 onChange={() => onToggle(reservationId)}
             />
-            <div className="ticket-content">
+
+            <div className="ticket-content" onClick={handleTicketClick} style={{ cursor: "pointer" }}>
                 <div className="ticket-left-bar"></div>
 
                 <div className="ticket-info">
