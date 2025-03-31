@@ -4,6 +4,7 @@ import styleb from "../styles/Box.module.css";
 import seatImage from "../assets/seat-button.svg";
 import trainConvenience from "../assets/train-convenience.svg";
 import "../styles/SelectSeat.css";
+import styles from "../styles/Button.module.css";
 
 interface Seat {
     seatNumber: string;
@@ -33,8 +34,12 @@ const SelectSeat = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const trainId = new URLSearchParams(location.search).get("trainId") || "";
-    const carriageNumber = new URLSearchParams(location.search).get("carriageNumber") || "1";
-    const totalPassengers = parseInt(localStorage.getItem("totalPassengers") || "1", 10);
+    const carriageNumber =
+        new URLSearchParams(location.search).get("carriageNumber") || "1";
+    const totalPassengers = parseInt(
+        localStorage.getItem("totalPassengers") || "1",
+        10
+    );
 
     const [availableSeats, setAvailableSeats] = useState<Seat[]>(dummySeats);
     const [selectedSeats, setSelectedSeats] = useState<string[]>(() => {
@@ -83,31 +88,55 @@ const SelectSeat = () => {
                     <div className="content-container">
                         <img src={trainConvenience} alt="기차 편의 시설"></img>
                         <div className="seat-grid">
-                            <div className="seat-guide"><div>창측</div><div>내측</div><div>내측</div><div>창측</div></div>
-                            {availableSeats.map(({ seatNumber, isAvailable }) => (
-                                <button
-                                    key={seatNumber}
-                                    className={`seat ${
-                                        selectedSeats.includes(seatNumber) ? "selected" : ""
-                                    }`}
-                                    onClick={() => isAvailable && toggleSeat(seatNumber)}
-                                    disabled={!isAvailable}
-                                >
-                                    <img
-                                        src={seatImage}
-                                        alt="Seat"
-                                        className={`seat-icon ${!isAvailable ? "disabled" : ""}`}
-                                    />
-                                    <div className="seat-number">{seatNumber}</div>
-                                </button>
-                            ))}
+                            <div className="seat-guide">
+                                <div>창측</div>
+                                <div>내측</div>
+                                <div>내측</div>
+                                <div>창측</div>
+                            </div>
+                            {availableSeats.map(
+                                ({ seatNumber, isAvailable }) => (
+                                    <button
+                                        key={seatNumber}
+                                        className={`seat ${
+                                            selectedSeats.includes(seatNumber)
+                                                ? "selected"
+                                                : ""
+                                        }`}
+                                        onClick={() =>
+                                            isAvailable &&
+                                            toggleSeat(seatNumber)
+                                        }
+                                        disabled={!isAvailable}
+                                    >
+                                        <img
+                                            src={seatImage}
+                                            alt="Seat"
+                                            className={`seat-icon ${
+                                                !isAvailable ? "disabled" : ""
+                                            }`}
+                                        />
+                                        <div className="seat-number">
+                                            {seatNumber}
+                                        </div>
+                                    </button>
+                                )
+                            )}
                         </div>
                         <div className="selected-seats">
-                            <h4>선택한 좌석 ({selectedSeats.length} / {totalPassengers}):</h4>
+                            <h4>
+                                선택한 좌석 ({selectedSeats.length} /{" "}
+                                {totalPassengers}):
+                            </h4>
                             {selectedSeats.length > 0 ? (
                                 selectedSeats.map((seat) => (
                                     <span key={seat} className="selected-seat">
-                                        {seat} <button onClick={() => toggleSeat(seat)}>X</button>
+                                        {seat}{" "}
+                                        <button
+                                            onClick={() => toggleSeat(seat)}
+                                        >
+                                            X
+                                        </button>
                                     </span>
                                 ))
                             ) : (
@@ -118,8 +147,19 @@ const SelectSeat = () => {
                 </div>
             </div>
             <div className="display-button">
-                <button className="goback-button" onClick={handleBack}>이전</button>
-                <button className="search-button" onClick={handleNext} disabled={selectedSeats.length === 0}>다음</button>
+                <button
+                    className={`${styles.button} select-seat-back`}
+                    onClick={handleBack}
+                >
+                    이전
+                </button>
+                <button
+                    className={`${styles.button} select-seat-next`}
+                    onClick={handleNext}
+                    disabled={selectedSeats.length === 0}
+                >
+                    다음
+                </button>
             </div>
         </div>
     );
