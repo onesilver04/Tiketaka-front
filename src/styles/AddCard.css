@@ -1,0 +1,27 @@
+button.addcard-back,
+button.addcard-search {
+    margin-top: 34px;
+    margin-left: 20px;
+    margin-bottom: 85px;
+}
+
+.addcard-selected-container {
+    width: 204px;
+    height: 199px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: 20px auto;
+}
+
+.addcard-selected {
+    width: 66px;
+    height: 56px;
+    background-color: #F8F8F9;
+    border: none;
+    border-radius: 8px;
+}
+
+.addcard-selected:focus {
+    background-color: #9EA4AA;
+}

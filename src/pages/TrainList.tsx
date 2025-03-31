@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
+import "../styles/TrainList.css";
 
 interface Train {
     trainId: string;
@@ -196,3 +197,6 @@ const TrainList = () => {
 };
 
 export default TrainList;
+
+
+// 표를 선택할 때 지금 표 때문에 하이트라이트가 끊겨서 나오는데 그렇게 하지 말고 하나의 하이라이트로 만들기. 표의 선 없애고. 이건 스타일로 지정?
