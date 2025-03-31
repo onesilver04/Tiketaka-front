@@ -8,6 +8,7 @@ const Start = () => {
 
     return (
         <div>
+            <title>Start</title>
             <div className="logo">
                 <img className="main-logo" src={logoMain} alt="메인로고" />
             </div>
