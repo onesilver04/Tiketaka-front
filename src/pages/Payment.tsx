@@ -66,8 +66,10 @@ const Payment: React.FC = () => {
                 <div className="content-container">
                     <div className="trip-info">
                         <p>출발: 서울역 → 도착: 부산역</p>
-                        <p>날짜: 2025.mm.dd</p>
+                        <p>날짜: 2025.mm.dd</p> 
+                        {/* reservation에서 선택한 날짜 정보가 여기로 넘어와야 함!!!! */}
                         <p>총 인원: 성인 2명, 어린이 1명</p>
+                        {/*reservation에서 선택한 인원수가 여기로 넘어와야 함!!!*/}
                         <p>지불하실 금액: nnn,nnn원</p>
                     </div>
 

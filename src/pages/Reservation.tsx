@@ -170,9 +170,8 @@ const Reservation = () => {
                                 }
                                 className="station-select-button"
                             >
-                                {departureStation ?? "출발역"} ▾
-                                {/* <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" /> */}
-                                {/* 이미지 전역에다가 준 css 수정 후 추가 */}
+                                {departureStation ?? "출발역"}
+                                <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
                             </button>
                         </div>
 
@@ -188,7 +187,8 @@ const Reservation = () => {
                                 }
                                 className="station-select-button"
                             >
-                                {destinationStation ?? "도착역"} ▾
+                                {destinationStation ?? "도착역"}
+                                <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
                             </button>
                         </div>
                     </div>
@@ -340,3 +340,5 @@ const Reservation = () => {
 };
 
 export default Reservation;
+
+// 예매가 모두 끝나고 다시 예매 화면으로 돌아오면 그 데이터는 로컬에 담아두고 다시 새로운 데이터를 받기 위해 초기화된 상태로 다시 화면이 로드되게 만들기
