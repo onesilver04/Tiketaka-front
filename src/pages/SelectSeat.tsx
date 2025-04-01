@@ -5,6 +5,7 @@ import seatImage from "../assets/seat-button.svg";
 import trainConvenience from "../assets/train-convenience.svg";
 import "../styles/SelectSeat.css";
 import styles from "../styles/Button.module.css";
+import { updateCurrentSession } from "../utils/session";
 
 interface Seat {
     seatNumber: string;
@@ -33,23 +34,21 @@ const dummySeats: Seat[] = [
 const SelectSeat = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const trainId = new URLSearchParams(location.search).get("trainId") || "";
-    const carriageNumber =
-        new URLSearchParams(location.search).get("carriageNumber") || "1";
-    const totalPassengers = parseInt(
-        localStorage.getItem("totalPassengers") || "1",
-        10
-    );
+    const { reservationData, trainInfo } = location.state;
+    const totalPassengers = reservationData.adultCount + reservationData.seniorCount + reservationData.teenCount;
 
+    const [carriageNumber, setCarriageNumber] = useState<number>(1);
     const [availableSeats, setAvailableSeats] = useState<Seat[]>(dummySeats);
-    const [selectedSeats, setSelectedSeats] = useState<string[]>(() => {
-        const storedSeats = sessionStorage.getItem("selectedSeats");
-        return storedSeats ? JSON.parse(storedSeats) : [];
-    });
+    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
     useEffect(() => {
-        sessionStorage.setItem("selectedSeats", JSON.stringify(selectedSeats));
-    }, [selectedSeats]);
+        updateCurrentSession({
+            selectedSeats: {
+                carriageNumber,
+                availableSeats: selectedSeats.map((seatNumber) => ({ seatNumber, isAvailable: true }))
+            }
+        });
+    }, [selectedSeats, carriageNumber]);
 
     const toggleSeat = (seatNumber: string) => {
         setSelectedSeats((prevSeats) => {
@@ -70,7 +69,12 @@ const SelectSeat = () => {
             return;
         }
         navigate("/reservation/payment", {
-            state: { trainId, carriageNumber, selectedSeats },
+            state: {
+                reservationData,
+                trainInfo,
+                selectedSeats,
+                carriageNumber,
+            },
         });
     };
 
@@ -85,8 +89,23 @@ const SelectSeat = () => {
                 <div className="seat-container">
                     <h2 className="page-title">좌석 선택</h2>
                     <hr className="page-title-bar" />
+
                     <div className="content-container">
-                        <img src={trainConvenience} alt="기차 편의 시설"></img>
+                        <div style={{ marginBottom: "16px" }}>
+                            <label htmlFor="carriage">호차 선택: </label>
+                            <select
+                                id="carriage"
+                                value={carriageNumber}
+                                onChange={(e) => setCarriageNumber(Number(e.target.value))}
+                            >
+                                <option value={1}>1호차</option>
+                                <option value={2}>2호차</option>
+                                <option value={3}>3호차</option>
+                            </select>
+                        </div>
+
+                        <img src={trainConvenience} alt="기차 편의 시설" />
+
                         <div className="seat-grid">
                             <div className="seat-guide">
                                 <div>창측</div>
@@ -94,49 +113,30 @@ const SelectSeat = () => {
                                 <div>내측</div>
                                 <div>창측</div>
                             </div>
-                            {availableSeats.map(
-                                ({ seatNumber, isAvailable }) => (
-                                    <button
-                                        key={seatNumber}
-                                        className={`seat ${
-                                            selectedSeats.includes(seatNumber)
-                                                ? "selected"
-                                                : ""
-                                        }`}
-                                        onClick={() =>
-                                            isAvailable &&
-                                            toggleSeat(seatNumber)
-                                        }
-                                        disabled={!isAvailable}
-                                    >
-                                        <img
-                                            src={seatImage}
-                                            alt="Seat"
-                                            className={`seat-icon ${
-                                                !isAvailable ? "disabled" : ""
-                                            }`}
-                                        />
-                                        <div className="seat-number">
-                                            {seatNumber}
-                                        </div>
-                                    </button>
-                                )
-                            )}
+                            {availableSeats.map(({ seatNumber, isAvailable }) => (
+                                <button
+                                    key={seatNumber}
+                                    className={`seat ${selectedSeats.includes(seatNumber) ? "selected" : ""}`}
+                                    onClick={() => isAvailable && toggleSeat(seatNumber)}
+                                    disabled={!isAvailable}
+                                >
+                                    <img
+                                        src={seatImage}
+                                        alt="Seat"
+                                        className={`seat-icon ${!isAvailable ? "disabled" : ""}`}
+                                    />
+                                    <div className="seat-number">{seatNumber}</div>
+                                </button>
+                            ))}
                         </div>
+
                         <div className="selected-seats">
-                            <h4>
-                                선택한 좌석 ({selectedSeats.length} /{" "}
-                                {totalPassengers}):
-                            </h4>
+                            <h4>선택한 좌석 ({selectedSeats.length} / {totalPassengers}):</h4>
                             {selectedSeats.length > 0 ? (
                                 selectedSeats.map((seat) => (
                                     <span key={seat} className="selected-seat">
-                                        {seat}{" "}
-                                        <button
-                                            onClick={() => toggleSeat(seat)}
-                                        >
-                                            X
-                                        </button>
+                                        {carriageNumber}호차 - {seat}
+                                        <button onClick={() => toggleSeat(seat)}>X</button>
                                     </span>
                                 ))
                             ) : (
@@ -146,11 +146,9 @@ const SelectSeat = () => {
                     </div>
                 </div>
             </div>
+
             <div className="display-button">
-                <button
-                    className={`${styles.button} select-seat-back`}
-                    onClick={handleBack}
-                >
+                <button className={`${styles.button} select-seat-back`} onClick={handleBack}>
                     이전
                 </button>
                 <button
