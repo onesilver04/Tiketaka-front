@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import RefundModalDetail from "../components/RefundModalDetail";
 import { Reservation } from "../types/reservation";
 import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
+import RefundModal from "../components/RefundModal";
 
 interface LocationState {
     reservations: Reservation[];
@@ -28,6 +28,10 @@ const BookingDetail = () => {
 
     const cancelRefund = () => {
         setIsModalOpen(false);
+    };
+
+    const handleBack = () => {
+        navigate(-1);
     };
 
     const totalPassengers = reservations.reduce(
@@ -113,15 +117,22 @@ const BookingDetail = () => {
                     </p>
                 </div>
             </div>
+            {/* detail -> history 페이지로 가는 이전 버튼 */}
             <button
-                className={`${styles.button} detail-refund`}
+                className={`${styles.button} detail-to-history`}
+                onClick={handleBack}
+            >
+                이전
+            </button>
+            {/* detail -> refund 페이지로 가는 이전 버튼 */}
+            <button
+                className={`${styles.button} detail-to-refund`}
                 onClick={handleRefund}
             >
                 환불하기
             </button>
-
             {isModalOpen && (
-                <RefundModalDetail
+                <RefundModal
                     onConfirm={confirmRefund}
                     onCancel={cancelRefund}
                 />
