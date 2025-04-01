@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import "../styles/History.css";
 
@@ -8,7 +7,9 @@ const HistoryNone = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="ticket-container none">
+        <div className="ticket-container-none">
+            <hr className="page-title-bar" />
+
             <div className="no-reservation-section">
                 <img
                     src="/src/assets/failed-button.svg"
