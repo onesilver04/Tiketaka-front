@@ -186,8 +186,9 @@ const History = () => {
                     }
                 />
             </div>
-
+            {/* history 조회 버튼 */}
             <button
+                id="history-search"
                 className={`${styles.button} history-look-up`}
                 onClick={handleSearch}
             >
@@ -240,7 +241,9 @@ const History = () => {
                             </div>
 
                             {filteredReservations.length > 0 && (
+                                // 환불 버튼 클릭 시 RefundModal창으로 이동하는 버튼
                                 <button
+                                    id="history-refund"
                                     className={`${styles.button} history-refund`}
                                     onClick={handleRefundClick}
                                 >
