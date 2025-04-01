@@ -75,14 +75,8 @@
 /* 선택된 날짜 스타일 */
 .react-calendar__tile--active,
 .selected-date {
-    background-color: transparent;
-    color: #2b32b2 !important;
-}
-
-/* 호버, 포커스 시 배경 없애기 */
-.react-calendar__tile:enabled:hover,
-.react-calendar__tile:enabled:focus {
-    background-color: transparent !important;
+    background-color: #00000000 !important;
+    color: black !important;
 }
 
 .react-calendar__tile:enabled:focus {

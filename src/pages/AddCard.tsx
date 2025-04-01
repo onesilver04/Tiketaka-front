@@ -26,20 +26,20 @@ const AddCard: React.FC = () => {
         let masked = "";
     
         for (let i = 0; i < digits.length; i += 4) {
-            if (e.target.value.length < 16) {
-                alert("카드번호가 올바르지 않습니다. ");
-            } else {
-                masked += (masked ? "-" : "") + digits.slice(i, i + 4);
-            }
+            if (e.target.value.length >= 16) {
+                masked += (masked ? "-" : "") + "****";
+            } 
+            // else {
+            //     masked += (masked ? "-" : "") + digits.slice(i, i + 4);
+            // }
         }
     
         setCardNumber(masked);
     };
 
     const handleCVCNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "").slice(0, 4)
-        if (digits.length <= 3) return digits;
-        return `${digits}`;
+        const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+        setCvc("*".repeat(digits.length));
     };
 
     const handleExpirationPeriod = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -262,13 +262,13 @@ const Reservation = () => {
                             }
                             selectRange={false}
                             minDate={new Date()} // 지나간 날 막기
-                            // tileClassName={({ date: tileDate }) =>
-                            //     departureDate &&
-                            //     tileDate.toDateString() ===
-                            //         new Date(departureDate).toDateString()
-                            //         ? "selected-date"
-                            //         : ""
-                            // }
+                            tileClassName={({ date: tileDate }) =>
+                                departureDate &&
+                                tileDate.toDateString() ===
+                                    new Date(departureDate).toDateString()
+                                    ? "selected-date"
+                                    : ""
+                            }
                         />
                     </div>
 

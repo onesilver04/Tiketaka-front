@@ -8,8 +8,8 @@ const Start = () => {
     const navigate = useNavigate();
 
     const handleStartReservation = () => {
-        createNewSession(); // 세션 생성만 호출
-        navigate("/reservation");
+        createNewSession(); // 기존 세션 리셋 및 새로운 세션 생성
+        navigate("/reservation", { state: { reset: true } }); // reservation에 초기화 지시
     };
 
     return (
