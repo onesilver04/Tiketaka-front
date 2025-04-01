@@ -71,3 +71,26 @@ button.history-refund {
     margin-left: 25%;
     margin-top: 17px;
 }
+.ticket-container-none {
+    border: none;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.no-reservation-section {
+    margin-top: 111px;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+.no-reservation-text {
+    margin-bottom: 190px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+#historyNone-to-home {
+    margin-bottom: 82px;
+}

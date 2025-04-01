@@ -1,7 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/History.css";
 import "../styles/HistoryTicket.css";
-import { Reservation } from "../types/reservation";
+import { Reservation } from "../pages/History";
 
 interface HistoryTicketProps {
     reservation: Reservation;
@@ -18,12 +19,21 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
         reservationId,
         departure,
         arrival,
+        departureDate,
         departureTime,
         arrivalTime,
-        departureDate,
         passengerCount,
-        seat,
+        carriageNumber,
+        seatNumbers,
     } = reservation;
+
+    const navigate = useNavigate();
+
+    const handleTicketClick = () => {
+        navigate("/history/booking-detail", {
+            state: { reservations: [reservation] }, // 배열 형태로 넘김
+        });
+    };
 
     return (
         <div className={`ticket-container ${isSelected ? "selected" : ""}`}>
@@ -33,18 +43,19 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                 checked={isSelected}
                 onChange={() => onToggle(reservationId)}
             />
+
             <div className="ticket-content">
                 <div className="ticket-left-bar"></div>
 
-                <div className="ticket-info">
+                <div className="ticket-info" onClick={handleTicketClick} style={{ cursor: "pointer" }}>
                     <div className="route-row">
-                        <span className="label">출발</span>
+                        <span className="start-label">출발</span>
                         <div className="station-block">
                             <span className="station">{departure}역</span>
                             <span>{departureTime}</span>
                         </div>
                         <span className="arrow">→</span>
-                        <span className="label">도착</span>
+                        <span className="arrive-label">도착</span>
                         <div className="station-block">
                             <span className="station">{arrival}역</span>
                             <span>{arrivalTime}</span>
@@ -52,22 +63,29 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                     </div>
 
                     <div className="details">
-                        <p>출발일 {departureDate}</p>
-                        <p>
-                            예약자{" "}
-                            {passengerCount.adult
-                                ? `성인 ${passengerCount.adult}명`
-                                : ""}
-                            {passengerCount.senior
-                                ? ` 노약자 ${passengerCount.senior}명`
-                                : ""}
-                            {passengerCount.youth
-                                ? ` 청소년 ${passengerCount.youth}명`
-                                : ""}
-                        </p>
-                        {seat && <p>예약좌석 {seat}</p>}
+                        <div className="detail-item">
+                            <span className="label">출발일</span>
+                            <span className="value">{departureDate}</span>
+                        </div>
+                        <div className="detail-item">
+                            <span className="label">예약자</span>
+                            <span className="value">
+                                {passengerCount.adult ? `성인 ${passengerCount.adult}명` : ""}
+                                {passengerCount.senior ? ` 노약자 ${passengerCount.senior}명` : ""}
+                                {passengerCount.youth ? ` 청소년 ${passengerCount.youth}명` : ""}
+                            </span>
+                        </div>
+                        {seatNumbers.length > 0 && (
+                            <div className="detail-item">
+                                <span className="label">예약좌석</span>
+                                <span className="value">
+                                    {carriageNumber}호차 {seatNumbers.join(", ")}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
+
             </div>
         </div>
     );

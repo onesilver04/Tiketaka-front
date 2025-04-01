@@ -40,10 +40,14 @@ p.booking-detail-station {
     margin-bottom: 95px;
 }
 
-button.detail-refund {
-    margin-top: 31px;
-    margin-left: 25%;
+button.detail-to-history,
+button.detail-to-refund {
+    margin-top: 34px;
+    margin-left: 20px;
+    margin-bottom: 85px;
 }
+
+
 .blurred {
     filter: blur(4px);
     pointer-events: none;

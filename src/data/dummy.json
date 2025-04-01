@@ -1,0 +1,32 @@
+[
+    {
+        "reservationId": "RES12345",
+        "departure": "서울",
+        "arrival": "부산",
+        "departureDate": "2025-03-20",
+        "departureTime": "08:30",
+        "arrivalTime": "12:00",
+        "passengerCount": {
+            "adult": 1,
+            "senior": 0,
+            "youth": 0
+        },
+        "carriageNumber": "1",
+        "seatNumbers": ["1A"]
+    },
+    {
+        "reservationId": "RES67890",
+        "departure": "부산",
+        "arrival": "서울",
+        "departureDate": "2025-04-05",
+        "departureTime": "15:00",
+        "arrivalTime": "18:30",
+        "passengerCount": {
+            "adult": 1,
+            "senior": 0,
+            "youth": 1
+        },
+        "carriageNumber": "1",
+        "seatNumbers": ["1C", "2D"]
+    }
+]
