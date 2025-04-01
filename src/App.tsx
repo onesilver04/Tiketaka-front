@@ -21,6 +21,7 @@ import BookingDetail from "./pages/BookingDetail";
 import RefundSuccess from "./pages/RefundSuccess";
 import End from "./pages/End";
 import HistoryNone from "./pages/HistoryNone";
+import TakaButton from "./components/TakaButton";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const location = useLocation();
@@ -31,7 +32,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             {!shouldHideHeader && <Header />}
-            <div className="App">{children}</div>
+            {!shouldHideHeader && <TakaButton />}
+            <div
+                className="App"
+                style={{ position: "relative", minHeight: "100vh" }}
+            >
+                {children}
+            </div>
         </>
     );
 };
