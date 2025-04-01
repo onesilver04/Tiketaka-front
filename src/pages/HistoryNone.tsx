@@ -21,7 +21,10 @@ const HistoryNone = () => {
                     예매 내역이 없습니다.
                 </p>
             </div>
-            <button className={styles.button} onClick={() => navigate("/")}>
+            <button
+                className={styles.button}
+                onClick={() => navigate("/")}
+            >
                 메인 화면으로
             </button>
         </div>

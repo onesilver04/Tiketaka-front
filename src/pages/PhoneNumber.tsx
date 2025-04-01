@@ -31,13 +31,19 @@ const PhoneNumber = () => {
 
     // 다음 버튼
     const handleNextClick = () => {
-        if (inputDigits.length === 11) {
-            navigate("/history", { state: { phoneNumber: inputDigits } });
-        } else {
+        if (inputDigits.length !== 11) {
             setIsModalOpen(true);
+            return;
         }
+    
+        if (!inputDigits.startsWith("010")) {
+            alert("전화번호는 010으로 시작해야 합니다.");
+            return;
+        }
+    
+        navigate("/history", { state: { phoneNumber: inputDigits } });
     };
-
+    
     return (
         <div className="phone-number">
             <p className="phone-number-title">전화번호 입력</p>
