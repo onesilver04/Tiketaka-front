@@ -4,6 +4,7 @@ import { Reservation } from "../types/reservation";
 import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
+import RefundModal from "../components/RefundModal";
 
 interface LocationState {
     reservations: Reservation[];
@@ -32,7 +33,6 @@ const BookingDetail = () => {
     const handleBack = () => {
         navigate(-1);
     };
-
 
     const totalPassengers = reservations.reduce(
         (acc, cur) =>
@@ -119,7 +119,7 @@ const BookingDetail = () => {
             </div>
             {/* detail -> history 페이지로 가는 이전 버튼 */}
             <button
-                className={`${styles.button} detail-to-history`} 
+                className={`${styles.button} detail-to-history`}
                 onClick={handleBack}
             >
                 이전
@@ -131,7 +131,12 @@ const BookingDetail = () => {
             >
                 환불하기
             </button>
-
+            {isModalOpen && (
+                <RefundModal
+                    onConfirm={confirmRefund}
+                    onCancel={cancelRefund}
+                />
+            )}
         </>
     );
 };

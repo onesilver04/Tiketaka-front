@@ -30,8 +30,8 @@
     gap: 20px;
 }
 
-button.refund-detail-yes,
-button.refund-detail-no {
+button.refund-yes,
+button.refund-no {
     width: 150px;
     height: 44px;
 }
