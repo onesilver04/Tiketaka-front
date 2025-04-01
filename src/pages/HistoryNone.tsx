@@ -21,7 +21,9 @@ const HistoryNone = () => {
                     예매 내역이 없습니다.
                 </p>
             </div>
+            {/* HistoryNone에서 메인화면으로 이동하는 버튼 */}
             <button
+                id="historyNone-to-home"
                 className={styles.button}
                 onClick={() => navigate("/")}
             >

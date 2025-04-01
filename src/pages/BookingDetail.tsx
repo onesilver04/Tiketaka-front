@@ -119,6 +119,7 @@ const BookingDetail = () => {
             </div>
             {/* detail -> history 페이지로 가는 이전 버튼 */}
             <button
+                id="detail-to-history"
                 className={`${styles.button} detail-to-history`}
                 onClick={handleBack}
             >
@@ -126,6 +127,7 @@ const BookingDetail = () => {
             </button>
             {/* detail -> refund 페이지로 가는 이전 버튼 */}
             <button
+                id="detail-to-refund"
                 className={`${styles.button} detail-to-refund`}
                 onClick={handleRefund}
             >

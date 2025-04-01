@@ -7,7 +7,7 @@ import PhoneModal from "../components/PhoneModal";
 
 const PhoneNumber = () => {
     const navigate = useNavigate();
-    const [inputDigits, setInputDigits] = useState(""); // 010 제외한 8자리만 저장
+    const [inputDigits, setInputDigits] = useState(""); // 입력된 전체 전화번호 (하이픈 없이 11자리)
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 숫자 버튼 입력
@@ -35,15 +35,15 @@ const PhoneNumber = () => {
             setIsModalOpen(true);
             return;
         }
-    
+
         if (!inputDigits.startsWith("010")) {
             alert("전화번호는 010으로 시작해야 합니다.");
             return;
         }
-    
+
         navigate("/history", { state: { phoneNumber: inputDigits } });
     };
-    
+
     return (
         <div className="phone-number">
             <p className="phone-number-title">전화번호 입력</p>
@@ -107,10 +107,20 @@ const PhoneNumber = () => {
             </div>
 
             <div className="nav-buttons">
-                <button className={styles.button} onClick={() => navigate("/")}>
+                {/* 전번입력->홈으로 이동하는 버튼 */}
+                <button
+                    id="phoneNumber-to-home"
+                    className={styles.button}
+                    onClick={() => navigate("/")}
+                >
                     이전
                 </button>
-                <button className={styles.button} onClick={handleNextClick}>
+                {/* 전번입력->예매 조회로 이동하는 버튼 */}
+                <button
+                    id="phoneNumber-to-history"
+                    className={styles.button}
+                    onClick={handleNextClick}
+                >
                     다음
                 </button>
             </div>
