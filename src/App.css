@@ -7,6 +7,7 @@ body {
 }
 
 .App {
+    position: relative;
     max-width: 430px;
     margin: 0 auto;
     min-height: 100vh;
@@ -15,7 +16,6 @@ body {
     overflow-x: hidden;
     scrollbar-width: none;
     width: auto;
-    position: relative;
     word-break: keep-all;
     background-color: #fff;
     font-family: "Pretendard", sans-serif;
