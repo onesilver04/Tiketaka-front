@@ -1,18 +1,78 @@
-.seat-grid {
-    width: 350px;
+.carriage-selection {
+    display: flex;
+    justify-content: end;
 }
 
-.seat-number {
-    position: absolute;
-    transform: translate(20px, -35px);
+#carriage {
+    width: 102px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #D9D9D9;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: center;
+}
+
+.train-convenience-box {
+    display: flex;
+    margin: 40px 0;
+}
+.train-convenience-img {
+    margin: 0 auto;
+}
+.seat {
+    background-color: transparent;
+    border: none;
+}
+
+.seat-icon {
+    height: 60px;
+    width: 60px;
+}
+
+/* 좌석 전체 그리드 컨테이너 */
+.seat-grid {
+    display: grid;
+    grid-template-columns: auto auto 40px auto auto; /* A B aisle C D */
+    gap: 24px 6px;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    margin: 24px auto;
 }
 
 .seat-guide {
-    margin-left: 20px;
+    grid-column: span 5;
     display: flex;
-    gap: 65px;
+    justify-content: space-around;
+    font-size: 14px;
+    margin-bottom: 12px;
 }
 
+/* 좌석 버튼 안의 숫자 위치 */
+.seat-number {
+    position: absolute;
+    transform: translate(20px, -35px);
+    font-size: 13px;
+}
+
+/* 통로 이미지 */
+.aisle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 64px;
+}
+
+.aisle img {
+    height: 64px;
+    width: auto;
+    opacity: 0.5;
+}
+
+/* 이전/다음 버튼 위치 유지 */
 button.select-seat-back,
 button.select-seat-next {
     margin-top: 34px;

@@ -2,9 +2,15 @@ import { useNavigate } from "react-router-dom";
 import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
+import { createNewSession } from "../utils/session";
 
 const Start = () => {
     const navigate = useNavigate();
+
+    const handleStartReservation = () => {
+        createNewSession(); // 기존 세션 리셋 및 새로운 세션 생성
+        navigate("/reservation", { state: { reset: true } }); // reservation에 초기화 지시
+    };
 
     return (
         <div>
@@ -15,7 +21,7 @@ const Start = () => {
             <div className="button-container">
                 <button
                     className={`${styles.button} reservation`}
-                    onClick={() => navigate("/reservation")}
+                    onClick={handleStartReservation}
                 >
                     예매하기
                 </button>
