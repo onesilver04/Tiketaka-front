@@ -23,17 +23,17 @@ interface Train {
     disabled?: boolean;
 }
 
-const dummyTrains: Train[] = [
-    { trainId: "DUMMY1", departureTime: "05:13", arrivalTime: "07:14", price: 69000, availableSeats: 36 },
-    { trainId: "DUMMY2", departureTime: "06:21", arrivalTime: "08:20", price: 69000, availableSeats: 10 },
-    { trainId: "DUMMY3", departureTime: "08:36", arrivalTime: "10:02", price: 71600, availableSeats: 0, disabled: true },
-    { trainId: "DUMMY4", departureTime: "11:03", arrivalTime: "13:14", price: 69000, availableSeats: 29 },
-    { trainId: "DUMMY5", departureTime: "12:27", arrivalTime: "15:20", price: 69000, availableSeats: 12 },
-    { trainId: "DUMMY6", departureTime: "15:13", arrivalTime: "17:14", price: 54000, availableSeats: 97 },
-    { trainId: "DUMMY7", departureTime: "16:21", arrivalTime: "18:20", price: 69000, availableSeats: 23 },
-    { trainId: "DUMMY8", departureTime: "18:36", arrivalTime: "20:02", price: 71600, availableSeats: 0, disabled: true },
-    { trainId: "DUMMY9", departureTime: "21:03", arrivalTime: "23:14", price: 32000, availableSeats: 17 },
-    { trainId: "DUMMY10", departureTime: "22:27", arrivalTime: "01:20", price: 69000, availableSeats: 8 },
+const KTXTrains: Train[] = [
+    { trainId: "KTX1", departureTime: "05:13", arrivalTime: "07:14", price: 69000, availableSeats: 36 },
+    { trainId: "KTX2", departureTime: "06:21", arrivalTime: "08:20", price: 69000, availableSeats: 10 },
+    { trainId: "KTX3", departureTime: "08:36", arrivalTime: "10:02", price: 71600, availableSeats: 0, disabled: true },
+    { trainId: "KTX4", departureTime: "11:03", arrivalTime: "13:14", price: 69000, availableSeats: 29 },
+    { trainId: "KTX5", departureTime: "12:27", arrivalTime: "15:20", price: 69000, availableSeats: 12 },
+    { trainId: "KTX6", departureTime: "15:13", arrivalTime: "17:14", price: 54000, availableSeats: 97 },
+    { trainId: "KTX7", departureTime: "16:21", arrivalTime: "18:20", price: 69000, availableSeats: 23 },
+    { trainId: "KTX8", departureTime: "18:36", arrivalTime: "20:02", price: 71600, availableSeats: 0, disabled: true },
+    { trainId: "KTX9", departureTime: "21:03", arrivalTime: "23:14", price: 32000, availableSeats: 17 },
+    { trainId: "KTX10", departureTime: "22:27", arrivalTime: "01:20", price: 69000, availableSeats: 8 },
 ];
 
 const TrainList = () => {
@@ -87,7 +87,7 @@ const TrainList = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {dummyTrains.map((train) => (
+                {KTXTrains.map((train) => (
                     <tr
                     key={train.trainId}
                     onClick={() => handleSelect(train)}

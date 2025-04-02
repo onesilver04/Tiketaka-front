@@ -157,13 +157,15 @@ const Reservation = () => {
         if (!departureStation) return alert("출발역은 필수입니다.");
         if (!destinationStation) return alert("도착역은 필수입니다.");
         if (!departureDate) return alert("날짜는 필수입니다.");
+        if (departureStation === destinationStation)
+            return alert("출발역과 도착역은 서로 달라야 합니다.");        
         if (adultCount + seniorCount + teenCount < 1)
             return alert("최소 1명 이상의 인원이 필요합니다.");
     
-        // ✅ 세션 업데이트
+        // 세션 업데이트
         updateCurrentSession({ reservationData });
 
-        // ✅ 다음 페이지로 예약 데이터 넘기기
+        // 다음 페이지로 예약 데이터 넘기기
         navigate("/reservation/train-list", {
             state: reservationData,
         });
