@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Reservation } from "../types/reservation";
+import { Reservation } from "./History";
 import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";

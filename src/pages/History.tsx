@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
 import RefundModalDetail from "../components/RefundModalDetail";
-// import { TakaBox } from "../components/TakaBox";
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
 import "../styles/History.css";
