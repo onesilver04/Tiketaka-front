@@ -4,3 +4,8 @@ button.payment-next {
     margin-left: 20px;
     margin-bottom: 85px;
 }
+
+.selected-station-inform {
+    display: flex;
+    flex-direction: row;
+}

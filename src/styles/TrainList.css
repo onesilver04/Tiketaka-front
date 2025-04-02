@@ -4,3 +4,15 @@ button.train-list-search {
     margin-left: 20px;
     margin-bottom: 85px;
 }
+
+table td,
+table th {
+    border: none;
+    padding: 14px 16px;
+    text-align: center;
+}
+
+.selected-row {
+    background-color: #e3f2fd;
+    border-radius: 8px;
+}

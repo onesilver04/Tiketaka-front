@@ -1,11 +1,13 @@
+//Reservation.tsx
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 import StationSelector from "./StationSelector";
 import styles from "../styles/Button.module.css";
+import { updateCurrentSession } from "../utils/session";
 
 const stations = [
     "선택",
@@ -52,27 +54,43 @@ const STORAGE_KEY = "reservationData";
 
 const Reservation = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const shouldReset = location.state?.reset === true;
+        if (shouldReset) {
+            localStorage.removeItem(STORAGE_KEY);
+            setReservationData({
+                departureStation: null,
+                destinationStation: null,
+                departureDate: null,
+                adultCount: 0,
+                seniorCount: 0,
+                teenCount: 0,
+            });
+        }
+    }, []);
 
     const loadStoredData = () => {
         const storedData = localStorage.getItem(STORAGE_KEY);
         return storedData ? JSON.parse(storedData) : null;
     };
 
-    const [reservationData, setReservationData] = useState<ReservationData>(
-        () => {
-            return (
-                loadStoredData() || {
-                    departureStation: null,
-                    destinationStation: null,
-                    departureDate: null,
-                    adultCount: 0,
-                    seniorCount: 0,
-                    teenCount: 0,
-                }
-            );
-        }
-    );
+    const [reservationData, setReservationData] = useState<ReservationData>(() => {
+        const stored = loadStoredData();
+        return {
+            departureStation: stored?.departureStation || null,
+            destinationStation: stored?.destinationStation || null,
+            departureDate: stored?.departureDate ? new Date(stored.departureDate) : null,
+            adultCount: stored?.adultCount ?? 0,
+            seniorCount: stored?.seniorCount ?? 0,
+            teenCount: stored?.teenCount ?? 0, 
+            //reservationData에서 인원 수 값(adultCount, seniorCount, teenCount)이 undefined 또는 null로 시작되어 + delta를 할 때 NaN 또는 오류가 발생
+            //?? 0을 사용하면 undefined나 null일 경우에도 0으로 초기화되기 때문에 NaN이 발생하지 않음
+        };
+    });
+    
 
     const {
         departureStation,
@@ -139,11 +157,20 @@ const Reservation = () => {
         if (!departureStation) return alert("출발역은 필수입니다.");
         if (!destinationStation) return alert("도착역은 필수입니다.");
         if (!departureDate) return alert("날짜는 필수입니다.");
+        if (departureStation === destinationStation)
+            return alert("출발역과 도착역은 서로 달라야 합니다.");        
         if (adultCount + seniorCount + teenCount < 1)
             return alert("최소 1명 이상의 인원이 필요합니다.");
+    
+        // 세션 업데이트
+        updateCurrentSession({ reservationData });
 
-        navigate("/reservation/train-list", { state: reservationData });
+        // 다음 페이지로 예약 데이터 넘기기
+        navigate("/reservation/train-list", {
+            state: reservationData,
+        });
     };
+    
 
     const handleBack = () => {
         navigate(-1);
