@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
 import RefundModalDetail from "../components/RefundModalDetail";
@@ -46,7 +46,6 @@ const History = () => {
     >([]);
     const [hasSearched, setHasSearched] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [allReservations, setAllReservations] = useState<Reservation[]>([]);
 
     const navigate = useNavigate();
 
@@ -61,19 +60,6 @@ const History = () => {
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     };
 
-    // 추가: 전체 로컬스토리지 예약 불러오기
-    const getCompletedReservations = () => {
-        const stored = localStorage.getItem("reservations");
-        if (!stored) return [];
-        try {
-            const all = JSON.parse(stored);
-            return Array.isArray(all) ? all.filter((r) => r.completed) : [];
-        } catch {
-            return [];
-        }
-    };
-
-    // 조회 버튼 눌렀을 때 호출되는 함수
     const handleSearch = () => {
         const matched: Reservation[] = [];
 
@@ -101,12 +87,11 @@ const History = () => {
                             const seatNumbers: string[] = Object.values(
                                 selectedSeatsObj
                             ).flat() as string[];
-
                             const carriageNumber =
                                 Object.keys(selectedSeatsObj)[0] || "";
 
                             matched.push({
-                                reservationId: item.id,
+                                reservationId: item.id.toString(),
                                 departure:
                                     item.reservationData.departureStation,
                                 arrival:
@@ -128,7 +113,7 @@ const History = () => {
                         }
                     }
                 });
-            } catch (e) {
+            } catch {
                 continue;
             }
         }
@@ -170,8 +155,9 @@ const History = () => {
 
                     const updatedItems = items.filter(
                         (item: any) =>
-                            item.id?.toString() !== reservationId &&
-                            item.reservationId?.toString() !== reservationId
+                            item.id?.toString() !== reservationId.toString() &&
+                            item.reservationId?.toString() !==
+                                reservationId.toString()
                     );
 
                     if (Array.isArray(data)) {
@@ -192,7 +178,6 @@ const History = () => {
             if (res) deleted.push(res);
         });
 
-        // 🧹 실제 삭제 적용
         keysToRemove.forEach((key) => localStorage.removeItem(key));
         keysToUpdate.forEach(({ key, data }) =>
             localStorage.setItem(key, JSON.stringify(data))
@@ -200,7 +185,7 @@ const History = () => {
 
         setIsModalOpen(false);
         setSelected([]);
-        handleSearch(); // 다시 조회해서 최신 상태로 반영
+        handleSearch();
 
         navigate("/history/refund-success", {
             state: { reservations: deleted },
@@ -218,7 +203,6 @@ const History = () => {
             </h3>
             <hr className="page-title-bar" />
 
-            {/* 날짜 선택 UI */}
             <div className="date-section">
                 <span>조회 기간</span>
                 <span className="period">
