@@ -127,6 +127,7 @@ const Payment: React.FC = () => {
     };
 
     const handlePrev = () => {
+        localStorage.removeItem("verifiedPhoneNumber");
         if (cards.length > 0) {
             setCurrentIndex((prev) => (prev - 1 + (cards.length + 1)) % (cards.length + 1));
         }
