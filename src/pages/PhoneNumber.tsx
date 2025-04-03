@@ -41,7 +41,51 @@ const PhoneNumber = () => {
             return;
         }
 
-        navigate("/history", { state: { phoneNumber: inputDigits } });
+        let found = false;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) continue;
+
+                const data = JSON.parse(raw);
+
+                // 배열인 경우: 예약 리스트 안에서 일치하는 전화번호 찾기
+                if (Array.isArray(data)) {
+                    if (
+                        data.some(
+                            (item) =>
+                                item?.completed === true &&
+                                item?.paymentInfo?.phoneNumber === inputDigits
+                        )
+                    ) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                // 단일 객체인 경우
+                if (
+                    data?.completed === true &&
+                    data?.paymentInfo?.phoneNumber === inputDigits
+                ) {
+                    found = true;
+                    break;
+                }
+            } catch (e) {
+                // 콘솔창에 에러 없애도 됨
+                console.error("JSON parse error:", e);
+                continue;
+            }
+        }
+
+        if (found) {
+            navigate("/history", { state: { phoneNumber: inputDigits } });
+        } else {
+            alert("입력한 전화번호로 완료된 예약 내역이 없습니다.");
+        }
     };
 
     return (

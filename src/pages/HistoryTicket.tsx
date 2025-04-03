@@ -47,12 +47,16 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
             <div className="ticket-content">
                 <div className="ticket-left-bar"></div>
 
-                <div className="ticket-info" onClick={handleTicketClick} style={{ cursor: "pointer" }}>
+                <div
+                    className="ticket-info"
+                    onClick={handleTicketClick}
+                    style={{ cursor: "pointer" }}
+                >
                     <div className="route-row">
                         <span className="start-label">출발</span>
                         <div className="station-block">
                             <span className="station">{departure}역</span>
-                            <span>{departureTime}</span>
+                            <span>{departureTime.split("T")[0]}</span>
                         </div>
                         <span className="arrow">→</span>
                         <span className="arrive-label">도착</span>
@@ -70,22 +74,28 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                         <div className="detail-item">
                             <span className="label">예약자</span>
                             <span className="value">
-                                {passengerCount.adult ? `성인 ${passengerCount.adult}명` : ""}
-                                {passengerCount.senior ? ` 노약자 ${passengerCount.senior}명` : ""}
-                                {passengerCount.youth ? ` 청소년 ${passengerCount.youth}명` : ""}
+                                {passengerCount.adult
+                                    ? `성인 ${passengerCount.adult}명`
+                                    : ""}
+                                {passengerCount.senior
+                                    ? ` 노약자 ${passengerCount.senior}명`
+                                    : ""}
+                                {passengerCount.youth
+                                    ? ` 청소년 ${passengerCount.youth}명`
+                                    : ""}
                             </span>
                         </div>
                         {seatNumbers.length > 0 && (
                             <div className="detail-item">
                                 <span className="label">예약좌석</span>
                                 <span className="value">
-                                    {carriageNumber}호차 {seatNumbers.join(", ")}
+                                    {carriageNumber}호차{" "}
+                                    {seatNumbers.join(", ")}
                                 </span>
                             </div>
                         )}
                     </div>
                 </div>
-
             </div>
         </div>
     );
