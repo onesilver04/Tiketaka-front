@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
+import { addHistoryLog } from "../utils/session";
 import RefundModalDetail from "../components/RefundModalDetail";
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
@@ -48,6 +49,7 @@ const History = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const navigate = useNavigate();
+    const sessionId = location.state?.sessionId;
 
     const toggleSelect = (id: string) => {
         setSelected((prev) =>
@@ -63,6 +65,19 @@ const History = () => {
     const handleSearch = () => {
         const matched: Reservation[] = [];
 
+        // ✅ 로그 기록만 조건부
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "history",
+                event: "click",
+                target_id: "history-search",
+                tag: "button",
+                text: "날짜 조회",
+            });
+        }
+
+        // ✅ 이 아래는 로그와 관계없이 항상 실행되어야 함
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (!key) continue;
@@ -118,11 +133,11 @@ const History = () => {
             }
         }
 
+        // ✅ 로그 여부와 무관하게 결과 세팅
         setFilteredReservations(matched);
         setSelected([]);
         setHasSearched(true);
     };
-
     const handleRefundClick = () => {
         const selectedRes = filteredReservations.filter((res) =>
             selected.includes(res.reservationId)
