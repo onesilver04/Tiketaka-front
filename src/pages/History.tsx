@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
 import RefundModalDetail from "../components/RefundModalDetail";
-// import { TakaBox } from "../components/TakaBox";
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
 import "../styles/History.css";
@@ -27,39 +26,6 @@ export interface Reservation {
     seatNumbers: string[];
 }
 
-const sampleReservations: Reservation[] = [
-    {
-        reservationId: "RES12345",
-        departure: "서울",
-        arrival: "부산",
-        departureDate: "2025-03-20",
-        departureTime: "08:30",
-        arrivalTime: "12:00",
-        passengerCount: {
-            adult: 1,
-            senior: 0,
-            youth: 0,
-        },
-        carriageNumber: "1",
-        seatNumbers: ["1A"],
-    },
-    {
-        reservationId: "RES67890",
-        departure: "부산",
-        arrival: "서울",
-        departureDate: "2025-04-05",
-        departureTime: "15:00",
-        arrivalTime: "18:30",
-        passengerCount: {
-            adult: 1,
-            senior: 0,
-            youth: 1,
-        },
-        carriageNumber: "1",
-        seatNumbers: ["1C", "2D"],
-    },
-];
-
 const History = () => {
     const location = useLocation();
     const phoneNumber = location.state?.phoneNumber || "고객";
@@ -79,7 +45,7 @@ const History = () => {
         Reservation[]
     >([]);
     const [hasSearched, setHasSearched] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // ✅ 모달 상태
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -95,11 +61,64 @@ const History = () => {
     };
 
     const handleSearch = () => {
-        const result = sampleReservations.filter((res) => {
-            const depDate = new Date(res.departureDate);
-            return depDate >= startDate && depDate <= endDate;
-        });
-        setFilteredReservations(result);
+        const matched: Reservation[] = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) continue;
+
+                const data = JSON.parse(raw);
+                const items = Array.isArray(data) ? data : [data];
+
+                items.forEach((item) => {
+                    if (
+                        item?.completed === true &&
+                        item?.paymentInfo?.phoneNumber === phoneNumber
+                    ) {
+                        const depDate = new Date(
+                            item.reservationData?.departureDate
+                        );
+                        if (depDate >= startDate && depDate <= endDate) {
+                            const selectedSeatsObj = item.selectedSeats || {};
+                            const seatNumbers: string[] = Object.values(
+                                selectedSeatsObj
+                            ).flat() as string[];
+                            const carriageNumber =
+                                Object.keys(selectedSeatsObj)[0] || "";
+
+                            matched.push({
+                                reservationId: item.id.toString(),
+                                departure:
+                                    item.reservationData.departureStation,
+                                arrival:
+                                    item.reservationData.destinationStation,
+                                departureDate:
+                                    item.reservationData.departureDate,
+                                departureTime:
+                                    item.trainInfo?.departureTime || "",
+                                arrivalTime: item.trainInfo?.arrivalTime || "",
+                                passengerCount: {
+                                    adult: item.reservationData.adultCount || 0,
+                                    senior:
+                                        item.reservationData.seniorCount || 0,
+                                    youth: 0,
+                                },
+                                carriageNumber,
+                                seatNumbers,
+                            });
+                        }
+                    }
+                });
+            } catch {
+                continue;
+            }
+        }
+
+        setFilteredReservations(matched);
         setSelected([]);
         setHasSearched(true);
     };
@@ -114,17 +133,62 @@ const History = () => {
             return;
         }
 
-        setIsModalOpen(true); // ✅ 모달 열기
+        setIsModalOpen(true);
     };
 
     const confirmRefund = () => {
-        const selectedRes = filteredReservations.filter((res) =>
-            selected.includes(res.reservationId)
+        const keysToRemove: string[] = [];
+        const keysToUpdate: { key: string; data: any[] }[] = [];
+        const deleted: Reservation[] = [];
+
+        selected.forEach((reservationId) => {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+
+                    const data = JSON.parse(raw);
+                    const items = Array.isArray(data) ? data : [data];
+
+                    const updatedItems = items.filter(
+                        (item: any) =>
+                            item.id?.toString() !== reservationId.toString() &&
+                            item.reservationId?.toString() !==
+                                reservationId.toString()
+                    );
+
+                    if (Array.isArray(data)) {
+                        if (updatedItems.length !== data.length) {
+                            keysToUpdate.push({ key, data: updatedItems });
+                        }
+                    } else if (updatedItems.length === 0) {
+                        keysToRemove.push(key);
+                    }
+                } catch {
+                    continue;
+                }
+            }
+
+            const res = filteredReservations.find(
+                (r) => r.reservationId === reservationId
+            );
+            if (res) deleted.push(res);
+        });
+
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        keysToUpdate.forEach(({ key, data }) =>
+            localStorage.setItem(key, JSON.stringify(data))
         );
 
         setIsModalOpen(false);
+        setSelected([]);
+        handleSearch();
+
         navigate("/history/refund-success", {
-            state: { reservations: selectedRes },
+            state: { reservations: deleted },
         });
     };
 
@@ -139,7 +203,6 @@ const History = () => {
             </h3>
             <hr className="page-title-bar" />
 
-            {/* 날짜 선택 UI */}
             <div className="date-section">
                 <span>조회 기간</span>
                 <span className="period">
@@ -169,13 +232,11 @@ const History = () => {
                         if (value instanceof Date) {
                             if (selectingDate === "start") {
                                 setStartDate(value);
-                                if (value > endDate) {
-                                    setEndDate(value);
-                                }
+                                if (value > endDate) setEndDate(value);
                             } else {
-                                const newEnd =
-                                    value < startDate ? startDate : value;
-                                setEndDate(newEnd);
+                                setEndDate(
+                                    value < startDate ? startDate : value
+                                );
                             }
                         }
                     }}
@@ -186,7 +247,7 @@ const History = () => {
                     }
                 />
             </div>
-            {/* history 조회 버튼 */}
+
             <button
                 id="history-search"
                 className={`${styles.button} history-look-up`}
@@ -241,7 +302,6 @@ const History = () => {
                             </div>
 
                             {filteredReservations.length > 0 && (
-                                // 환불 버튼 클릭 시 RefundModal창으로 이동하는 버튼
                                 <button
                                     id="history-refund"
                                     className={`${styles.button} history-refund`}
@@ -255,7 +315,6 @@ const History = () => {
                 )}
             </div>
 
-            {/* ✅ 모달 컴포넌트 */}
             {isModalOpen && (
                 <RefundModalDetail
                     onConfirm={confirmRefund}

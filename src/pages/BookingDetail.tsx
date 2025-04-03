@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Reservation } from "../types/reservation";
+import { Reservation } from "./History";
 import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
@@ -16,12 +16,51 @@ const BookingDetail = () => {
     const { reservations } = location.state as LocationState;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [cardNumber, setCardNumber] = useState<string | null>(null);
+    const [totalPrice, setTotalPrice] = useState<number>(0);
 
     const handleRefund = () => {
         setIsModalOpen(true);
     };
 
     const confirmRefund = () => {
+        reservations.forEach((res) => {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+
+                    const data = JSON.parse(raw);
+
+                    // 배열인 경우: 해당 예약만 제거해서 다시 저장
+                    if (Array.isArray(data)) {
+                        const updated = data.filter(
+                            (item) =>
+                                item.id !== res.reservationId &&
+                                item.reservationId !== res.reservationId
+                        );
+
+                        if (updated.length !== data.length) {
+                            localStorage.setItem(key, JSON.stringify(updated));
+                        }
+                    }
+
+                    // 객체인 경우: 예약 ID가 일치하면 해당 key 통째로 제거
+                    else if (
+                        data.id === res.reservationId ||
+                        data.reservationId === res.reservationId
+                    ) {
+                        localStorage.removeItem(key);
+                    }
+                } catch {
+                    continue;
+                }
+            }
+        });
+
         setIsModalOpen(false);
         navigate("/history/refund-success");
     };
@@ -43,7 +82,49 @@ const BookingDetail = () => {
         0
     );
 
-    const totalPrice = totalPassengers * 10000;
+    // 카드 번호와 가격 계산
+    useEffect(() => {
+        let priceSum = 0;
+        let foundCard: string | null = null;
+
+        reservations.forEach((res) => {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+
+                    const data = JSON.parse(raw);
+                    const items = Array.isArray(data) ? data : [data];
+
+                    items.forEach((item) => {
+                        if (
+                            item.id === res.reservationId ||
+                            item.reservationId === res.reservationId
+                        ) {
+                            const count =
+                                res.passengerCount.adult +
+                                res.passengerCount.senior +
+                                res.passengerCount.youth;
+
+                            const pricePerPerson =
+                                item.trainInfo?.price || 10000;
+                            priceSum += pricePerPerson * count;
+
+                            if (!foundCard && item.paymentInfo?.cardNumber) {
+                                foundCard = item.paymentInfo.cardNumber;
+                            }
+                        }
+                    });
+                } catch {}
+            }
+        });
+
+        setTotalPrice(priceSum);
+        setCardNumber(foundCard);
+    }, [reservations]);
 
     return (
         <>
@@ -53,7 +134,7 @@ const BookingDetail = () => {
                 }`}
             >
                 <h3 className="page-title">티켓 상세 내역</h3>
-                <hr className="page-title-bar"></hr>
+                <hr className="page-title-bar" />
 
                 {reservations.map((res) => (
                     <div key={res.reservationId} className="route-box">
@@ -102,22 +183,26 @@ const BookingDetail = () => {
                     </p>
                 </div>
 
-                <hr className="page-title-bar"></hr>
+                <hr className="page-title-bar" />
 
                 <div className="price-info">
                     <strong>총액: {totalPrice.toLocaleString()}원</strong>
                 </div>
 
                 <p className="title-card-info">카드 정보</p>
-                <hr className="page-title-bar"></hr>
+                <hr className="page-title-bar" />
                 <div className="card-number">
                     <p>카드 번호</p>
                     <p className="card-number-info">
-                        <strong>1111 2222 3333 ****</strong>
+                        <strong>
+                            {cardNumber
+                                ? cardNumber.replace(/\d{4}$/, "****")
+                                : "정보 없음"}
+                        </strong>
                     </p>
                 </div>
             </div>
-            {/* detail -> history 페이지로 가는 이전 버튼 */}
+
             <button
                 id="detail-to-history"
                 className={`${styles.button} detail-to-history`}
@@ -125,7 +210,6 @@ const BookingDetail = () => {
             >
                 이전
             </button>
-            {/* detail -> refund 페이지로 가는 이전 버튼 */}
             <button
                 id="detail-to-refund"
                 className={`${styles.button} detail-to-refund`}
@@ -133,6 +217,7 @@ const BookingDetail = () => {
             >
                 환불하기
             </button>
+
             {isModalOpen && (
                 <RefundModal
                     onConfirm={confirmRefund}
