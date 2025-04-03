@@ -1,8 +1,10 @@
 .taka-wrapper {
-    position: absolute;
+    position: fixed;
+    left: 50%;
+    transform: translateX(33%);
     bottom: 14px;
-    right: 14px;
     z-index: 200;
+    width: 430px; 
 }
 
 .taka-button {
