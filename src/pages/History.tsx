@@ -152,30 +152,58 @@ const History = () => {
     };
 
     const confirmRefund = () => {
-        const remaining = allReservations.filter(
-            (res) => !selected.includes(res.reservationId)
-        );
+        const keysToRemove: string[] = [];
+        const keysToUpdate: { key: string; data: any[] }[] = [];
+        const deleted: Reservation[] = [];
 
-        // 로컬스토리지 업데이트
-        localStorage.setItem("reservations", JSON.stringify(remaining));
-        setAllReservations(remaining);
+        selected.forEach((reservationId) => {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
 
-        // 필터링 다시 적용
-        const updatedFiltered = remaining.filter((res) => {
-            const depDate = new Date(res.departureDate);
-            return depDate >= startDate && depDate <= endDate;
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+
+                    const data = JSON.parse(raw);
+                    const items = Array.isArray(data) ? data : [data];
+
+                    const updatedItems = items.filter(
+                        (item: any) =>
+                            item.id?.toString() !== reservationId &&
+                            item.reservationId?.toString() !== reservationId
+                    );
+
+                    if (Array.isArray(data)) {
+                        if (updatedItems.length !== data.length) {
+                            keysToUpdate.push({ key, data: updatedItems });
+                        }
+                    } else if (updatedItems.length === 0) {
+                        keysToRemove.push(key);
+                    }
+                } catch {
+                    continue;
+                }
+            }
+
+            const res = filteredReservations.find(
+                (r) => r.reservationId === reservationId
+            );
+            if (res) deleted.push(res);
         });
 
-        setFilteredReservations(updatedFiltered);
-        setSelected([]);
-        setIsModalOpen(false);
-
-        const refunded = allReservations.filter((res) =>
-            selected.includes(res.reservationId)
+        // 🧹 실제 삭제 적용
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        keysToUpdate.forEach(({ key, data }) =>
+            localStorage.setItem(key, JSON.stringify(data))
         );
 
+        setIsModalOpen(false);
+        setSelected([]);
+        handleSearch(); // 다시 조회해서 최신 상태로 반영
+
         navigate("/history/refund-success", {
-            state: { reservations: refunded },
+            state: { reservations: deleted },
         });
     };
 
