@@ -196,11 +196,14 @@ const Reservation = () => {
                                     )
                                 }
                                 className="station-select-button"
+                                id="select-departure-station"
                             >
                                 {departureStation ?? "출발역"}
                                 <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
                             </button>
                         </div>
+                        
+                        <div className="station-selection-arrow">→</div>
 
                         <div className="station-selection">
                             <div className="arrival-station">도착</div>
@@ -213,6 +216,7 @@ const Reservation = () => {
                                     )
                                 }
                                 className="station-select-button"
+                                id="select-arrival-station"
                             >
                                 {destinationStation ?? "도착역"}
                                 <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
@@ -248,101 +252,114 @@ const Reservation = () => {
                     )}
 
                     <div>
-                        <h4>
-                            출발일<br></br>
+                        <h4 className="reservation-detail-select">
+                            <p className="reservation-detail-select-inform">출발일</p>
                             {departureDate
                                 ? new Date(departureDate).toLocaleDateString()
                                 : "날짜를 선택해주세요."}
                         </h4>
-                        <Calendar
-                            calendarType="gregory"
-                            onChange={(value) =>
-                                handleDateChange(value as Date | Date[] | null)
-                            }
-                            value={
-                                departureDate ? new Date(departureDate) : null
-                            }
-                            selectRange={false}
-                            minDate={new Date()} // 지나간 날 막기
-                            tileClassName={({ date: tileDate }) =>
-                                departureDate &&
-                                tileDate.toDateString() ===
-                                    new Date(departureDate).toDateString()
-                                    ? "selected-date"
-                                    : ""
-                            }
-                        />
+                        <div id="calendar-wrapper">
+                            <Calendar
+                                calendarType="gregory"
+                                onChange={(value) =>
+                                    handleDateChange(value as Date | Date[] | null)
+                                }
+                                value={
+                                    departureDate ? new Date(departureDate) : null
+                                }
+                                selectRange={false}
+                                minDate={new Date()} // 지나간 날 막기
+                                tileClassName={({ date: tileDate }) =>
+                                    departureDate &&
+                                    tileDate.toDateString() ===
+                                        new Date(departureDate).toDateString()
+                                        ? "selected-date"
+                                        : ""
+                                }
+                            />
+                        </div>
                     </div>
 
                     <div>
-                        <h4>
-                            인원 선택
-                            <br />
-                            <span style={{ fontWeight: 400 }}>
+                        <h4 className="reservation-detail-select">
+                            <p className="reservation-detail-select-inform">인원 선택</p>
+                            <span>
                                 성인 {adultCount}명, 노약자 {seniorCount}명,
                                 청소년 {teenCount}명
                             </span>
                         </h4>
                         <div className="select-people-number">
                             <div>
-                                <div>
+                                <div className="select-people-number-button">
                                     성인<br></br>(만 19세 이상)
                                 </div>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("adultCount", -1)
-                                    }
-                                >
-                                    -
-                                </button>
-                                <span>{adultCount}</span>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("adultCount", 1)
-                                    }
-                                >
-                                    +
-                                </button>
+                                <div className="select-people-number-button">
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("adultCount", -1)
+                                        }
+                                        id="decrease-adult"
+                                    >
+                                        -
+                                    </button>
+                                    <span>{adultCount}</span>
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("adultCount", 1)
+                                        }
+                                        id="increase-adult"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
                             <div>
-                                <div>
+                                <div className="select-people-number-button">
                                     노약자<br></br>(만 65세 이상)
                                 </div>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("seniorCount", -1)
-                                    }
-                                >
-                                    -
-                                </button>
-                                <span>{seniorCount}</span>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("seniorCount", 1)
-                                    }
-                                >
-                                    +
-                                </button>
+                                <div className="select-people-number-button">
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("seniorCount", -1)
+                                        }
+                                        id="decrease-senior"
+                                    >
+                                        -
+                                    </button>
+                                    <span>{seniorCount}</span>
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("seniorCount", 1)
+                                        }
+                                        id="increase-senior"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
                             <div>
-                                <div>
+                                <div className="select-people-number-button">
                                     청소년<br></br>(만 13~18세)
                                 </div>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("teenCount", -1)
-                                    }
-                                >
-                                    -
-                                </button>
-                                <span>{teenCount}</span>
-                                <button
-                                    onClick={() =>
-                                        handleCountChange("teenCount", 1)
-                                    }
-                                >
-                                    +
-                                </button>
+                                <div className="select-people-number-button">
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("teenCount", -1)
+                                        }
+                                        id="decrease-teen"
+                                    >
+                                        -
+                                    </button>
+                                    <span>{teenCount}</span>
+                                    <button
+                                        onClick={() =>
+                                            handleCountChange("teenCount", 1)
+                                        }
+                                        id="increase-teen"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -351,12 +368,14 @@ const Reservation = () => {
             <div className="display-button">
                 <button
                     className={`${styles.button} reservation-back`}
+                    id="reservation-to-home"
                     onClick={handleBack}
                 >
                     이전
                 </button>
                 <button
                     className={`${styles.button} reservation-search`}
+                    id="reservation-to=trainlist"
                     onClick={handleSearch}
                 >
                     조회
@@ -367,5 +386,3 @@ const Reservation = () => {
 };
 
 export default Reservation;
-
-// 예매가 모두 끝나고 다시 예매 화면으로 돌아오면 그 데이터는 로컬에 담아두고 다시 새로운 데이터를 받기 위해 초기화된 상태로 다시 화면이 로드되게 만들기

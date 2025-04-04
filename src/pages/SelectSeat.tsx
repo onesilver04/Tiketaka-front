@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 import seatImage from "../assets/seat-button.svg";
 import trainConvenience from "../assets/train-convenience.svg";
-import aisleImage from "../assets/train-track-single.svg";
+import trainaisle from "../assets/train-track-single.svg";
 import "../styles/SelectSeat.css";
 import styles from "../styles/Button.module.css";
 import { updateCurrentSession } from "../utils/session";
@@ -170,8 +170,8 @@ const SelectSeat = () => {
                                             </button>
                                         );
                                     })}
-                                    <div className="aisle">
-                                        <img src={aisleImage} alt="Aisle" />
+                                    <div className="train-aisle">
+                                        <img src={trainaisle} alt="기차 통로 이미지" />
                                     </div>
                                     {["C", "D"].map((col) => {
                                         const seat = availableSeats.find(
@@ -203,7 +203,9 @@ const SelectSeat = () => {
                                 seats.map((seat) => (
                                     <span key={`${carNum}-${seat}`} className="selected-seat">
                                         {carNum}호차 - {seat}
-                                        <button onClick={() => {
+                                        <button 
+                                            id="selected-seats-delete"
+                                            onClick={() => {
                                             // 특정 호차의 특정 좌석만 삭제
                                             setAllSelectedSeats(prev => ({
                                                 ...prev,

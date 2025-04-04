@@ -194,7 +194,6 @@ const Payment: React.FC = () => {
 
     return (
         <div>
-            <title>Payment</title>
             <div className={styleb.box}>
                 <h2 className="page-title">결제창</h2>
                 <hr className="page-title-bar" />
@@ -202,24 +201,24 @@ const Payment: React.FC = () => {
                 <div className="content-container">
                     <div className="trip-info">
                         <div className="selected-station-inform">
-                            <div>
-                                <div>출발</div>
-                                <div>{reservationData?.departureStation}</div>
-                                <div>{trainInfo?.departureTime}</div>
+                            <div className="selected-departure-station">
+                                <div className="selected-departure-inform">출발</div>
+                                <div className="selected-departure-detail">{reservationData?.departureStation}</div>
+                                <div className="selected-departure-inform">{trainInfo?.departureTime}</div>
                             </div>
-                            <div>→</div>
-                            <div>
-                                <div>도착</div>
-                                <div>{reservationData?.destinationStation}</div>
-                                <div>{trainInfo?.arrivalTime}</div>
+                            <div className="selected-departure-station">→</div>
+                            <div className="selected-departure-station">
+                                <div className="selected-departure-inform">도착</div>
+                                <div className="selected-departure-detail">{reservationData?.destinationStation}</div>
+                                <div className="selected-departure-inform">{trainInfo?.arrivalTime}</div>
                             </div>
                         </div>
-                        <div>
+                        <div className="reservation-detail-select">
                             <div>날짜</div>
                             <div>{formattedDate}</div>
                         </div>
-                        <div>
-                            <div><span>총 인원 수: </span><span>{totalPassengers.toLocaleString()}명</span></div>
+                        <div className="reservation-detail-select">
+                            <div ><span>총 인원 수: </span><span>{totalPassengers.toLocaleString()}명</span></div>
                             <div><span>성인: </span><span>{reservationData?.adultCount}명</span></div>
                             <div><span>노약자: </span><span>{reservationData?.seniorCount}명</span></div>
                             <div><span>청소년: </span><span>{reservationData?.teenCount}명</span></div>
@@ -228,12 +227,12 @@ const Payment: React.FC = () => {
                         <p>지불하실 금액: {totalPrice.toLocaleString()}원</p>
                     </div>
 
-                    <div>
+                    <div className="reservation-detail-select">
                         <label>개인정보 동의</label>
                         <input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} />
                     </div>
 
-                    <div>
+                    <div className="reservation-detail-select">
                         <div>전화번호 입력</div>
                         <input
                             type="text"

@@ -116,6 +116,7 @@
     display: flex;
     justify-content: space-around;
     flex-direction: row;
+    
 }
 
 .station-selection {
@@ -125,6 +126,17 @@
 
 .content-container {
     margin: 30px 20px;
+}
+
+.station-select-button{
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 38px;
+    color: #333333;
+}
+
+.dropdown-arrow-icon {
+    margin-left: 10px;
 }
 
 .station-selection select {
@@ -155,6 +167,30 @@
     font-weight: 600;
 }
 
+.depature-station, .arrival-station {
+    margin: 10px 0 10px 40px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+}
+
+.reservation-detail-select {
+    margin-top: 40px;
+    margin-left: 20px;
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+}
+
+.reservation-detail-select-inform {
+    font-weight: 400;
+}
+
+.station-selection-arrow {
+    margin-top: 10px;
+}
+
 .select-people-number {
     display: flex;
     flex-direction: row;
@@ -164,10 +200,15 @@
 .select-people-number button {
     background-color: #00000000;
     border: none;
+    margin: 0 auto;
 }
 
 .select-people-number button:hover {
     cursor: pointer;
+}
+
+.select-people-number-button {
+    text-align: center;
 }
 
 button.reservation-back,
