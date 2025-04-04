@@ -30,18 +30,18 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
 
     const navigate = useNavigate();
 
-    const handleTicketClick = () => {
-        const session = JSON.parse(
-            localStorage.getItem("currentHistorySession") || "{}"
-        );
-        const sessionId = session?.sessionId;
+    const session = JSON.parse(
+        localStorage.getItem("currentHistorySession") || "{}"
+    );
+    const sessionId = session?.sessionId;
 
+    const handleTicketClick = () => {
         if (sessionId) {
             addHistoryLog({
                 sessionId,
                 page: "History",
-                event: "navigate", // click??? 예인언니한테 물어보기
-                target_id: "ticket-info", //`ticket-${reservationId}`,
+                event: "navigate",
+                target_id: "ticket-info",
                 tag: "div",
                 text: `${departure} to ${arrival} booking-detail 페이지로 이동`,
                 url: window.location.href,
@@ -60,13 +60,29 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
         });
     };
 
+    const handleCheckboxChange = () => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "HistoryTicket",
+                event: "click",
+                target_id: `history-ticket-checkbox`,
+                tag: "checkbox",
+                text: "티켓 부분 선택 체크 박스",
+                url: window.location.href,
+            });
+        }
+        onToggle(reservationId);
+    };
+
     return (
         <div className={`ticket-container ${isSelected ? "selected" : ""}`}>
             <input
+                id={`history-ticket-checkbox`}
                 className="history-ticket-checkbox"
                 type="checkbox"
                 checked={isSelected}
-                onChange={() => onToggle(reservationId)}
+                onChange={handleCheckboxChange}
             />
 
             <div className="ticket-content">

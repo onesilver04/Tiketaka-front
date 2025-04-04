@@ -66,11 +66,6 @@ const App = () => {
                     <Route path="/phonenumber" element={<PhoneNumber />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/history-none" element={<HistoryNone />} />
-                    <Route path="/history" element={<RefundModal />} />
-                    <Route
-                        path="/history/refund-modal-detail"
-                        element={<RefundModalDetail />}
-                    />
                     <Route
                         path="/history/booking-detail"
                         element={<BookingDetail />}

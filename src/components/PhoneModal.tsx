@@ -11,7 +11,10 @@ const PhoneModal: React.FC<PhoneModalProps> = ({ onClose }) => {
         <div className="modal-overlay">
             <div className="modal-box">
                 <p>전화번호를 다 채워주세요!</p>
-                <button className={`${styles.button} ok`} onClick={onClose}>
+                <button
+                    className={`${styles.button} phonemodal-ok`}
+                    onClick={onClose}
+                >
                     확인
                 </button>
             </div>
