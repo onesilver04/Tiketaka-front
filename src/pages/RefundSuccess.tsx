@@ -22,10 +22,11 @@ const RefundSuccess = () => {
                 text: "환불 완료 후 메인으로 돌아감",
             });
 
-            // ✅ 세션 종료 처리
+            // ✅ 세션 종료 + 목적 변경
             updateHistorySession({
                 status: "completed",
                 end_reason: "refund_completed",
+                purpose: "refund", // 환불 완료 후 pupose: "refund"로 변경
             });
         }
 

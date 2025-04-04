@@ -21,6 +21,23 @@ const BookingDetail = () => {
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
     const handleRefund = () => {
+        const session = JSON.parse(
+            localStorage.getItem("currentHistorySession") || "{}"
+        );
+        const sessionId = session?.sessionId;
+
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "BookingDetail",
+                event: "click",
+                target_id: "detail-to-refund",
+                tag: "button",
+                text: "bookingdetail에서 환불하기 버튼 클릭",
+                url: window.location.href,
+            });
+        }
+
         setIsModalOpen(true);
     };
 
@@ -33,11 +50,11 @@ const BookingDetail = () => {
         if (sessionId) {
             addHistoryLog({
                 sessionId,
-                page: "BookingDetail",
-                event: "click",
+                page: "RefundModal",
+                event: "navigate",
                 target_id: "refundModal-yes-to-success",
                 tag: "button",
-                text: "RefundModal에서 yes 클릭으로 환불 확정",
+                text: "RefundModal에서 yes 클릭으로 환불 진행 후 환불 성공 페이지로 이동",
                 url: window.location.href,
             });
         }
@@ -84,6 +101,22 @@ const BookingDetail = () => {
     };
 
     const cancelRefund = () => {
+        const session = JSON.parse(
+            localStorage.getItem("currentHistorySession") || "{}"
+        );
+        const sessionId = session?.sessionId;
+
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "RefundModal",
+                event: "click",
+                target_id: "refundModal-no-to-success",
+                tag: "button",
+                text: "RefundModal에서 no 클릭으로 환불 취소",
+                url: window.location.href,
+            });
+        }
         setIsModalOpen(false);
     };
 

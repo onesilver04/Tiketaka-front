@@ -1,9 +1,8 @@
 // utils/session.ts
 export const CURRENT_SESSION_KEY = "currentReservationSession";
 export const RESERVATION_HISTORY_KEY = "reservationSessions";
-// 조회용
 export const HISTORY_SESSION_KEY = "currentHistorySession";
-export const HISTORY_LOG_KEY = "historyLogs";
+export const HISTORY_SESSIONS_KEY = "historySessions";
 
 export const loadCurrentSession = () => {
     const session = localStorage.getItem(CURRENT_SESSION_KEY);
@@ -60,13 +59,36 @@ export const updateCurrentSession = (updates: Partial<any>) => {
     }
 };
 
-// 조회용 세션 생성
 export const createHistorySession = () => {
+    const prev = localStorage.getItem(HISTORY_SESSION_KEY);
+    if (prev) {
+        try {
+            const prevSession = JSON.parse(prev);
+            if (prevSession.status === "active") {
+                prevSession.status = "incomplete";
+                const sessionList = JSON.parse(
+                    localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
+                );
+                const index = sessionList.findIndex(
+                    (s: any) => s.sessionId === prevSession.sessionId
+                );
+                if (index !== -1) {
+                    sessionList[index] = prevSession;
+                } else {
+                    sessionList.push(prevSession);
+                }
+                localStorage.setItem(
+                    HISTORY_SESSIONS_KEY,
+                    JSON.stringify(sessionList)
+                );
+            }
+        } catch {}
+    }
+
     const newSession = {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        // end_reason: "",
         current_page: "PhoneNumber",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
@@ -75,6 +97,13 @@ export const createHistorySession = () => {
     };
 
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(newSession));
+
+    const sessionList = JSON.parse(
+        localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
+    );
+    sessionList.push(newSession);
+    localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessionList));
+
     return newSession.sessionId;
 };
 
@@ -111,12 +140,10 @@ export const addHistoryLog = ({
         timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
     };
 
-    // 1. 현재 세션 객체에 로그 추가
     if (!session.logs) session.logs = [];
     session.logs.push(newLog);
     session.last_interaction = new Date().toISOString();
 
-    // 2. 중복 없이 previous_pages 재생성
     const seen = new Set<string>();
     session.previous_pages = [];
     for (const log of session.logs) {
@@ -128,20 +155,16 @@ export const addHistoryLog = ({
 
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(session));
 
-    // 3. logs_{sessionId} 키에도 별도 저장 (세션별 로그 추적용)
-    const key = `logs_${sessionId}`;
-    const existing = localStorage.getItem(key);
-    const parsed = existing
-        ? JSON.parse(existing)
-        : {
-              sessionId,
-              purpose: "history",
-              location: session.current_page || "unknown",
-              logs: [],
-          };
-
-    parsed.logs.push(newLog);
-    localStorage.setItem(key, JSON.stringify(parsed));
+    const sessions = JSON.parse(
+        localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
+    );
+    const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
+    if (index !== -1) {
+        sessions[index] = session;
+    } else {
+        sessions.push(session);
+    }
+    localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessions));
 };
 
 export const updateHistorySession = (updates: Partial<any>) => {
@@ -156,6 +179,18 @@ export const updateHistorySession = (updates: Partial<any>) => {
         last_interaction: new Date().toISOString(),
     };
 
-    // previous_pages는 addHistoryLog에서 관리하므로 이곳에서는 제외
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(updated));
+
+    const sessions = JSON.parse(
+        localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
+    );
+    const index = sessions.findIndex(
+        (s: any) => s.sessionId === updated.sessionId
+    );
+    if (index !== -1) {
+        sessions[index] = updated;
+    } else {
+        sessions.push(updated);
+    }
+    localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessions));
 };
