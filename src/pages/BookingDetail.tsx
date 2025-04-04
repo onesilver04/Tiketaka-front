@@ -5,6 +5,7 @@ import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import RefundModal from "../components/RefundModal";
+import { addHistoryLog } from "../utils/session";
 
 interface LocationState {
     reservations: Reservation[];
@@ -24,6 +25,23 @@ const BookingDetail = () => {
     };
 
     const confirmRefund = () => {
+        const session = JSON.parse(
+            localStorage.getItem("currentHistorySession") || "{}"
+        );
+        const sessionId = session?.sessionId;
+
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "BookingDetail",
+                event: "click",
+                target_id: "refundModal-yes-to-success",
+                tag: "button",
+                text: "RefundModal에서 yes 클릭으로 환불 확정",
+                url: window.location.href,
+            });
+        }
+
         reservations.forEach((res) => {
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -100,19 +118,22 @@ const BookingDetail = () => {
                     const items = Array.isArray(data) ? data : [data];
 
                     items.forEach((item) => {
-                        if (
-                            item.id === res.reservationId ||
-                            item.reservationId === res.reservationId
-                        ) {
+                        const isMatched =
+                            item.id?.toString() === res.reservationId ||
+                            item.reservationId?.toString() ===
+                                res.reservationId;
+
+                        if (isMatched) {
+                            // ✅ 가격 계산
                             const count =
                                 res.passengerCount.adult +
                                 res.passengerCount.senior +
                                 res.passengerCount.youth;
 
-                            const pricePerPerson =
-                                item.trainInfo?.price || 10000;
+                            const pricePerPerson = item.trainInfo?.price ?? 0;
                             priceSum += pricePerPerson * count;
 
+                            // ✅ 카드 정보 저장
                             if (!foundCard && item.paymentInfo?.cardNumber) {
                                 foundCard = item.paymentInfo.cardNumber;
                             }
@@ -123,7 +144,7 @@ const BookingDetail = () => {
         });
 
         setTotalPrice(priceSum);
-        setCardNumber(foundCard);
+        setCardNumber(foundCard); // ✅ 여기서 세팅됨!
     }, [reservations]);
 
     return (

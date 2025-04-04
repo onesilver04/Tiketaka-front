@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
+import { updateHistorySession, addHistoryLog } from "../utils/session";
 import RefundModalDetail from "../components/RefundModalDetail";
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
@@ -24,6 +25,12 @@ export interface Reservation {
     };
     carriageNumber: string;
     seatNumbers: string[];
+    trainInfo?: {
+        price: number;
+        departureTime: string;
+        arrivalTime: string;
+        trainId: string;
+    };
 }
 
 const History = () => {
@@ -48,6 +55,16 @@ const History = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const navigate = useNavigate();
+    const sessionId = location.state?.sessionId;
+
+    useEffect(() => {
+        if (sessionId) {
+            updateHistorySession({
+                current_page: "History",
+                previous_pages: ["PhoneNumber"],
+            });
+        }
+    }, []);
 
     const toggleSelect = (id: string) => {
         setSelected((prev) =>
@@ -63,6 +80,19 @@ const History = () => {
     const handleSearch = () => {
         const matched: Reservation[] = [];
 
+        // ✅ 로그 기록만 조건부
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "History",
+                event: "click",
+                target_id: "history-search",
+                tag: "button",
+                text: "날짜 조회",
+            });
+        }
+
+        // ✅ 이 아래는 로그와 관계없이 항상 실행되어야 함
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (!key) continue;
@@ -109,6 +139,7 @@ const History = () => {
                                 },
                                 carriageNumber,
                                 seatNumbers,
+                                trainInfo: item.trainInfo,
                             });
                         }
                     }
@@ -118,11 +149,23 @@ const History = () => {
             }
         }
 
+        if (matched.length === 0 && sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "HistoryNone",
+                event: "navigate",
+                target_id: "history-search",
+                tag: "button",
+                text: "해당 기간 예매 내역 없음",
+                url: window.location.href,
+            });
+        }
+
+        // ✅ 로그 여부와 무관하게 결과 세팅
         setFilteredReservations(matched);
         setSelected([]);
         setHasSearched(true);
     };
-
     const handleRefundClick = () => {
         const selectedRes = filteredReservations.filter((res) =>
             selected.includes(res.reservationId)
@@ -197,130 +240,136 @@ const History = () => {
     };
 
     return (
-        <div className={styleb.box}>
-            <h3 className="page-title">
-                <span className="user-id">{maskedNumber}</span> 님의 예매 내역
-            </h3>
-            <hr className="page-title-bar" />
+        <div>
+            <title>history</title>
+            <div className={styleb.box}>
+                <h3 className="page-title">
+                    <span className="user-id">{maskedNumber}</span> 님의 예매
+                    내역
+                </h3>
+                <hr className="page-title-bar" />
 
-            <div className="date-section">
-                <span>조회 기간</span>
-                <span className="period">
-                    <span
-                        className={`clickable ${
-                            selectingDate === "start" ? "active" : ""
-                        }`}
-                        onClick={() => setSelectingDate("start")}
-                    >
-                        {formatDate(startDate)}
-                    </span>{" "}
-                    ~{" "}
-                    <span
-                        className={`clickable ${
-                            selectingDate === "end" ? "active" : ""
-                        }`}
-                        onClick={() => setSelectingDate("end")}
-                    >
-                        {formatDate(endDate)}
+                <div className="date-section">
+                    <span>조회 기간</span>
+                    <span className="period">
+                        <span
+                            className={`clickable ${
+                                selectingDate === "start" ? "active" : ""
+                            }`}
+                            onClick={() => setSelectingDate("start")}
+                        >
+                            {formatDate(startDate)}
+                        </span>{" "}
+                        ~{" "}
+                        <span
+                            className={`clickable ${
+                                selectingDate === "end" ? "active" : ""
+                            }`}
+                            onClick={() => setSelectingDate("end")}
+                        >
+                            {formatDate(endDate)}
+                        </span>
                     </span>
-                </span>
-            </div>
+                </div>
 
-            <div className="calendar-wrapper">
-                <Calendar
-                    onChange={(value) => {
-                        if (value instanceof Date) {
-                            if (selectingDate === "start") {
-                                setStartDate(value);
-                                if (value > endDate) setEndDate(value);
-                            } else {
-                                setEndDate(
-                                    value < startDate ? startDate : value
-                                );
+                <div className="calendar-wrapper">
+                    <Calendar
+                        onChange={(value) => {
+                            if (value instanceof Date) {
+                                if (selectingDate === "start") {
+                                    setStartDate(value);
+                                    if (value > endDate) setEndDate(value);
+                                } else {
+                                    setEndDate(
+                                        value < startDate ? startDate : value
+                                    );
+                                }
                             }
+                        }}
+                        value={selectingDate === "start" ? startDate : endDate}
+                        selectRange={false}
+                        minDate={
+                            selectingDate === "start"
+                                ? threeMonthsAgo
+                                : undefined
                         }
-                    }}
-                    value={selectingDate === "start" ? startDate : endDate}
-                    selectRange={false}
-                    minDate={
-                        selectingDate === "start" ? threeMonthsAgo : undefined
-                    }
-                />
-            </div>
+                    />
+                </div>
 
-            <button
-                id="history-search"
-                className={`${styles.button} history-look-up`}
-                onClick={handleSearch}
-            >
-                조회
-            </button>
+                <button
+                    id="history-search"
+                    className={`${styles.button} history-look-up`}
+                    onClick={handleSearch}
+                >
+                    조회
+                </button>
 
-            <div className="history-ticket">
-                {hasSearched && filteredReservations.length === 0 ? (
-                    <HistoryNone />
-                ) : (
-                    <>
-                        <div className="selection-header">
-                            <p>예매 내역</p>
-                            <label className="selection-header-right">
-                                <input
-                                    className="checkbox"
-                                    type="checkbox"
-                                    checked={
-                                        filteredReservations.length > 0 &&
-                                        selected.length ===
-                                            filteredReservations.length
-                                    }
-                                    onChange={(e) => {
-                                        setSelected(
-                                            e.target.checked
-                                                ? filteredReservations.map(
-                                                      (r) => r.reservationId
-                                                  )
-                                                : []
-                                        );
-                                    }}
-                                />
-                                전체 선택
-                            </label>
-                        </div>
-
-                        <hr className="page-title-bar" />
-                        <div className="ticket-list-containter">
-                            <div className="ticket-list">
-                                {filteredReservations.map((res) => (
-                                    <HistoryTicket
-                                        key={res.reservationId}
-                                        reservation={res}
-                                        isSelected={selected.includes(
-                                            res.reservationId
-                                        )}
-                                        onToggle={toggleSelect}
+                <div className="history-ticket">
+                    {hasSearched && filteredReservations.length === 0 ? (
+                        <HistoryNone />
+                    ) : (
+                        <>
+                            <div className="selection-header">
+                                <p>예매 내역</p>
+                                <label className="selection-header-right">
+                                    <input
+                                        className="checkbox"
+                                        type="checkbox"
+                                        checked={
+                                            filteredReservations.length > 0 &&
+                                            selected.length ===
+                                                filteredReservations.length
+                                        }
+                                        onChange={(e) => {
+                                            setSelected(
+                                                e.target.checked
+                                                    ? filteredReservations.map(
+                                                          (r) => r.reservationId
+                                                      )
+                                                    : []
+                                            );
+                                        }}
                                     />
-                                ))}
+                                    전체 선택
+                                </label>
                             </div>
 
-                            {filteredReservations.length > 0 && (
-                                <button
-                                    id="history-refund"
-                                    className={`${styles.button} history-refund`}
-                                    onClick={handleRefundClick}
-                                >
-                                    선택항목 환불
-                                </button>
-                            )}
-                        </div>
-                    </>
+                            <hr className="page-title-bar" />
+                            <div className="ticket-list-containter">
+                                <div className="ticket-list">
+                                    {filteredReservations.map((res) => (
+                                        <HistoryTicket
+                                            key={res.reservationId}
+                                            reservation={res}
+                                            isSelected={selected.includes(
+                                                res.reservationId
+                                            )}
+                                            onToggle={toggleSelect}
+                                        />
+                                    ))}
+                                </div>
+
+                                {filteredReservations.length > 0 && (
+                                    <button
+                                        id="history-refund"
+                                        className={`${styles.button} history-refund`}
+                                        onClick={handleRefundClick}
+                                    >
+                                        선택항목 환불
+                                    </button>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {isModalOpen && (
+                    <RefundModalDetail
+                        onConfirm={confirmRefund}
+                        onCancel={cancelRefund}
+                    />
                 )}
             </div>
-
-            {isModalOpen && (
-                <RefundModalDetail
-                    onConfirm={confirmRefund}
-                    onCancel={cancelRefund}
-                />
-            )}
         </div>
     );
 };

@@ -2,7 +2,11 @@ import { useNavigate } from "react-router-dom";
 import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
-import { createNewSession } from "../utils/session";
+import {
+    createNewSession,
+    createHistorySession,
+    updateHistorySession,
+} from "../utils/session";
 
 const Start = () => {
     const navigate = useNavigate();
@@ -10,6 +14,15 @@ const Start = () => {
     const handleStartReservation = () => {
         createNewSession(); // 기존 세션 리셋 및 새로운 세션 생성
         navigate("/reservation", { state: { reset: true } }); // reservation에 초기화 지시
+    };
+
+    const handleStartSearch = () => {
+        const sessionId = createHistorySession(); // ✅ 조회용 세션 생성
+        updateHistorySession({
+            previous_pages: ["Start"], // ✅ 이전 페이지로 Start 추가
+            current_page: "PhoneNumber",
+        });
+        navigate("/phonenumber", { state: { sessionId } }); // ✅ 전달
     };
 
     return (
@@ -27,7 +40,7 @@ const Start = () => {
                 </button>
                 <button
                     className={`${styles.button} look-up`}
-                    onClick={() => navigate("/phonenumber")}
+                    onClick={handleStartSearch}
                 >
                     조회하기
                 </button>

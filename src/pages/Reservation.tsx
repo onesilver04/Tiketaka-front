@@ -14,7 +14,7 @@ const stations = [
     "서울",
     "광명",
     "수원",
-    "천안아산",
+    "천안",
     "오송",
     "대전",
     "마산",
@@ -24,13 +24,13 @@ const stations = [
     "강릉",
     "전주",
     "목포",
-    "청량리",
+    "여수",
     "용산",
     "원주",
     "평택",
     "천안",
-    "조치원",
-    "서대전",
+    "서산",
+    "순천",
     "대구",
     "동해",
     "진부",
@@ -38,7 +38,7 @@ const stations = [
     "부산",
     "순천",
     "울산",
-    "정동진",
+    "창원",
 ];
 
 interface ReservationData {
@@ -77,20 +77,23 @@ const Reservation = () => {
         return storedData ? JSON.parse(storedData) : null;
     };
 
-    const [reservationData, setReservationData] = useState<ReservationData>(() => {
-        const stored = loadStoredData();
-        return {
-            departureStation: stored?.departureStation || null,
-            destinationStation: stored?.destinationStation || null,
-            departureDate: stored?.departureDate ? new Date(stored.departureDate) : null,
-            adultCount: stored?.adultCount ?? 0,
-            seniorCount: stored?.seniorCount ?? 0,
-            teenCount: stored?.teenCount ?? 0, 
-            //reservationData에서 인원 수 값(adultCount, seniorCount, teenCount)이 undefined 또는 null로 시작되어 + delta를 할 때 NaN 또는 오류가 발생
-            //?? 0을 사용하면 undefined나 null일 경우에도 0으로 초기화되기 때문에 NaN이 발생하지 않음
-        };
-    });
-    
+    const [reservationData, setReservationData] = useState<ReservationData>(
+        () => {
+            const stored = loadStoredData();
+            return {
+                departureStation: stored?.departureStation || null,
+                destinationStation: stored?.destinationStation || null,
+                departureDate: stored?.departureDate
+                    ? new Date(stored.departureDate)
+                    : null,
+                adultCount: stored?.adultCount ?? 0,
+                seniorCount: stored?.seniorCount ?? 0,
+                teenCount: stored?.teenCount ?? 0,
+                //reservationData에서 인원 수 값(adultCount, seniorCount, teenCount)이 undefined 또는 null로 시작되어 + delta를 할 때 NaN 또는 오류가 발생
+                //?? 0을 사용하면 undefined나 null일 경우에도 0으로 초기화되기 때문에 NaN이 발생하지 않음
+            };
+        }
+    );
 
     const {
         departureStation,
@@ -158,10 +161,10 @@ const Reservation = () => {
         if (!destinationStation) return alert("도착역은 필수입니다.");
         if (!departureDate) return alert("날짜는 필수입니다.");
         if (departureStation === destinationStation)
-            return alert("출발역과 도착역은 서로 달라야 합니다.");        
+            return alert("출발역과 도착역은 서로 달라야 합니다.");
         if (adultCount + seniorCount + teenCount < 1)
             return alert("최소 1명 이상의 인원이 필요합니다.");
-    
+
         // 세션 업데이트
         updateCurrentSession({ reservationData });
 
@@ -170,7 +173,6 @@ const Reservation = () => {
             state: reservationData,
         });
     };
-    
 
     const handleBack = () => {
         navigate(-1);
@@ -199,7 +201,11 @@ const Reservation = () => {
                                 id="select-departure-station"
                             >
                                 {departureStation ?? "출발역"}
-                                <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
+                                <img
+                                    src="src/assets/down-arrow.svg"
+                                    alt="화살표"
+                                    className="dropdown-arrow-icon"
+                                />
                             </button>
                         </div>
                         
@@ -219,7 +225,11 @@ const Reservation = () => {
                                 id="select-arrival-station"
                             >
                                 {destinationStation ?? "도착역"}
-                                <img src="src/assets/down-arrow.svg" alt="화살표" className="dropdown-arrow-icon" />
+                                <img
+                                    src="src/assets/down-arrow.svg"
+                                    alt="화살표"
+                                    className="dropdown-arrow-icon"
+                                />
                             </button>
                         </div>
                     </div>
