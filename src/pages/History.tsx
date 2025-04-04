@@ -25,6 +25,12 @@ export interface Reservation {
     };
     carriageNumber: string;
     seatNumbers: string[];
+    trainInfo?: {
+        price: number;
+        departureTime: string;
+        arrivalTime: string;
+        trainId: string;
+    };
 }
 
 const History = () => {
@@ -124,6 +130,7 @@ const History = () => {
                                 },
                                 carriageNumber,
                                 seatNumbers,
+                                trainInfo: item.trainInfo,
                             });
                         }
                     }

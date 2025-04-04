@@ -100,19 +100,22 @@ const BookingDetail = () => {
                     const items = Array.isArray(data) ? data : [data];
 
                     items.forEach((item) => {
-                        if (
-                            item.id === res.reservationId ||
-                            item.reservationId === res.reservationId
-                        ) {
+                        const isMatched =
+                            item.id?.toString() === res.reservationId ||
+                            item.reservationId?.toString() ===
+                                res.reservationId;
+
+                        if (isMatched) {
+                            // ✅ 가격 계산
                             const count =
                                 res.passengerCount.adult +
                                 res.passengerCount.senior +
                                 res.passengerCount.youth;
 
-                            const pricePerPerson =
-                                item.trainInfo?.price || 10000;
+                            const pricePerPerson = item.trainInfo?.price ?? 0;
                             priceSum += pricePerPerson * count;
 
+                            // ✅ 카드 정보 저장
                             if (!foundCard && item.paymentInfo?.cardNumber) {
                                 foundCard = item.paymentInfo.cardNumber;
                             }
@@ -123,7 +126,7 @@ const BookingDetail = () => {
         });
 
         setTotalPrice(priceSum);
-        setCardNumber(foundCard);
+        setCardNumber(foundCard); // ✅ 여기서 세팅됨!
     }, [reservations]);
 
     return (

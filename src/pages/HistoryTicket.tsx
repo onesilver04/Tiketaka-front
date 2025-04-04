@@ -31,7 +31,14 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
 
     const handleTicketClick = () => {
         navigate("/history/booking-detail", {
-            state: { reservations: [reservation] }, // 배열 형태로 넘김
+            state: {
+                reservations: [
+                    {
+                        ...reservation,
+                        trainInfo: reservation.trainInfo, // ✅ 이 줄 추가
+                    },
+                ],
+            },
         });
     };
 
