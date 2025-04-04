@@ -80,7 +80,6 @@ const History = () => {
     const handleSearch = () => {
         const matched: Reservation[] = [];
 
-        // ✅ 로그 기록만 조건부
         if (sessionId) {
             addHistoryLog({
                 sessionId,
@@ -92,7 +91,6 @@ const History = () => {
             });
         }
 
-        // ✅ 이 아래는 로그와 관계없이 항상 실행되어야 함
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (!key) continue;
@@ -135,7 +133,8 @@ const History = () => {
                                     adult: item.reservationData.adultCount || 0,
                                     senior:
                                         item.reservationData.seniorCount || 0,
-                                    youth: 0,
+                                    youth:
+                                        item.reservationData.seniorCount || 0,
                                 },
                                 carriageNumber,
                                 seatNumbers,
@@ -161,11 +160,11 @@ const History = () => {
             });
         }
 
-        // ✅ 로그 여부와 무관하게 결과 세팅
         setFilteredReservations(matched);
         setSelected([]);
         setHasSearched(true);
     };
+
     const handleRefundClick = () => {
         const selectedRes = filteredReservations.filter((res) =>
             selected.includes(res.reservationId)
@@ -176,10 +175,32 @@ const History = () => {
             return;
         }
 
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "History",
+                event: "click",
+                target_id: "history-refund",
+                tag: "button",
+                text: "선택항목 환불 버튼 클릭",
+            });
+        }
+
         setIsModalOpen(true);
     };
 
     const confirmRefund = () => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "RefundModalDetail",
+                event: "click",
+                target_id: "refundModalDetail-yes-to-RefundSuccess",
+                tag: "button",
+                text: "환불 모달창 - 예 클릭",
+            });
+        }
+
         const keysToRemove: string[] = [];
         const keysToUpdate: { key: string; data: any[] }[] = [];
         const deleted: Reservation[] = [];
@@ -236,7 +257,46 @@ const History = () => {
     };
 
     const cancelRefund = () => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "RefundModalDetail",
+                event: "click",
+                target_id: "refundModalDetail-no-to-History",
+                tag: "button",
+                text: "환불 모달창 - 아니오 클릭",
+            });
+        }
         setIsModalOpen(false);
+    };
+
+    const handleCalendarClick = (value: Date) => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "History",
+                event: "click",
+                target_id:
+                    selectingDate === "start"
+                        ? "calendar-start"
+                        : "calendar-end",
+                tag: "calendar",
+                text: `날짜 선택: ${formatDate(value)}`,
+            });
+        }
+    };
+
+    const handleCheckboxToggle = (checked: boolean) => {
+        if (sessionId && checked) {
+            addHistoryLog({
+                sessionId,
+                page: "History",
+                event: "click",
+                target_id: "checkbox-all",
+                tag: "checkbox",
+                text: "체크박스 티켓 전체 선택",
+            });
+        }
     };
 
     return (
@@ -276,6 +336,7 @@ const History = () => {
                     <Calendar
                         onChange={(value) => {
                             if (value instanceof Date) {
+                                handleCalendarClick(value);
                                 if (selectingDate === "start") {
                                     setStartDate(value);
                                     if (value > endDate) setEndDate(value);
@@ -321,8 +382,10 @@ const History = () => {
                                                 filteredReservations.length
                                         }
                                         onChange={(e) => {
+                                            const isChecked = e.target.checked;
+                                            handleCheckboxToggle(isChecked);
                                             setSelected(
-                                                e.target.checked
+                                                isChecked
                                                     ? filteredReservations.map(
                                                           (r) => r.reservationId
                                                       )
