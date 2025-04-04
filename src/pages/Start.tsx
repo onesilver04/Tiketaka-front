@@ -20,7 +20,7 @@ const Start = () => {
         const sessionId = createHistorySession(); // ✅ 조회용 세션 생성
         updateHistorySession({
             previous_pages: ["Start"], // ✅ 이전 페이지로 Start 추가
-            current_page: "PhoneNumber",
+            current_page: "phonenumber",
         });
         navigate("/phonenumber", { state: { sessionId } }); // ✅ 전달
     };

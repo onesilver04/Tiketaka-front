@@ -71,9 +71,10 @@ export const createHistorySession = () => {
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
+        logs: [],
     };
 
-    localStorage.setItem("currentHistorySession", JSON.stringify(newSession));
+    localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(newSession));
     return newSession.sessionId;
 };
 
@@ -111,9 +112,20 @@ export const addHistoryLog = ({
     if (!session.logs) session.logs = [];
     session.logs.push(newLog);
     session.last_interaction = new Date().toISOString();
+
+    // 2. 중복 없이 previous_pages 재생성
+    const seen = new Set<string>();
+    session.previous_pages = [];
+    for (const log of session.logs) {
+        if (log.page && !seen.has(log.page)) {
+            seen.add(log.page);
+            session.previous_pages.push(log.page);
+        }
+    }
+
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(session));
 
-    // 2. logs_{sessionId} 키에도 별도 저장 (세션별 로그 추적용)
+    // 3. logs_{sessionId} 키에도 별도 저장 (세션별 로그 추적용)
     const key = `logs_${sessionId}`;
     const existing = localStorage.getItem(key);
     const parsed = existing
@@ -128,6 +140,7 @@ export const addHistoryLog = ({
     parsed.logs.push(newLog);
     localStorage.setItem(key, JSON.stringify(parsed));
 };
+
 export const updateHistorySession = (updates: Partial<any>) => {
     const raw = localStorage.getItem(HISTORY_SESSION_KEY);
     if (!raw) return;
@@ -140,13 +153,6 @@ export const updateHistorySession = (updates: Partial<any>) => {
         last_interaction: new Date().toISOString(),
     };
 
-    // 이전 페이지 누적 처리
-    if (updates.previous_pages && Array.isArray(updates.previous_pages)) {
-        updated.previous_pages = [
-            ...(session.previous_pages || []),
-            ...updates.previous_pages,
-        ];
-    }
-
+    // previous_pages는 addHistoryLog에서 관리하므로 이곳에서는 제외
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(updated));
 };
