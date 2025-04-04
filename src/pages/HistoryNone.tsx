@@ -1,10 +1,27 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { addHistoryLog } from "../utils/session";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../styles/Button.module.css";
 import "../styles/History.css";
 
 const HistoryNone = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const sessionId = location.state?.sessionId;
+
+    const handleGoHome = () => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "HistoryNone",
+                event: "click",
+                target_id: "historyNone-to-home",
+                tag: "button",
+                text: "해당 날짜 없음 메인으로 돌아감",
+            });
+        }
+        navigate("/");
+    };
 
     return (
         <div className="ticket-container-none">
@@ -26,7 +43,23 @@ const HistoryNone = () => {
             <button
                 id="historyNone-to-home"
                 className={styles.button}
-                onClick={() => navigate("/")}
+                onClick={() => {
+                    const sessionId = JSON.parse(
+                        localStorage.getItem("currentHistorySession") || "{}"
+                    )?.sessionId;
+                    if (sessionId) {
+                        addHistoryLog({
+                            sessionId,
+                            page: "Start",
+                            event: "click",
+                            target_id: "historyNone-to-home",
+                            tag: "button",
+                            text: "예매 없어서 메인으로 돌아감",
+                            url: window.location.href,
+                        });
+                    }
+                    navigate("/");
+                }}
             >
                 메인 화면으로
             </button>

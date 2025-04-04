@@ -1,11 +1,34 @@
 import "../styles/RefundSuccess.css";
 import styles from "../styles/Button.module.css";
 import { useNavigate } from "react-router-dom";
+import { addHistoryLog, updateHistorySession } from "../utils/session";
 
 const RefundSuccess = () => {
     const navigate = useNavigate();
 
     const handleHome = () => {
+        const sessionRaw = localStorage.getItem("currentHistorySession");
+        if (sessionRaw) {
+            const session = JSON.parse(sessionRaw);
+            const sessionId = session.sessionId;
+
+            // ✅ 로그 기록
+            addHistoryLog({
+                sessionId,
+                page: "RefundSuccess",
+                event: "click",
+                target_id: "refundSuccess-to-home",
+                tag: "button",
+                text: "환불 완료 후 메인으로 돌아감",
+            });
+
+            // ✅ 세션 종료 처리
+            updateHistorySession({
+                status: "completed",
+                end_reason: "refund_completed",
+            });
+        }
+
         navigate("/");
     };
 

@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+    updateHistorySession,
+    createHistorySession,
+    addHistoryLog,
+} from "../utils/session";
 import "../styles/PhoneNumber.css";
 import deleteIcon from "../assets/delete-button.svg";
 import styles from "../styles/Button.module.css";
@@ -9,6 +14,9 @@ const PhoneNumber = () => {
     const navigate = useNavigate();
     const [inputDigits, setInputDigits] = useState(""); // 입력된 전체 전화번호 (하이픈 없이 11자리)
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const location = useLocation();
+    const sessionId = location.state?.sessionId;
 
     // 숫자 버튼 입력
     const handleNumberClick = (num: string) => {
@@ -82,9 +90,24 @@ const PhoneNumber = () => {
         }
 
         if (found) {
-            navigate("/history", { state: { phoneNumber: inputDigits } });
-        } else {
-            alert("입력한 전화번호로 완료된 예약 내역이 없습니다.");
+            const sessionId = createHistorySession(); // ✅ 세션 생성
+
+            // ✅ 조회 성공 로그 기록
+            addHistoryLog({
+                sessionId,
+                page: "PhoneNumber",
+                event: "click",
+                target_id: "phoneNumber-to-history",
+                tag: "button",
+                text: "전화번호 조회 성공",
+            });
+
+            navigate("/history", {
+                state: {
+                    phoneNumber: inputDigits,
+                    sessionId,
+                },
+            });
         }
     };
 

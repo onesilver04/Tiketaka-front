@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { addHistoryLog } from "../utils/session";
 import "../styles/History.css";
 import "../styles/HistoryTicket.css";
 import { Reservation } from "../pages/History";
@@ -30,8 +31,32 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
     const navigate = useNavigate();
 
     const handleTicketClick = () => {
+        const session = JSON.parse(
+            localStorage.getItem("currentHistorySession") || "{}"
+        );
+        const sessionId = session?.sessionId;
+
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "History",
+                event: "navigate", // click??? 예인언니한테 물어보기
+                target_id: "ticket-info", //`ticket-${reservationId}`,
+                tag: "div",
+                text: `${departure} to ${arrival} booking-detail 페이지로 이동`,
+                url: window.location.href,
+            });
+        }
+
         navigate("/history/booking-detail", {
-            state: { reservations: [reservation] }, // 배열 형태로 넘김
+            state: {
+                reservations: [
+                    {
+                        ...reservation,
+                        trainInfo: reservation.trainInfo,
+                    },
+                ],
+            },
         });
     };
 
@@ -48,6 +73,7 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                 <div className="ticket-left-bar"></div>
 
                 <div
+                    id="ticket-info"
                     className="ticket-info"
                     onClick={handleTicketClick}
                     style={{ cursor: "pointer" }}
