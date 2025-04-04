@@ -11,6 +11,7 @@
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     background-color: #D9D9D9;
     font-weight: 400;
+    font-size: 18px;
     line-height: 20px;
     text-align: center;
 }
@@ -59,14 +60,14 @@
 }
 
 /* 통로 이미지 */
-.aisle {
+.train-aisle {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 64px;
 }
 
-.aisle img {
+.train-aisle img {
     height: 64px;
     width: auto;
     opacity: 0.5;
@@ -78,4 +79,11 @@ button.select-seat-next {
     margin-top: 34px;
     margin-left: 20px;
     margin-bottom: 85px;
+}
+
+#selected-seats-delete {
+    margin-left: 5px;
+    background-color: transparent;
+    border: 1px solid #2b32b2;
+    border-radius: 8px;
 }

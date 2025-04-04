@@ -194,7 +194,6 @@ const Payment: React.FC = () => {
 
     return (
         <div>
-            <title>Payment</title>
             <div className={styleb.box}>
                 <h2 className="page-title">결제창</h2>
                 <hr className="page-title-bar" />
@@ -202,56 +201,59 @@ const Payment: React.FC = () => {
                 <div className="content-container">
                     <div className="trip-info">
                         <div className="selected-station-inform">
-                            <div>
-                                <div>출발</div>
-                                <div>{reservationData?.departureStation}</div>
-                                <div>{trainInfo?.departureTime}</div>
+                            <div className="selected-departure-station">
+                                <div className="selected-departure-inform">출발</div>
+                                <div className="selected-departure-detail">{reservationData?.departureStation}</div>
+                                <div className="selected-departure-inform">{trainInfo?.departureTime}</div>
                             </div>
-                            <div>→</div>
-                            <div>
-                                <div>도착</div>
-                                <div>{reservationData?.destinationStation}</div>
-                                <div>{trainInfo?.arrivalTime}</div>
+                            <div className="selected-departure-station">→</div>
+                            <div className="selected-departure-station">
+                                <div className="selected-departure-inform">도착</div>
+                                <div className="selected-departure-detail">{reservationData?.destinationStation}</div>
+                                <div className="selected-departure-inform">{trainInfo?.arrivalTime}</div>
                             </div>
                         </div>
-                        <div>
-                            <div>날짜</div>
+                        <div className="reservation-detail-select">
+                            <div className="payment-selected-date">날짜</div>
                             <div>{formattedDate}</div>
                         </div>
-                        <div>
-                            <div><span>총 인원 수: </span><span>{totalPassengers.toLocaleString()}명</span></div>
+                        <div className="reservation-detail-select">
+                            <div className="total-number"><span>총 인원 수: </span><span>{totalPassengers.toLocaleString()}명</span></div>
                             <div><span>성인: </span><span>{reservationData?.adultCount}명</span></div>
                             <div><span>노약자: </span><span>{reservationData?.seniorCount}명</span></div>
                             <div><span>청소년: </span><span>{reservationData?.teenCount}명</span></div>
                         </div>
                         <hr />
-                        <p>지불하실 금액: {totalPrice.toLocaleString()}원</p>
+                        <p className="total-price">지불하실 금액: {totalPrice.toLocaleString()}원</p>
                     </div>
 
-                    <div>
-                        <label>개인정보 동의</label>
+                    <div className="reservation-detail-select">
+                        <label className="payment-agree">개인정보 동의</label>
                         <input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} />
                     </div>
 
-                    <div>
-                        <div>전화번호 입력</div>
+                    <div className="reservation-detail-select">
+                        <div className="payment-phonenumber">전화번호 입력</div> 
                         <input
+                            className="payment-phonenumber-input"
                             type="text"
                             value={phoneNumber}
                             onChange={handlePhoneChange}
                             placeholder="전화번호를 입력해주세요."
                         />
-                        <button onClick={fetchCards} disabled={!isValidPhone}>확인</button>
+                        <button className="payment-phonenumber-check" onClick={fetchCards} disabled={!isValidPhone}>확인</button>
                     </div>
 
+                    <hr></hr>
+                    <div className="select-payment-method">결제 수단 선택</div>
                     <div className="payment-method">
-                        <button disabled={!phoneConfirmed || !agree} className={paymentMethod === "credit" ? "active" : ""} onClick={() => setPaymentMethod("credit")}>신용카드</button>
-                        <button disabled={!phoneConfirmed || !agree} className={paymentMethod === "kakao" ? "active" : ""} onClick={() => setPaymentMethod("kakao")}>카카오페이</button>
-                        <button disabled={!phoneConfirmed || !agree} className={paymentMethod === "mobile" ? "active" : ""} onClick={() => setPaymentMethod("mobile")}>휴대폰 결제</button>
+                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "credit" ? "active" : ""} onClick={() => setPaymentMethod("credit")}>신용카드</button>
+                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "kakao" ? "active" : ""} onClick={() => setPaymentMethod("kakao")}>카카오페이</button>
+                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "mobile" ? "active" : ""} onClick={() => setPaymentMethod("mobile")}>휴대폰 결제</button>
                     </div>
 
-                    <div className="card-slider">
-                        <button onClick={handlePrev}>&lt;</button>
+                    <div className="payment-card-slider">
+                        <button className="payment-card-prev" onClick={handlePrev}>&lt;</button>
                         {cards.length > 0 && currentIndex < cards.length ? (
                             <div
                                 className={`card-box ${paymentMethod === "existing" && currentIndex === selectedCardIndex ? "selected" : ""}`}
@@ -260,7 +262,7 @@ const Payment: React.FC = () => {
                                     setSelectedCardIndex(currentIndex);
                                 }}
                             >
-                                <img src={AddCard} alt="카드 이미지" className="card-img" />
+                                <img src={AddCard} alt="카드 이미지" className="payment-card-img" />
                                 <div>등록된 카드 {cards[currentIndex].last4Digits}</div>
                             </div>
                         ) : (
@@ -271,7 +273,7 @@ const Payment: React.FC = () => {
                                 +
                             </div>
                         )}
-                        <button onClick={handleNext}>&gt;</button>
+                        <button className="payment-card-next" onClick={handleNext}>&gt;</button>
                     </div>
                 </div>
             </div>

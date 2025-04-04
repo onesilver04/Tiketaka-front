@@ -32,7 +32,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             {!shouldHideHeader && <Header />}
-            {!shouldHideHeader && <TakaButton />}
+            {/* {!shouldHideHeader && <TakaButton />} */}
+            {<TakaButton />}
             <div
                 className="App"
                 style={{ position: "relative", minHeight: "100vh" }}

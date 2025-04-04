@@ -44,7 +44,7 @@ const TrainList = () => {
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
 
     const handleBack = () => {
-        navigate(-1);
+        navigate("/reservation");
     };
 
     const handleSelect = (train: Train) => {
@@ -71,7 +71,6 @@ const TrainList = () => {
 
     return (
         <div>
-        <title>TimeTable</title>
         <div className={styleb.box}>
             <h2 className="page-title">시간대 선택</h2>
             <hr className="page-title-bar" />
@@ -83,13 +82,14 @@ const TrainList = () => {
                     <th>출발</th>
                     <th>도착</th>
                     <th>가격</th>
-                    <th>남은 좌석 수</th>
+                    <th>남은 <br/>좌석 수</th>
                 </tr>
                 </thead>
                 <tbody>
                 {KTXTrains.map((train) => (
                     <tr
                     key={train.trainId}
+                    id={`select-trainlist-${train.trainId}`}
                     onClick={() => handleSelect(train)}
                     style={{
                         opacity: train.disabled ? 0.3 : 1,
@@ -119,10 +119,10 @@ const TrainList = () => {
         </div>
 
         <div className="display-button">
-            <button className={`${styles.button} train-list-back`} onClick={handleBack}>
+            <button className={`${styles.button} train-list-back`} id="trainlist-to-reservation" onClick={handleBack}>
             이전
             </button>
-            <button className={`${styles.button} train-list-search`} onClick={handleNext}>
+            <button className={`${styles.button} train-list-search`} id="trainlist-to-selectseat" onClick={handleNext}>
             다음
             </button>
         </div>
