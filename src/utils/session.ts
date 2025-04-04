@@ -66,8 +66,8 @@ export const createHistorySession = () => {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        end_reason: "",
-        current_page: "phonenumber",
+        // end_reason: "",
+        current_page: "PhoneNumber",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
@@ -84,6 +84,7 @@ export const addHistoryLog = ({
     event,
     target_id,
     tag,
+    url,
     text,
 }: {
     sessionId: string;
@@ -91,6 +92,7 @@ export const addHistoryLog = ({
     event: "click" | "navigate" | "submit";
     target_id: string;
     tag: string;
+    url?: string;
     text: string;
 }) => {
     const raw = localStorage.getItem(HISTORY_SESSION_KEY);
@@ -105,7 +107,8 @@ export const addHistoryLog = ({
         target_id,
         tag,
         text,
-        timestamp: new Date().toISOString(),
+        url: window.location.href,
+        timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
     };
 
     // 1. 현재 세션 객체에 로그 추가

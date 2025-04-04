@@ -95,7 +95,7 @@ const PhoneNumber = () => {
             // ✅ 조회 성공 로그 기록
             addHistoryLog({
                 sessionId,
-                page: "phonenumber",
+                page: "PhoneNumber",
                 event: "click",
                 target_id: "phoneNumber-to-history",
                 tag: "button",

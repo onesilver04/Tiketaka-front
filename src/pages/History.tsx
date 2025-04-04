@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { addHistoryLog } from "../utils/session";
+import { updateHistorySession, addHistoryLog } from "../utils/session";
 import RefundModalDetail from "../components/RefundModalDetail";
 import "react-calendar/dist/Calendar.css";
 import "../styles/Reservation.css";
@@ -10,7 +10,6 @@ import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import HistoryTicket from "./HistoryTicket";
 import HistoryNone from "./HistoryNone";
-import { updateHistorySession } from "../utils/session";
 
 export interface Reservation {
     reservationId: string;
@@ -61,8 +60,8 @@ const History = () => {
     useEffect(() => {
         if (sessionId) {
             updateHistorySession({
-                current_page: "history",
-                previous_pages: ["phonenumber"],
+                current_page: "History",
+                previous_pages: ["PhoneNumber"],
             });
         }
     }, []);
@@ -85,7 +84,7 @@ const History = () => {
         if (sessionId) {
             addHistoryLog({
                 sessionId,
-                page: "history",
+                page: "History",
                 event: "click",
                 target_id: "history-search",
                 tag: "button",
@@ -148,6 +147,18 @@ const History = () => {
             } catch {
                 continue;
             }
+        }
+
+        if (matched.length === 0 && sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "HistoryNone",
+                event: "navigate",
+                target_id: "history-search",
+                tag: "button",
+                text: "해당 기간 예매 내역 없음",
+                url: window.location.href,
+            });
         }
 
         // ✅ 로그 여부와 무관하게 결과 세팅

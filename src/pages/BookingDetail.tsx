@@ -5,6 +5,7 @@ import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import RefundModal from "../components/RefundModal";
+import { addHistoryLog } from "../utils/session";
 
 interface LocationState {
     reservations: Reservation[];
@@ -24,6 +25,23 @@ const BookingDetail = () => {
     };
 
     const confirmRefund = () => {
+        const session = JSON.parse(
+            localStorage.getItem("currentHistorySession") || "{}"
+        );
+        const sessionId = session?.sessionId;
+
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "BookingDetail",
+                event: "click",
+                target_id: "refundModal-yes-to-success",
+                tag: "button",
+                text: "RefundModal에서 yes 클릭으로 환불 확정",
+                url: window.location.href,
+            });
+        }
+
         reservations.forEach((res) => {
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
