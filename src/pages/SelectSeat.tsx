@@ -111,7 +111,7 @@ const SelectSeat = () => {
     
 
     const handleBack = () => {
-        navigate(-1);
+        navigate("/reservation/train-list");
     };
 
     return (

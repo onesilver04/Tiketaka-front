@@ -44,7 +44,7 @@ const TrainList = () => {
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
 
     const handleBack = () => {
-        navigate(-1);
+        navigate("/reservation");
     };
 
     const handleSelect = (train: Train) => {

@@ -26,3 +26,89 @@ button.payment-next {
     font-weight: 700;
 }
 
+.total-number {
+    font-weight: 700;
+    font-size: 20px;
+    margin: 7px 0;
+}
+
+.total-price, .select-payment-method {
+    font-weight: 700;
+    font-size: 20px;
+    margin: 20px;
+}
+
+.payment-agree, .payment-phonenumber, .payment-selected-date {
+    font-size: 20px;
+    font-weight: 700;;
+}
+
+.payment-phonenumber-input {
+    position: relative;
+    margin: 7px auto;
+    padding-left: 10px;
+    width: 290px;
+    height: 39px;
+    border: none;
+    border-radius: 8px;
+    background-color: rgb(207, 206, 206);
+    box-sizing: border-box;
+}
+
+.payment-phonenumber-check {
+    width: 48px;
+    height: 25px;
+    position: absolute;
+    transform: translate(-55px, 15px);
+    border: none;
+    border-radius: 8px;
+    background-color: white;
+    color: #111111;
+}
+
+.payment-method {
+    display: flex;
+    justify-content: space-around;
+}
+.payment-method button {
+    margin: 7px 0;
+    width: 90px;
+    height: 44px;
+    border: none;
+    border-radius: 32px;
+    background-color: #1488CC;
+    color: white;
+}
+
+.payment-method button:disabled {
+    background-color: #B3E5FC;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.payment-method button.active {
+    background-color: #2B32B2;
+}
+
+.payment-card-slider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 20px;
+}
+
+.payment-card-img {
+    margin: 3px 7px;
+}
+
+.payment-card-prev, .payment-card-next {
+    background-color: transparent;
+    border: 2px solid #2B32B2;
+    border-radius: 8px;
+    align-items: center;
+    height: 30px;
+}

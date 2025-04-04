@@ -147,6 +147,8 @@ const AddCard: React.FC = () => {
                                 onChange={handleCardNumber}
                                 inputMode="numeric"
                                 maxLength={19}
+                                placeholder="카드번호 16자리"
+                                className="addcard-inform-input"
                             />
                         </div>
                         <div>
@@ -157,6 +159,8 @@ const AddCard: React.FC = () => {
                                 onChange={handleCVCNumber}
                                 inputMode="numeric"
                                 maxLength={3}
+                                placeholder="cvc 번호 입력"
+                                className="addcard-inform-input"
                             />
                         </div>
                         <div>
@@ -168,6 +172,7 @@ const AddCard: React.FC = () => {
                                 onChange={handleExpirationPeriod}
                                 inputMode="numeric"
                                 maxLength={5}
+                                className="addcard-inform-input"
                             />
                         </div>
                         <div>
@@ -179,6 +184,7 @@ const AddCard: React.FC = () => {
                                 onChange={handleCardPassword}
                                 inputMode="numeric"
                                 maxLength={2}
+                                className="addcard-inform-input"
                             />
                         </div>
                     </div>
