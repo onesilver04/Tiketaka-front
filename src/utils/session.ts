@@ -194,3 +194,115 @@ export const updateHistorySession = (updates: Partial<any>) => {
     }
     localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessions));
 };
+
+export const RESERVATION_LOG_SESSION_KEY = "currentReservationLogSession";
+export const RESERVATION_LOG_SESSIONS_KEY = "reservationLogSessions";
+
+export const createReservationLogSession = () => {
+    const newSession = {
+        sessionId: Date.now().toString(),
+        purpose: "reservation",
+        status: "active",
+        current_page: "Reservation",
+        start_time: new Date().toISOString(),
+        last_interaction: new Date().toISOString(),
+        previous_pages: [],
+        logs: [],
+    };
+
+    localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(newSession));
+
+    const sessionList = JSON.parse(
+        localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
+    );
+    sessionList.push(newSession);
+    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessionList));
+
+    return newSession.sessionId;
+};
+
+export const addReservationLog = ({
+    sessionId,
+    page,
+    event,
+    target_id,
+    tag,
+    url,
+    text,
+}: {
+    sessionId: string;
+    page: string;
+    event: "click" | "navigate" | "submit";
+    target_id: string;
+    tag: string;
+    url?: string;
+    text: string;
+}) => {
+    const raw = localStorage.getItem(RESERVATION_LOG_SESSION_KEY);
+    if (!raw) return;
+
+    const session = JSON.parse(raw);
+    if (session.sessionId !== sessionId) return;
+
+    const newLog = {
+        page,
+        event,
+        target_id,
+        tag,
+        text,
+        url: url ?? window.location.pathname,
+        timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+    };
+
+    if (!session.logs) session.logs = [];
+    session.logs.push(newLog);
+    session.last_interaction = new Date().toISOString();
+
+    const seen = new Set<string>();
+    session.previous_pages = [];
+    for (const log of session.logs) {
+        if (!seen.has(log.page)) {
+            seen.add(log.page);
+            session.previous_pages.push(log.page);
+        }
+    }
+
+    localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(session));
+
+    const sessions = JSON.parse(
+        localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
+    );
+    const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
+    if (index !== -1) {
+        sessions[index] = session;
+    } else {
+        sessions.push(session);
+    }
+    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
+};
+
+export const updateReservationLogSession = (updates: Partial<any>) => {
+    const raw = localStorage.getItem(RESERVATION_LOG_SESSION_KEY);
+    if (!raw) return;
+
+    const session = JSON.parse(raw);
+
+    const updated = {
+        ...session,
+        ...updates,
+        last_interaction: new Date().toISOString(),
+    };
+
+    localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updated));
+
+    const sessions = JSON.parse(
+        localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
+    );
+    const index = sessions.findIndex((s: any) => s.sessionId === updated.sessionId);
+    if (index !== -1) {
+        sessions[index] = updated;
+    } else {
+        sessions.push(updated);
+    }
+    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
+};

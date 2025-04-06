@@ -7,38 +7,12 @@ import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 import StationSelector from "./StationSelector";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession } from "../utils/session";
+import { updateCurrentSession, addReservationLog } from "../utils/session";
 
 const stations = [
-    "선택",
-    "서울",
-    "광명",
-    "수원",
-    "천안",
-    "오송",
-    "대전",
-    "마산",
-    "밀양",
-    "구포",
-    "평창",
-    "강릉",
-    "전주",
-    "목포",
-    "여수",
-    "용산",
-    "원주",
-    "평택",
-    "천안",
-    "서산",
-    "순천",
-    "대구",
-    "동해",
-    "진부",
-    "익산",
-    "부산",
-    "순천",
-    "울산",
-    "창원",
+    "선택", "서울", "광명", "수원", "천안", "오송", "대전", "마산", "밀양", "구포",
+    "평창", "강릉", "전주", "목포", "여수", "용산", "원주", "평택", "안동", "서산",
+    "진주", "대구", "동해", "진부", "익산", "부산", "순천", "울산", "창원",
 ];
 
 interface ReservationData {
@@ -56,6 +30,26 @@ const Reservation = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const sessionId = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+        } catch {
+            return null;
+        }
+    })();
+
+    const logClick = (target_id: string, text: string, tag = "button") => {
+        if (!sessionId) return;
+        addReservationLog({
+            sessionId,
+            page: "Reservation",
+            event: "click",
+            target_id,
+            tag,
+            text
+        });
+    };
 
     useEffect(() => {
         const shouldReset = location.state?.reset === true;
@@ -77,23 +71,17 @@ const Reservation = () => {
         return storedData ? JSON.parse(storedData) : null;
     };
 
-    const [reservationData, setReservationData] = useState<ReservationData>(
-        () => {
-            const stored = loadStoredData();
-            return {
-                departureStation: stored?.departureStation || null,
-                destinationStation: stored?.destinationStation || null,
-                departureDate: stored?.departureDate
-                    ? new Date(stored.departureDate)
-                    : null,
-                adultCount: stored?.adultCount ?? 0,
-                seniorCount: stored?.seniorCount ?? 0,
-                teenCount: stored?.teenCount ?? 0,
-                //reservationData에서 인원 수 값(adultCount, seniorCount, teenCount)이 undefined 또는 null로 시작되어 + delta를 할 때 NaN 또는 오류가 발생
-                //?? 0을 사용하면 undefined나 null일 경우에도 0으로 초기화되기 때문에 NaN이 발생하지 않음
-            };
-        }
-    );
+    const [reservationData, setReservationData] = useState<ReservationData>(() => {
+        const stored = loadStoredData();
+        return {
+            departureStation: stored?.departureStation || null,
+            destinationStation: stored?.destinationStation || null,
+            departureDate: stored?.departureDate ? new Date(stored.departureDate) : null,
+            adultCount: stored?.adultCount ?? 0,
+            seniorCount: stored?.seniorCount ?? 0,
+            teenCount: stored?.teenCount ?? 0,
+        };
+    });
 
     const {
         departureStation,
@@ -103,9 +91,8 @@ const Reservation = () => {
         seniorCount,
         teenCount,
     } = reservationData;
-    const [showStationSelector, setShowStationSelector] = useState<
-        "departure" | "arrival" | null
-    >(null);
+
+    const [showStationSelector, setShowStationSelector] = useState<"departure" | "arrival" | null>(null);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
@@ -113,10 +100,7 @@ const Reservation = () => {
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target as Node)
-            ) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
                 setShowStationSelector(null);
             }
         };
@@ -128,21 +112,23 @@ const Reservation = () => {
         };
     }, [showStationSelector]);
 
-    const handleStationChange = (
-        type: "departure" | "arrival",
-        value: string
-    ) => {
+    const handleStationChange = (type: "departure" | "arrival", value: string) => {
+        const id = type === "departure" ? "select-departure-station" : "select-arrival-station";
+        logClick(id, `${type === "departure" ? "출발역" : "도착역"} 선택: ${value}`);
         setReservationData((prev) => ({
             ...prev,
-            [type === "departure" ? "departureStation" : "destinationStation"]:
-                value,
+            [type === "departure" ? "departureStation" : "destinationStation"]: value,
         }));
     };
 
     const handleDateChange = (value: Date | Date[] | null) => {
+        const dateValue = value instanceof Date ? value : Array.isArray(value) ? value[0] : null;
+        if (dateValue) {
+            logClick("calendar-tile", `날짜 선택: ${dateValue.toLocaleDateString()}`, "tile");
+        }
         setReservationData((prev) => ({
             ...prev,
-            departureDate: value instanceof Date ? value : value?.[0] || null,
+            departureDate: dateValue,
         }));
     };
 
@@ -150,6 +136,13 @@ const Reservation = () => {
         type: "adultCount" | "seniorCount" | "teenCount",
         delta: number
     ) => {
+        const id = `${delta > 0 ? "increase" : "decrease"}-${type.replace("Count", "")}`;
+        const labelMap = {
+            adultCount: "성인",
+            seniorCount: "노약자",
+            teenCount: "청소년",
+        };
+        logClick(id, `${labelMap[type]} 수 ${delta > 0 ? "증가" : "감소"}`);
         setReservationData((prev) => ({
             ...prev,
             [type]: Math.max(0, prev[type] + delta),
@@ -157,31 +150,26 @@ const Reservation = () => {
     };
 
     const handleSearch = () => {
+        logClick("reservation-to-trainlist", "조회");
         if (!departureStation) return alert("출발역은 필수입니다.");
         if (!destinationStation) return alert("도착역은 필수입니다.");
         if (!departureDate) return alert("날짜는 필수입니다.");
-        if (departureStation === destinationStation)
-            return alert("출발역과 도착역은 서로 달라야 합니다.");
-        if (adultCount + seniorCount + teenCount < 1)
-            return alert("최소 1명 이상의 인원이 필요합니다.");
+        if (departureStation === destinationStation) return alert("출발역과 도착역은 서로 달라야 합니다.");
+        if (adultCount + seniorCount + teenCount < 1) return alert("최소 1명 이상의 인원이 필요합니다.");
 
-        // 세션 업데이트
         updateCurrentSession({ reservationData });
 
-        // 다음 페이지로 예약 데이터 넘기기
-        navigate("/reservation/train-list", {
-            state: reservationData,
-        });
+        navigate("/reservation/train-list", { state: reservationData });
     };
 
     const handleBack = () => {
-        navigate(-1);
+        logClick("reservation-to-home", "이전");
+        navigate("/");
     };
 
     return (
         <div>
             <div className={styleb.box} style={{ position: "relative" }}>
-                <title>Reservation</title>
                 <h2 className="page-title">승차권 예매</h2>
                 <hr className="page-title-bar" />
 
@@ -386,7 +374,7 @@ const Reservation = () => {
                 </button>
                 <button
                     className={`${styles.button} reservation-search`}
-                    id="reservation-to=trainlist"
+                    id="reservation-to-trainlist"
                     onClick={handleSearch}
                 >
                     조회
