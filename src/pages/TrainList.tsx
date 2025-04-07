@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import "../styles/TrainList.css";
-import { updateCurrentSession, addReservationLog } from "../utils/session";
+import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 
 interface ReservationData {
     departureStation: string | null;
@@ -62,6 +62,37 @@ const TrainList = () => {
             text,
         });
     };
+
+    useEffect(() => {
+        if (sessionId) {
+            updateReservationLogSession({
+                location: "TrainList",
+                previous_pages: ["Reservation"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "TrainList" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "TrainList",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "TrainList 페이지 도착",
+                    });
+                }
+            }
+        }
+    }, [sessionId]);
 
     const handleBack = () => {
         logClick("trainlist-to-reservation", "이전");

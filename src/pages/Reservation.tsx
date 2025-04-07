@@ -7,7 +7,7 @@ import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 import StationSelector from "./StationSelector";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession, addReservationLog } from "../utils/session";
+import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 
 const stations = [
     "선택", "서울", "광명", "수원", "천안", "오송", "대전", "마산", "밀양", "구포",
@@ -38,6 +38,37 @@ const Reservation = () => {
             return null;
         }
     })();
+
+    useEffect(() => {
+        if (sessionId) {
+            updateReservationLogSession({
+                location: "Reservation",
+                previous_pages: ["Start"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "Reservation" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "Reservation",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "Reservation 페이지 도착",
+                    });
+                }
+            }
+        }
+    }, [sessionId]);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
