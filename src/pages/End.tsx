@@ -29,16 +29,32 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
-            updateReservationLogSession({ current_page: "End" });
-            // addReservationLog({
-            //     sessionId,
-            //     page: "End",
-            //     event: "navigate",
-            //     target_id: "page-load",
-            //     tag: "system",
-            //     text: "End 페이지 도착",
-            // });
-            // 없앨까 말까
+            updateReservationLogSession({
+                location: "End",
+                previous_pages: ["Payment"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: { page: string; event: string; target_id: string; }) =>
+                        log.page === "End" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                ); // ts에서 any 쓰는 건 ts의 장점을 해치는거고, any 자체에 자꾸 오류나니까 type 위에 처럼 바꿈. 이상하면 다시 log: any로 변경ㄱㄱ
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "End",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "End 페이지 도착",
+                    });
+                }
+            }
         }
     }, [sessionId]);
 
@@ -71,3 +87,4 @@ const End = () => {
 };
 
 export default End;
+

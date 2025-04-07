@@ -6,7 +6,7 @@ import trainConvenience from "../assets/train-convenience.svg";
 import trainaisle from "../assets/train-track-single.svg";
 import "../styles/SelectSeat.css";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession, addReservationLog } from "../utils/session";
+import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 
 interface Seat {
     seatNumber: string;
@@ -52,6 +52,37 @@ const SelectSeat = () => {
             return null;
         }
     })();
+
+    useEffect(() => {
+        if (sessionId) {
+            updateReservationLogSession({
+                location: "SelectSeat",
+                previous_pages: ["TrainList"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "SelectSeat" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "SelectSeat",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "SelectSeat 페이지 도착",
+                    });
+                }
+            }
+        }
+    }, [sessionId]);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;

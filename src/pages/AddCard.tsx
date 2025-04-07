@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import "../styles/AddCard.css";
-import { addReservationLog } from "../utils/session";
+import { addReservationLog, updateReservationLogSession } from "../utils/session";
 
-const cardCompanies = ["NH농업", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
+const cardCompanies = ["NH농협", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
 
 const AddCard: React.FC = () => {
     const navigate = useNavigate();
@@ -19,6 +19,37 @@ const AddCard: React.FC = () => {
             return null;
         }
     })();
+
+    useEffect(() => {
+        if (sessionId) {
+            updateReservationLogSession({
+                location: "Addcard",
+                previous_pages: ["Payment"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "Addcard" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "Addcard",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "Addcard 페이지 도착",
+                    });
+                }
+            }
+        }
+    }, [sessionId]);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;

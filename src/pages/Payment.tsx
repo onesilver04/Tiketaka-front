@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Payment.css";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession, addReservationLog } from "../utils/session";
+import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 import AddCard from "../assets/add-card-img.svg";
 
 interface Card {
@@ -43,6 +43,37 @@ const Payment: React.FC = () => {
             return null;
         }
     })();
+
+    useEffect(() => {
+        if (sessionId) {
+            updateReservationLogSession({
+                location: "Payment",
+                previous_pages: ["SelectSeat"],
+            });
+
+            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "Payment" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addReservationLog({
+                        sessionId,
+                        page: "Payment",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "Payment 페이지 도착",
+                    });
+                }
+            }
+        }
+    }, [sessionId]);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
