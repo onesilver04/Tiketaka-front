@@ -66,6 +66,10 @@ export const createHistorySession = () => {
             const prevSession = JSON.parse(prev);
             if (prevSession.status === "active") {
                 prevSession.status = "incomplete";
+                if (!prevSession.end_reason) {
+                    prevSession.end_reason = null;
+                }
+
                 const sessionList = JSON.parse(
                     localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
                 );
@@ -89,7 +93,8 @@ export const createHistorySession = () => {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        location: "PhoneNumber",
+        end_reason: null, // ✅ 추가
+        current_page: "PhoneNumber",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
@@ -97,13 +102,6 @@ export const createHistorySession = () => {
     };
 
     localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(newSession));
-
-    const sessionList = JSON.parse(
-        localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
-    );
-    sessionList.push(newSession);
-    localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessionList));
-
     return newSession.sessionId;
 };
 
