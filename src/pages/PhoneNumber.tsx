@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-    updateHistorySession,
-    createHistorySession,
-    addHistoryLog,
-} from "../utils/session";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createHistorySession, addHistoryLog } from "../utils/session";
 import "../styles/PhoneNumber.css";
 import deleteIcon from "../assets/delete-button.svg";
 import styles from "../styles/Button.module.css";

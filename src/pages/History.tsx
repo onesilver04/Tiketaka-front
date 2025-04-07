@@ -156,7 +156,7 @@ const History = () => {
                 target_id: "history-search",
                 tag: "button",
                 text: "해당 기간 예매 내역 없음",
-                url: window.location.href,
+                url: window.location.pathname,
             });
         }
 

@@ -136,7 +136,7 @@ export const addHistoryLog = ({
         target_id,
         tag,
         text,
-        url: window.location.href,
+        url: window.location.pathname,
         timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
     };
 

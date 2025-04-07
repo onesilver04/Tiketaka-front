@@ -15,8 +15,6 @@ import AddCard from "./pages/AddCard";
 import PhoneNumber from "./pages/PhoneNumber";
 import Header from "./components/Header";
 import History from "./pages/History";
-import RefundModal from "./components/RefundModal";
-import RefundModalDetail from "./components/RefundModalDetail";
 import BookingDetail from "./pages/BookingDetail";
 import RefundSuccess from "./pages/RefundSuccess";
 import End from "./pages/End";
