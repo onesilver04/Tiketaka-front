@@ -111,7 +111,6 @@ export const addHistoryLog = ({
     event,
     target_id,
     tag,
-    url,
     text,
 }: {
     sessionId: string;
