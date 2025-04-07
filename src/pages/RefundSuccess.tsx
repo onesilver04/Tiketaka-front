@@ -2,9 +2,36 @@ import "../styles/RefundSuccess.css";
 import styles from "../styles/Button.module.css";
 import { useNavigate } from "react-router-dom";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
+import { useEffect } from "react";
 
 const RefundSuccess = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const sessionRaw = localStorage.getItem("currentHistorySession");
+        if (sessionRaw) {
+            const session = JSON.parse(sessionRaw);
+            const sessionId = session.sessionId;
+
+            const alreadyLogged = session.logs?.some(
+                (log: any) =>
+                    log.page === "RefundSuccess" &&
+                    log.event === "navigate" &&
+                    log.target_id === "page-load"
+            );
+
+            if (!alreadyLogged) {
+                addHistoryLog({
+                    sessionId,
+                    page: "RefundSuccess",
+                    event: "navigate",
+                    target_id: "page-load",
+                    tag: "system",
+                    text: "RefundSuccess 페이지 도착",
+                });
+            }
+        }
+    }, []);
 
     const handleHome = () => {
         const sessionRaw = localStorage.getItem("currentHistorySession");

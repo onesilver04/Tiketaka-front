@@ -51,10 +51,10 @@ const BookingDetail = () => {
             addHistoryLog({
                 sessionId,
                 page: "RefundModal",
-                event: "navigate",
+                event: "click",
                 target_id: "refundModal-yes-to-success",
                 tag: "button",
-                text: "RefundModal에서 yes 클릭으로 환불 진행 후 환불 성공 페이지로 이동",
+                text: "RefundModal에서 yes 클릭, 환불 성공",
                 url: window.location.pathname,
             });
         }
@@ -133,7 +133,35 @@ const BookingDetail = () => {
         0
     );
 
-    // 카드 번호와 가격 계산
+    // 1. 페이지 진입 시 로그 기록 (navigate: BookingDetail 페이지 도착)
+    useEffect(() => {
+        const sessionRaw = localStorage.getItem("currentHistorySession");
+        if (sessionRaw) {
+            const session = JSON.parse(sessionRaw);
+            const sessionId = session.sessionId;
+
+            const alreadyLogged = session.logs?.some(
+                (log: any) =>
+                    log.page === "BookingDetail" &&
+                    log.event === "navigate" &&
+                    log.target_id === "page-load"
+            );
+
+            if (!alreadyLogged) {
+                addHistoryLog({
+                    sessionId,
+                    page: "BookingDetail",
+                    event: "navigate",
+                    target_id: "page-load",
+                    tag: "system",
+                    text: "BookingDetail 페이지 도착",
+                    url: window.location.pathname,
+                });
+            }
+        }
+    }, []);
+
+    // 2. 카드 번호 및 가격 계산용
     useEffect(() => {
         let priceSum = 0;
         let foundCard: string | null = null;
@@ -157,7 +185,6 @@ const BookingDetail = () => {
                                 res.reservationId;
 
                         if (isMatched) {
-                            // ✅ 가격 계산
                             const count =
                                 res.passengerCount.adult +
                                 res.passengerCount.senior +
@@ -166,7 +193,6 @@ const BookingDetail = () => {
                             const pricePerPerson = item.trainInfo?.price ?? 0;
                             priceSum += pricePerPerson * count;
 
-                            // ✅ 카드 정보 저장
                             if (!foundCard && item.paymentInfo?.cardNumber) {
                                 foundCard = item.paymentInfo.cardNumber;
                             }
@@ -177,7 +203,7 @@ const BookingDetail = () => {
         });
 
         setTotalPrice(priceSum);
-        setCardNumber(foundCard); // ✅ 여기서 세팅됨!
+        setCardNumber(foundCard);
     }, [reservations]);
 
     return (

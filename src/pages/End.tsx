@@ -2,14 +2,20 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
-import { markSessionCompleted, updateReservationLogSession, addReservationLog } from "../utils/session";
+import {
+    markSessionCompleted,
+    updateReservationLogSession,
+    addReservationLog,
+} from "../utils/session";
 
 const End = () => {
     const navigate = useNavigate();
 
     const sessionId = (() => {
         try {
-            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+            return JSON.parse(
+                localStorage.getItem("currentReservationLogSession") || "null"
+            )?.sessionId;
         } catch {
             return null;
         }
@@ -29,6 +35,7 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
+<<<<<<< HEAD
             updateReservationLogSession({
                 location: "End",
                 previous_pages: ["Payment"],
@@ -55,6 +62,19 @@ const End = () => {
                     });
                 }
             }
+=======
+            // 넘어온 페이지
+            updateReservationLogSession({ location: "End" });
+            // addReservationLog({
+            //     sessionId,
+            //     page: "End",
+            //     event: "navigate",
+            //     target_id: "page-load",
+            //     tag: "system",
+            //     text: "End 페이지 도착",
+            // });
+            // 없앨까 말까
+>>>>>>> project/develop
         }
     }, [sessionId]);
 
