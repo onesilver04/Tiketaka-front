@@ -35,6 +35,7 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
+            // 넘어온 페이지
             updateReservationLogSession({ location: "End" });
             // addReservationLog({
             //     sessionId,
