@@ -60,7 +60,7 @@ const History = () => {
     useEffect(() => {
         if (sessionId) {
             updateHistorySession({
-                current_page: "History",
+                location: "History",
                 previous_pages: ["PhoneNumber"],
             });
         }
