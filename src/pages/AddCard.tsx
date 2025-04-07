@@ -1,126 +1,113 @@
-// ✅ AddCard.tsx — ownerPhone 저장 추가
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import "../styles/AddCard.css";
+import { addReservationLog } from "../utils/session";
 
 const cardCompanies = ["NH농업", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
 
 const AddCard: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { phoneNumber, phoneConfirmed, agree } = location.state || {};
+    const { phoneNumber, phoneConfirmed, agree, reservationData, trainInfo, selectedSeats } = location.state || {};
+
+    const sessionId = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+        } catch {
+            return null;
+        }
+    })();
+
+    const logClick = (target_id: string, text: string, tag = "button") => {
+        if (!sessionId) return;
+        addReservationLog({
+            sessionId,
+            page: "AddCard",
+            event: "click",
+            target_id,
+            tag,
+            text,
+        });
+    };
 
     const [selectedCompany, setSelectedCompany] = useState("");
-    const [rawCardNumber, setRawCardNumber] = useState("");
     const [cardNumber, setCardNumber] = useState("");
-
-    const [rawCvc, setRawCvc] = useState("");
     const [cvc, setCvc] = useState("");
-
-    const [rawExpiry, setRawExpiry] = useState("");
     const [expiry, setExpiry] = useState("");
-
-    const [rawPassword, setRawPassword] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = () => {
-        if (!selectedCompany) {
-            alert("카드사를 선택해주세요.");
-            return;
-        }
-        if (rawCardNumber.length !== 16) {
-            alert("카드 번호 16자리를 정확히 입력해주세요.");
-            return;
-        }
-        if (rawCvc.length !== 3) {
-            alert("CVC 번호 3자리를 정확히 입력해주세요.");
-            return;
-        }
-        if (!/^\d{4}$/.test(rawExpiry)) {
-            alert("유효기간 4자리(MMYY)를 정확히 입력해주세요.");
-            return;
-        }
-        if (rawPassword.length !== 2) {
-            alert("카드 비밀번호 앞 2자리를 입력해주세요.");
-            return;
-        }
+        if (!selectedCompany) return alert("카드사를 선택해주세요.");
+        if (cardNumber.replace(/\D/g, "").length !== 16) return alert("카드 번호 16자리를 정확히 입력해주세요.");
+        if (cvc.length !== 3) return alert("CVC 번호 3자리를 정확히 입력해주세요.");
+        if (!/^\d{4}$/.test(expiry)) return alert("유효기간 4자리(MMYY)를 입력해주세요.");
+        if (password.length !== 2) return alert("카드 비밀번호 앞 2자리를 입력해주세요.");
+
+        const rawCard = cardNumber.replace(/\D/g, "");
+        const maskedCardNumber = `****-****-****-${rawCard.slice(-4)}`;
 
         const storedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
         const newCard = {
             id: Date.now(),
             cardCompany: selectedCompany,
-            cardNumber: rawCardNumber.replace(/(\d{4})(?=\d)/g, "$1-"),
-            last4Digits: rawCardNumber.slice(-4),
-            expirationDate: rawExpiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
+            cardNumber: maskedCardNumber,
+            last4Digits: rawCard.slice(-4),
+            expirationDate: expiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
             ownerPhone: phoneNumber.replace(/-/g, "")
         };
 
+        logClick("addcard-success", "카드 등록");
+
         localStorage.setItem("customCards", JSON.stringify([...storedCards, newCard]));
+
         navigate("/reservation/payment", {
             state: {
                 fromAddCard: true,
                 phoneNumber,
                 phoneConfirmed,
                 agree,
-                reservationData: location.state?.reservationData,
-                trainInfo: location.state?.trainInfo,
-                selectedSeats: location.state?.selectedSeats,
+                reservationData,
+                trainInfo,
+                selectedSeats,
             }
         });
     };
 
     const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
-        setRawCardNumber(raw);
-
-        let masked = "";
-        for (let i = 0; i < raw.length; i++) {
-            const char = i < 12 ? raw[i] : "0";
-            masked += char;
-            if ((i + 1) % 4 === 0 && i !== raw.length - 1) masked += "-";
-        }
-        setCardNumber(masked);
+        const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+        const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1-");
+        setCardNumber(formatted);
+        logClick("addcard-card-number", `카드번호 입력: ${formatted}`);
     };
-
-    const handleCVCNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const handleCVC = (e: React.ChangeEvent<HTMLInputElement>) => {
         const digits = e.target.value.replace(/\D/g, "").slice(0, 3);
-        setRawCvc(digits);
-        setCvc("0".repeat(digits.length));
+        setCvc(digits);
+        logClick("addcard-card-cvc", `CVC 입력: ${"*".repeat(digits.length)}`);
     };
-
-    const handleExpirationPeriod = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
         const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-        setRawExpiry(digits);
-
-        let masked = "";
-        if (digits.length === 0) {
-            masked = "";
-        } else if (digits.length === 1) {
-            masked = "0";
-        } else if (digits.length === 2) {
-            masked = "00";
-        } else if (digits.length === 3) {
-            masked = "00/0";
-        } else {
-            masked = "00/00";
-        }
-
-        setExpiry(masked);
+        setExpiry(digits);
+        logClick("addcard-card-period", `유효기간 입력: ${digits}`);
     };
-
-    const handleCardPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
         const digits = e.target.value.replace(/\D/g, "").slice(0, 2);
-        setRawPassword(digits);
-        setPassword("0".repeat(digits.length));
+        setPassword(digits);
+        logClick("addcard-card-password", `비밀번호 앞자리 입력: **`);
     };
+    
 
-    const handleBack = () => navigate(-1);
+    const handleBack = () => {
+        logClick("addcard-to-payment", "결제화면으로 돌아가기");
+        navigate(-1);
+    };
 
     return (
         <div>
-            <title>RegisterCredit</title>
             <div className={styleb.box}>
                 <div className="add-card-container">
                     <h2 className="page-title">카드 등록</h2>
@@ -133,12 +120,17 @@ const AddCard: React.FC = () => {
                                 <button
                                     key={company}
                                     className={`addcard-selected ${selectedCompany === company ? "active" : ""}`}
-                                    onClick={() => setSelectedCompany(company)}
+                                    onClick={() => {
+                                        setSelectedCompany(company);
+                                        logClick("addcard-selected", `카드사 선택: ${company}`, "button");
+                                    }}
+                                    id="addcard-selected"
                                 >
                                     {company}
                                 </button>
                             ))}
                         </div>
+
                         <div>
                             <div>카드 번호</div>
                             <input
@@ -149,50 +141,58 @@ const AddCard: React.FC = () => {
                                 maxLength={19}
                                 placeholder="카드번호 16자리"
                                 className="addcard-inform-input"
+                                id="addcard-card-number"
                             />
                         </div>
+
                         <div>
                             <div>CVC</div>
                             <input
-                                type="text"
+                                type="password"
                                 value={cvc}
-                                onChange={handleCVCNumber}
+                                onChange={handleCVC}
                                 inputMode="numeric"
                                 maxLength={3}
                                 placeholder="cvc 번호 입력"
                                 className="addcard-inform-input"
+                                id="addcard-card-cvc"
                             />
                         </div>
+
                         <div>
                             <div>유효 기간</div>
                             <input
-                                type="text"
-                                placeholder="MM/YY"
+                                type="password"
                                 value={expiry}
-                                onChange={handleExpirationPeriod}
+                                onChange={handleExpiry}
                                 inputMode="numeric"
-                                maxLength={5}
+                                maxLength={4}
+                                placeholder="MMYY"
                                 className="addcard-inform-input"
+                                id="addcard-card-period"
                             />
                         </div>
+
                         <div>
                             <div>카드 비밀번호</div>
                             <input
                                 type="password"
-                                placeholder="비밀번호 앞 2자리"
                                 value={password}
-                                onChange={handleCardPassword}
+                                onChange={handlePassword}
                                 inputMode="numeric"
                                 maxLength={2}
+                                placeholder="비밀번호 앞 2자리"
                                 className="addcard-inform-input"
+                                id="addcard-card-password"
                             />
                         </div>
                     </div>
                 </div>
             </div>
+
             <div className="display-button">
-                <button className={`${styles.button} addcard-back`} onClick={handleBack}>이전</button>
-                <button className={`${styles.button} addcard-search`} onClick={handleSubmit}>등록하기</button>
+                <button className={`${styles.button} addcard-back`} id="addcard-to-payment" onClick={handleBack}>이전</button>
+                <button className={`${styles.button} addcard-search`} id="addcard-success" onClick={handleSubmit}>등록하기</button>
             </div>
         </div>
     );

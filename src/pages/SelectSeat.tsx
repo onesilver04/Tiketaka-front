@@ -6,7 +6,7 @@ import trainConvenience from "../assets/train-convenience.svg";
 import trainaisle from "../assets/train-track-single.svg";
 import "../styles/SelectSeat.css";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession } from "../utils/session";
+import { updateCurrentSession, addReservationLog } from "../utils/session";
 
 interface Seat {
     seatNumber: string;
@@ -43,11 +43,28 @@ const SelectSeat = () => {
     const [allSelectedSeats, setAllSelectedSeats] = useState<Record<number, string[]>>({});
 
     const selectedSeats = allSelectedSeats[carriageNumber] || [];
-
-    // 현재 호차용 좌석 불러오기
     const availableSeats = seatMap[carriageNumber] || [];
 
-    // 한 번만 실행되는 초기화 - 모든 호차 좌석을 준비
+    const sessionId = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+        } catch {
+            return null;
+        }
+    })();
+
+    const logClick = (target_id: string, text: string, tag = "button") => {
+        if (!sessionId) return;
+        addReservationLog({
+            sessionId,
+            page: "SelectSeat",
+            event: "click",
+            target_id,
+            tag,
+            text,
+        });
+    };
+
     useEffect(() => {
         const newMap: Record<number, Seat[]> = {};
         for (let i = 1; i <= 3; i++) {
@@ -60,26 +77,23 @@ const SelectSeat = () => {
         setSeatMap(newMap);
     }, []);
 
-
     useEffect(() => {
-        updateCurrentSession({
-            selectedSeats: allSelectedSeats,
-        });
+        updateCurrentSession({ selectedSeats: allSelectedSeats });
     }, [allSelectedSeats]);
 
     const toggleSeat = (seatNumber: string) => {
         setAllSelectedSeats((prev) => {
-            // 전체 선택한 좌석 개수 계산
             const totalSelected = Object.values(prev).flat().length;
-    
             const current = prev[carriageNumber] || [];
-    
+
             if (current.includes(seatNumber)) {
+                logClick(`seat-${carriageNumber}-${seatNumber}`, `좌석 해제: ${carriageNumber}호차 ${seatNumber}`);
                 return {
                     ...prev,
                     [carriageNumber]: current.filter((s) => s !== seatNumber),
                 };
             } else if (totalSelected < totalPassengers) {
+                logClick(`seat-${carriageNumber}-${seatNumber}`, `좌석 선택: ${carriageNumber}호차 ${seatNumber}`);
                 return {
                     ...prev,
                     [carriageNumber]: [...current, seatNumber],
@@ -90,33 +104,39 @@ const SelectSeat = () => {
             }
         });
     };
-    
+
+    const handleDelete = (carNum: number, seat: string) => {
+        logClick(`delete-seat-${carNum}-${seat}`, `좌석 제거: ${carNum}호차 ${seat}`, "button");
+        setAllSelectedSeats((prev) => ({
+            ...prev,
+            [carNum]: prev[carNum].filter((s) => s !== seat),
+        }));
+    };
 
     const handleNext = () => {
+        logClick("selectseat-to-payment", "다음");
         const totalSelected = Object.values(allSelectedSeats).flat().length;
-    
         if (totalSelected < totalPassengers) {
             alert(`총 ${totalPassengers}개의 좌석을 선택해야 합니다.`);
             return;
         }
-    
         navigate("/reservation/payment", {
             state: {
                 reservationData,
                 trainInfo,
-                selectedSeats: allSelectedSeats, // 모든 호차의 선택 좌석 전달
+                selectedSeats: allSelectedSeats,
             },
         });
     };
-    
 
     const handleBack = () => {
+        logClick("selectseat-to-trainlist", "이전");
         navigate("/reservation/train-list");
     };
 
+
     return (
         <div>
-            <title>Seats</title>
             <div className={styleb.box}>
                 <div className="seat-container">
                     <h2 className="page-title">좌석 선택</h2>
@@ -203,32 +223,25 @@ const SelectSeat = () => {
                                 seats.map((seat) => (
                                     <span key={`${carNum}-${seat}`} className="selected-seat">
                                         {carNum}호차 - {seat}
-                                        <button 
+                                        <button
                                             id="selected-seats-delete"
-                                            onClick={() => {
-                                            // 특정 호차의 특정 좌석만 삭제
-                                            setAllSelectedSeats(prev => ({
-                                                ...prev,
-                                                [Number(carNum)]: prev[Number(carNum)].filter(s => s !== seat)
-                                            }));
-                                        }}>X</button>
+                                            onClick={() => handleDelete(Number(carNum), seat)}
+                                        >
+                                            X
+                                        </button>
                                     </span>
                                 ))
                             )}
                         </div>
-
                     </div>
                 </div>
             </div>
 
             <div className="display-button">
-                <button className={`${styles.button} select-seat-back`} onClick={handleBack}>
+                <button className={`${styles.button} select-seat-back`} id="selectseat-to-trainlist" onClick={handleBack}>
                     이전
                 </button>
-                <button
-                    className={`${styles.button} select-seat-next`}
-                    onClick={handleNext}
-                >
+                <button className={`${styles.button} select-seat-next`} id="selectseat-to-payment" onClick={handleNext}>
                     다음
                 </button>
             </div>

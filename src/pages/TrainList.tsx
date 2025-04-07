@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import "../styles/TrainList.css";
-import { updateCurrentSession } from "../utils/session";
+import { updateCurrentSession, addReservationLog } from "../utils/session";
 
 interface ReservationData {
     departureStation: string | null;
@@ -43,17 +43,41 @@ const TrainList = () => {
 
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
 
+    const sessionId = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+        } catch {
+            return null;
+        }
+    })();
+
+    const logClick = (target_id: string, text: string, tag = "button") => {
+        if (!sessionId) return;
+        addReservationLog({
+            sessionId,
+            page: "TrainList",
+            event: "click",
+            target_id,
+            tag,
+            text,
+        });
+    };
+
     const handleBack = () => {
+        logClick("trainlist-to-reservation", "이전");
         navigate("/reservation");
     };
 
     const handleSelect = (train: Train) => {
         if (!train.disabled) {
-        setSelectedTrain(train);
+            setSelectedTrain(train);
+            logClick(`select-trainlist-${train.trainId}`, `${train.trainId} 선택`, "tr");
         }
     };
 
     const handleNext = () => {
+        logClick("trainlist-to-selectseat", "다음");
+
         if (!selectedTrain) {
             alert("기차를 선택해주세요.");
             return;
@@ -71,61 +95,73 @@ const TrainList = () => {
 
     return (
         <div>
-        <div className={styleb.box}>
-            <h2 className="page-title">시간대 선택</h2>
-            <hr className="page-title-bar" />
+            <div className={styleb.box}>
+                <h2 className="page-title">시간대 선택</h2>
+                <hr className="page-title-bar" />
 
-            <div className="content-container">
-            <table style={{ borderCollapse: "collapse", width: "100%" }}>
-                <thead>
-                <tr>
-                    <th>출발</th>
-                    <th>도착</th>
-                    <th>가격</th>
-                    <th>남은 <br/>좌석 수</th>
-                </tr>
-                </thead>
-                <tbody>
-                {KTXTrains.map((train) => (
-                    <tr
-                    key={train.trainId}
-                    id={`select-trainlist-${train.trainId}`}
-                    onClick={() => handleSelect(train)}
-                    style={{
-                        opacity: train.disabled ? 0.3 : 1,
-                        backgroundColor:
-                        train.trainId === selectedTrain?.trainId
-                            ? "#E3F2FD"
-                            : "transparent",
-                        cursor: train.disabled ? "not-allowed" : "pointer",
-                        transition: "0.3s ease-in-out",
-                        borderRadius: "8px",
-                    }}
-                    className={
-                        train.trainId === selectedTrain?.trainId ? "selected-row" : ""
-                    }
-                    >
-                    <td>{train.departureTime}</td>
-                    <td>{train.arrivalTime}</td>
-                    <td>{train.price.toLocaleString()}원</td>
-                    <td style={{ color: train.availableSeats <= 15 ? "#FF1744" : "#111111" }}>
-                        {train.availableSeats}
-                    </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+                <div className="content-container">
+                    <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                        <thead>
+                            <tr>
+                                <th>출발</th>
+                                <th>도착</th>
+                                <th>가격</th>
+                                <th>남은 <br />좌석 수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {KTXTrains.map((train) => (
+                                <tr
+                                    key={train.trainId}
+                                    id={`select-trainlist-${train.trainId}`}
+                                    onClick={() => handleSelect(train)}
+                                    style={{
+                                        opacity: train.disabled ? 0.3 : 1,
+                                        backgroundColor:
+                                            train.trainId === selectedTrain?.trainId
+                                                ? "#E3F2FD"
+                                                : "transparent",
+                                        cursor: train.disabled ? "not-allowed" : "pointer",
+                                        transition: "0.3s ease-in-out",
+                                        borderRadius: "8px",
+                                    }}
+                                    className={
+                                        train.trainId === selectedTrain?.trainId ? "selected-row" : ""
+                                    }
+                                >
+                                    <td>{train.departureTime}</td>
+                                    <td>{train.arrivalTime}</td>
+                                    <td>{train.price.toLocaleString()}원</td>
+                                    <td
+                                        style={{
+                                            color: train.availableSeats <= 15 ? "#FF1744" : "#111111",
+                                        }}
+                                    >
+                                        {train.availableSeats}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <div className="display-button">
-            <button className={`${styles.button} train-list-back`} id="trainlist-to-reservation" onClick={handleBack}>
-            이전
-            </button>
-            <button className={`${styles.button} train-list-search`} id="trainlist-to-selectseat" onClick={handleNext}>
-            다음
-            </button>
-        </div>
+            <div className="display-button">
+                <button
+                    className={`${styles.button} train-list-back`}
+                    id="trainlist-to-reservation"
+                    onClick={handleBack}
+                >
+                    이전
+                </button>
+                <button
+                    className={`${styles.button} train-list-search`}
+                    id="trainlist-to-selectseat"
+                    onClick={handleNext}
+                >
+                    다음
+                </button>
+            </div>
         </div>
     );
 };
