@@ -35,17 +35,18 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
-<<<<<<< HEAD
             updateReservationLogSession({
                 location: "End",
                 previous_pages: ["Payment"],
             });
 
-            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            const sessionRaw = localStorage.getItem(
+                "currentReservationLogSession"
+            );
             if (sessionRaw) {
                 const session = JSON.parse(sessionRaw);
                 const alreadyLogged = session.logs?.some(
-                    (log: { page: string; event: string; target_id: string; }) =>
+                    (log: { page: string; event: string; target_id: string }) =>
                         log.page === "End" &&
                         log.event === "navigate" &&
                         log.target_id === "page-load"
@@ -62,19 +63,6 @@ const End = () => {
                     });
                 }
             }
-=======
-            // 넘어온 페이지
-            updateReservationLogSession({ location: "End" });
-            // addReservationLog({
-            //     sessionId,
-            //     page: "End",
-            //     event: "navigate",
-            //     target_id: "page-load",
-            //     tag: "system",
-            //     text: "End 페이지 도착",
-            // });
-            // 없앨까 말까
->>>>>>> project/develop
         }
     }, [sessionId]);
 
@@ -107,4 +95,3 @@ const End = () => {
 };
 
 export default End;
-

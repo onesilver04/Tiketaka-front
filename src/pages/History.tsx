@@ -86,6 +86,21 @@ const History = () => {
                 }
             }
         }
+
+        // ✅ 헤더 클릭 감지용 이벤트 리스너 등록
+        const onClickHeader = (e: MouseEvent) => {
+            const headerEl = (e.target as HTMLElement)?.closest(".header-container");
+            if (headerEl && sessionId) {
+                updateHistorySession({
+                    status: "incomplete",
+                    purpose: "history",
+                    end_reason: "go-home",
+                });
+            }
+        };
+
+        document.addEventListener("click", onClickHeader);
+        return () => document.removeEventListener("click", onClickHeader);
     }, [sessionId]);
 
     const toggleSelect = (id: string) => {
@@ -221,7 +236,13 @@ const History = () => {
                 tag: "button",
                 text: "환불 모달창 - 예 클릭",
             });
+
+            // ✅ 세션에 end_reason 추가
+        updateHistorySession({
+            end_reason: "refund_success",
+        });
         }
+        
 
         const keysToRemove: string[] = [];
         const keysToUpdate: { key: string; data: any[] }[] = [];
