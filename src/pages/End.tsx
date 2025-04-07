@@ -2,14 +2,20 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
-import { markSessionCompleted, updateReservationLogSession, addReservationLog } from "../utils/session";
+import {
+    markSessionCompleted,
+    updateReservationLogSession,
+    addReservationLog,
+} from "../utils/session";
 
 const End = () => {
     const navigate = useNavigate();
 
     const sessionId = (() => {
         try {
-            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+            return JSON.parse(
+                localStorage.getItem("currentReservationLogSession") || "null"
+            )?.sessionId;
         } catch {
             return null;
         }
@@ -29,7 +35,7 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
-            updateReservationLogSession({ current_page: "End" });
+            updateReservationLogSession({ location: "End" });
             // addReservationLog({
             //     sessionId,
             //     page: "End",

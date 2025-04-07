@@ -19,7 +19,7 @@ const Start = () => {
 
         updateReservationLogSession({
             previous_pages: ["Start"],
-            current_page: "Reservation",
+            location: "Reservation",
         });
 
         navigate("/reservation", { state: { reset: true, sessionId } }); // 넘겨줄 수도 있음
@@ -29,7 +29,7 @@ const Start = () => {
         const sessionId = createHistorySession(); // 조회 로그 세션 시작
         updateHistorySession({
             previous_pages: ["Start"],
-            current_page: "PhoneNumber",
+            location: "PhoneNumber",
         });
         navigate("/phonenumber", { state: { sessionId } });
     };

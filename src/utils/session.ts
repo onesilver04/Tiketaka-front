@@ -89,7 +89,7 @@ export const createHistorySession = () => {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        current_page: "PhoneNumber",
+        location: "PhoneNumber",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
@@ -203,20 +203,26 @@ export const createReservationLogSession = () => {
         sessionId: Date.now().toString(),
         purpose: "reservation",
         status: "active",
-        current_page: "Reservation",
+        location: "Reservation",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
         logs: [],
     };
 
-    localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(newSession));
+    localStorage.setItem(
+        RESERVATION_LOG_SESSION_KEY,
+        JSON.stringify(newSession)
+    );
 
     const sessionList = JSON.parse(
         localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
     );
     sessionList.push(newSession);
-    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessionList));
+    localStorage.setItem(
+        RESERVATION_LOG_SESSIONS_KEY,
+        JSON.stringify(sessionList)
+    );
 
     return newSession.sessionId;
 };
@@ -278,7 +284,10 @@ export const addReservationLog = ({
     } else {
         sessions.push(session);
     }
-    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
+    localStorage.setItem(
+        RESERVATION_LOG_SESSIONS_KEY,
+        JSON.stringify(sessions)
+    );
 };
 
 export const updateReservationLogSession = (updates: Partial<any>) => {
@@ -298,11 +307,16 @@ export const updateReservationLogSession = (updates: Partial<any>) => {
     const sessions = JSON.parse(
         localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
     );
-    const index = sessions.findIndex((s: any) => s.sessionId === updated.sessionId);
+    const index = sessions.findIndex(
+        (s: any) => s.sessionId === updated.sessionId
+    );
     if (index !== -1) {
         sessions[index] = updated;
     } else {
         sessions.push(updated);
     }
-    localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
+    localStorage.setItem(
+        RESERVATION_LOG_SESSIONS_KEY,
+        JSON.stringify(sessions)
+    );
 };
