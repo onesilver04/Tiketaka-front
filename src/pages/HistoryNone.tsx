@@ -55,7 +55,7 @@ const HistoryNone = () => {
                             target_id: "historyNone-to-home",
                             tag: "button",
                             text: "예매 없어서 메인으로 돌아감",
-                            url: window.location.href,
+                            url: window.location.pathname,
                         });
                     }
                     navigate("/");
