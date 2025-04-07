@@ -6,23 +6,32 @@ import {
     createNewSession,
     createHistorySession,
     updateHistorySession,
+    createReservationLogSession,
+    updateReservationLogSession,
 } from "../utils/session";
 
 const Start = () => {
     const navigate = useNavigate();
 
     const handleStartReservation = () => {
-        createNewSession(); // 기존 세션 리셋 및 새로운 세션 생성
-        navigate("/reservation", { state: { reset: true } }); // reservation에 초기화 지시
+        createNewSession(); // 예매용 예약 데이터 세션
+        const sessionId = createReservationLogSession(); // ✅ 예매 로그 세션 시작
+
+        updateReservationLogSession({
+            previous_pages: ["Start"],
+            current_page: "Reservation",
+        });
+
+        navigate("/reservation", { state: { reset: true, sessionId } }); // 넘겨줄 수도 있음
     };
 
     const handleStartSearch = () => {
-        const sessionId = createHistorySession(); // ✅ 조회용 세션 생성
+        const sessionId = createHistorySession(); // 조회 로그 세션 시작
         updateHistorySession({
-            previous_pages: ["Start"], // ✅ 이전 페이지로 Start 추가
+            previous_pages: ["Start"],
             current_page: "PhoneNumber",
         });
-        navigate("/phonenumber", { state: { sessionId } }); // ✅ 전달
+        navigate("/phonenumber", { state: { sessionId } });
     };
 
     return (

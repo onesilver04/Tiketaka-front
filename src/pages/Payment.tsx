@@ -1,11 +1,11 @@
-// ✅ Payment.tsx — 카드 필터링, 뒤로가기 경로 수정, 상태 유지 보완, 마스킹 문제 해결 + SelectSeat에서 예약 정보 유지되도록 보완
+// Payment.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Payment.css";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession } from "../utils/session";
-import AddCard from '../assets/add-card-img.svg';
+import { updateCurrentSession, addReservationLog } from "../utils/session";
+import AddCard from "../assets/add-card-img.svg";
 
 interface Card {
     cardNumber: string;
@@ -35,6 +35,27 @@ interface TrainInfo {
 const Payment: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    const sessionId = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
+        } catch {
+            return null;
+        }
+    })();
+
+    const logClick = (target_id: string, text: string, tag = "button") => {
+        if (!sessionId) return;
+        addReservationLog({
+            sessionId,
+            page: "Payment",
+            event: "click",
+            target_id,
+            tag,
+            text,
+        });
+    };
+
     const state = location.state as {
         reservationData?: ReservationData;
         trainInfo?: TrainInfo;
@@ -71,6 +92,7 @@ const Payment: React.FC = () => {
 
     const fetchCards = () => {
         if (!isValidPhone) return alert("올바른 전화번호 형식을 입력해주세요.");
+        logClick("payment-phonenumber-check", "전화번호 확인");
 
         const formatted = phoneNumber.replace(/-/g, "");
         localStorage.setItem("verifiedPhoneNumber", phoneNumber);
@@ -83,7 +105,11 @@ const Payment: React.FC = () => {
 
     useEffect(() => {
         const storedPhone = localStorage.getItem("verifiedPhoneNumber");
-        if (storedPhone) {
+        if (!state?.fromAddCard && storedPhone) {
+            localStorage.removeItem("verifiedPhoneNumber");
+            setPhoneNumber("");
+            setPhoneConfirmed(false);
+        } else if (storedPhone) {
             setPhoneNumber(storedPhone);
             setPhoneConfirmed(true);
         }
@@ -106,34 +132,22 @@ const Payment: React.FC = () => {
         }
     }, [cards, state]);
 
-    useEffect(() => {
-        const currentSession = JSON.parse(localStorage.getItem("reservationSession") || "{}");
-        const currentSessionId = currentSession?.id;
-        const lastSessionId = localStorage.getItem("lastPaymentSessionId");
-    
-        // 새로운 세션이면 전화번호 초기화
-        if (currentSessionId && currentSessionId !== lastSessionId) {
-            localStorage.removeItem("verifiedPhoneNumber");
-            localStorage.setItem("lastPaymentSessionId", currentSessionId);
-            setPhoneNumber("");
-            setPhoneConfirmed(false);
-        }
-    }, []);
-
     const handleNext = () => {
+        logClick("payment-addedcard-next", "카드 다음");
         if (cards.length > 0) {
             setCurrentIndex((prev) => (prev + 1) % (cards.length + 1));
         }
     };
 
     const handlePrev = () => {
-        localStorage.removeItem("verifiedPhoneNumber");
+        logClick("payment-addedcard-prev", "카드 이전");
         if (cards.length > 0) {
             setCurrentIndex((prev) => (prev - 1 + (cards.length + 1)) % (cards.length + 1));
         }
     };
 
     const handleBack = () => {
+        logClick("payment-to-selectseat", "이전");
         localStorage.removeItem("verifiedPhoneNumber");
         navigate("/reservation/select-seat", {
             state: {
@@ -144,6 +158,7 @@ const Payment: React.FC = () => {
     };
 
     const handleEnd = () => {
+        logClick("payment-to-end", "결제 완료");
         if (!agree) return alert("개인정보에 동의해주세요.");
         if (!isValidPhone) return alert("올바른 전화번호를 입력해주세요.");
         if (!phoneConfirmed) return alert("전화번호 확인을 해주세요.");
@@ -155,9 +170,7 @@ const Payment: React.FC = () => {
             paymentInfo: {
                 phoneNumber: phoneNumber.replace(/-/g, ""),
                 paymentMethod,
-                cardNumber: selectedCard
-                    ? selectedCard.cardNumber
-                    : null,
+                cardNumber: selectedCard ? selectedCard.cardNumber : null,
             },
         });
 
@@ -166,6 +179,7 @@ const Payment: React.FC = () => {
     };
 
     const navigateToAddCard = () => {
+        logClick("payment-add-card", "카드 추가로 이동");
         if (!agree) return alert("개인정보에 동의해 주세요.");
         if (!phoneConfirmed) return alert("카드를 등록하려면 전화번호를 먼저 확인해주세요.");
         navigate("/reservation/payment/addcard", {
@@ -229,31 +243,74 @@ const Payment: React.FC = () => {
 
                     <div className="reservation-detail-select">
                         <label className="payment-agree">개인정보 동의</label>
-                        <input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} />
+                        <input
+                            type="checkbox"
+                            id="payment-privacy-agree"
+                            checked={agree}
+                            onChange={() => {
+                                setAgree(!agree);
+                                logClick("payment-privacy-agree", !agree ? "개인정보 동의 체크" : "개인정보 동의 해제", "checkbox");
+                            }}
+                        />
                     </div>
 
                     <div className="reservation-detail-select">
-                        <div className="payment-phonenumber">전화번호 입력</div> 
+                        <div className="payment-phonenumber">전화번호 입력</div>
                         <input
                             className="payment-phonenumber-input"
-                            type="text"
+                            id="payment-phonenumber-input"
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={phoneNumber}
                             onChange={handlePhoneChange}
                             placeholder="전화번호를 입력해주세요."
                         />
-                        <button className="payment-phonenumber-check" onClick={fetchCards} disabled={!isValidPhone}>확인</button>
+                        <button className="payment-phonenumber-check" onClick={fetchCards} disabled={!isValidPhone}>
+                            확인
+                        </button>
                     </div>
 
                     <hr></hr>
                     <div className="select-payment-method">결제 수단 선택</div>
                     <div className="payment-method">
-                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "credit" ? "active" : ""} onClick={() => setPaymentMethod("credit")}>신용카드</button>
-                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "kakao" ? "active" : ""} onClick={() => setPaymentMethod("kakao")}>카카오페이</button>
-                        <button  disabled={!phoneConfirmed || !agree} className={paymentMethod === "mobile" ? "active" : ""} onClick={() => setPaymentMethod("mobile")}>휴대폰 결제</button>
+                        <button
+                            disabled={!phoneConfirmed || !agree}
+                            className={paymentMethod === "credit" ? "active" : ""}
+                            id="payment-method-credit"
+                            onClick={() => {
+                                setPaymentMethod("credit");
+                                logClick("payment-method-credit", "신용카드 선택");
+                            }}
+                        >
+                            신용카드
+                        </button>
+                        <button
+                            disabled={!phoneConfirmed || !agree}
+                            className={paymentMethod === "kakao" ? "active" : ""}
+                            id="payment-method-kakao"
+                            onClick={() => {
+                                setPaymentMethod("kakao");
+                                logClick("payment-method-kakao", "카카오페이 선택");
+                            }}
+                        >
+                            카카오페이
+                        </button>
+                        <button
+                            disabled={!phoneConfirmed || !agree}
+                            className={paymentMethod === "mobile" ? "active" : ""}
+                            id="payment-method-mobile"
+                            onClick={() => {
+                                setPaymentMethod("mobile");
+                                logClick("payment-method-mobile", "휴대폰 결제 선택");
+                            }}
+                        >
+                            휴대폰 결제
+                        </button>
                     </div>
 
                     <div className="payment-card-slider">
-                        <button className="payment-card-prev" onClick={handlePrev}>&lt;</button>
+                        <button className="payment-card-prev" id="payment-addedcard-prev" onClick={handlePrev}>&lt;</button>
                         {cards.length > 0 && currentIndex < cards.length ? (
                             <div
                                 className={`card-box ${paymentMethod === "existing" && currentIndex === selectedCardIndex ? "selected" : ""}`}
@@ -261,6 +318,7 @@ const Payment: React.FC = () => {
                                     setPaymentMethod("existing");
                                     setSelectedCardIndex(currentIndex);
                                 }}
+                                id="payment-addedcard-select"
                             >
                                 <img src={AddCard} alt="카드 이미지" className="payment-card-img" />
                                 <div>등록된 카드 {cards[currentIndex].last4Digits}</div>
@@ -268,19 +326,20 @@ const Payment: React.FC = () => {
                         ) : (
                             <div
                                 className="card-box add-card"
+                                id="payment-add-card"
                                 onClick={navigateToAddCard}
                             >
                                 +
                             </div>
                         )}
-                        <button className="payment-card-next" onClick={handleNext}>&gt;</button>
+                        <button className="payment-card-next" id="payment-addedcard-next" onClick={handleNext}>&gt;</button>
                     </div>
                 </div>
             </div>
 
             <div className="display-button">
-                <button className={`${styles.button} payment-back`} onClick={handleBack}>이전</button>
-                <button className={`${styles.button} payment-next`} onClick={handleEnd}>다음</button>
+                <button className={`${styles.button} payment-back`} id="payment-to-selectseat" onClick={handleBack}>이전</button>
+                <button className={`${styles.button} payment-next`} id="payment-to-end" onClick={handleEnd}>다음</button>
             </div>
         </div>
     );
