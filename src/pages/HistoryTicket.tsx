@@ -40,10 +40,10 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
             addHistoryLog({
                 sessionId,
                 page: "History",
-                event: "navigate",
+                event: "click",
                 target_id: "ticket-info",
                 tag: "div",
-                text: `${departure} to ${arrival} booking-detail 페이지로 이동`,
+                text: `${departure} to ${arrival} 티켓 클릭`,
                 url: window.location.pathname,
             });
         }

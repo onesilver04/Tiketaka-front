@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createHistorySession, addHistoryLog } from "../utils/session";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { updateHistorySession, addHistoryLog } from "../utils/session";
 import "../styles/PhoneNumber.css";
 import deleteIcon from "../assets/delete-button.svg";
 import styles from "../styles/Button.module.css";
@@ -8,38 +8,75 @@ import PhoneModal from "../components/PhoneModal";
 
 const PhoneNumber = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const sessionId = location.state?.sessionId;
+
     const [inputDigits, setInputDigits] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [sessionId] = useState(() => createHistorySession());
+    // ✅ useEffect: sessionId가 존재하면 로그 기록
+    useEffect(() => {
+        if (!sessionId) return;
+
+        const raw = localStorage.getItem("currentHistorySession");
+        if (raw) {
+            const session = JSON.parse(raw);
+            const alreadyLogged = session.logs?.some(
+                (log: any) =>
+                    log.page === "PhoneNumber" &&
+                    log.event === "navigate" &&
+                    log.target_id === "page-load"
+            );
+
+            if (!alreadyLogged) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "navigate",
+                    target_id: "page-load",
+                    tag: "system",
+                    text: "PhoneNumber 페이지 도착",
+                });
+            }
+        }
+
+        updateHistorySession({
+            location: "PhoneNumber",
+            previous_pages: ["Start"],
+        });
+    }, [sessionId]);
 
     const handleNumberClick = (num: string) => {
         if (inputDigits.length >= 11) return;
         const newDigits = inputDigits + num;
         setInputDigits(newDigits);
 
-        addHistoryLog({
-            sessionId,
-            page: "PhoneNumber",
-            event: "click",
-            target_id: `digit-${num}`,
-            tag: "button",
-            text: `전화번호 입력 중: ${newDigits}`,
-        });
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "PhoneNumber",
+                event: "click",
+                target_id: `digit-${num}`,
+                tag: "button",
+                text: `전화번호 입력 중: ${newDigits}`,
+            });
+        }
     };
 
     const handleDelete = () => {
         const newDigits = inputDigits.slice(0, -1);
         setInputDigits(newDigits);
 
-        addHistoryLog({
-            sessionId,
-            page: "PhoneNumber",
-            event: "click",
-            target_id: "delete-button",
-            tag: "button",
-            text: `전화번호 지움: ${newDigits}`,
-        });
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "PhoneNumber",
+                event: "click",
+                target_id: "delete-button",
+                tag: "button",
+                text: `전화번호 지움: ${newDigits}`,
+            });
+        }
     };
 
     const getFormattedPhone = () => {
@@ -51,27 +88,31 @@ const PhoneNumber = () => {
 
     const handleNextClick = () => {
         if (inputDigits.length !== 11) {
-            addHistoryLog({
-                sessionId,
-                page: "PhoneNumber",
-                event: "click",
-                target_id: "phoneNumber-to-history",
-                tag: "button",
-                text: "입력 자리수 부족 - 모달 창 띄움",
-            });
+            if (sessionId) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "click",
+                    target_id: "phoneNumber-to-history",
+                    tag: "button",
+                    text: "입력 자리수 부족 - 모달 창 띄움",
+                });
+            }
             setIsModalOpen(true);
             return;
         }
 
         if (!inputDigits.startsWith("010")) {
-            addHistoryLog({
-                sessionId,
-                page: "PhoneNumber",
-                event: "click",
-                target_id: "phoneNumber-to-history",
-                tag: "button",
-                text: `010 아님 - 입력값: ${inputDigits}`,
-            });
+            if (sessionId) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "click",
+                    target_id: "phoneNumber-to-history",
+                    tag: "button",
+                    text: `010 아님 - 입력값: ${inputDigits}`,
+                });
+            }
             alert("전화번호는 010으로 시작해야 합니다.");
             return;
         }
@@ -107,21 +148,22 @@ const PhoneNumber = () => {
                     found = true;
                     break;
                 }
-            } catch (e) {
-                console.error("JSON parse error:", e);
+            } catch {
                 continue;
             }
         }
 
         if (found) {
-            addHistoryLog({
-                sessionId,
-                page: "PhoneNumber",
-                event: "navigate",
-                target_id: "phoneNumber-to-history",
-                tag: "button",
-                text: "전화번호 조회 성공",
-            });
+            if (sessionId) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "click",
+                    target_id: "phoneNumber-to-history",
+                    tag: "button",
+                    text: "전화번호 조회 버튼 클릭",
+                });
+            }
 
             navigate("/history", {
                 state: {
@@ -130,14 +172,16 @@ const PhoneNumber = () => {
                 },
             });
         } else {
-            addHistoryLog({
-                sessionId,
-                page: "PhoneNumber",
-                event: "click",
-                target_id: "phoneNumber-to-history",
-                tag: "button",
-                text: `조회 실패 - 존재하지 않는 전화번호: ${inputDigits}`,
-            });
+            if (sessionId) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "click",
+                    target_id: "phoneNumber-to-history",
+                    tag: "button",
+                    text: `조회 실패 - 존재하지 않는 전화번호: ${inputDigits}`,
+                });
+            }
             alert("입력한 전화번호로 완료된 예약 내역이 없습니다.");
         }
     };
@@ -225,14 +269,16 @@ const PhoneNumber = () => {
                 <PhoneModal
                     onClose={() => {
                         setIsModalOpen(false);
-                        addHistoryLog({
-                            sessionId,
-                            page: "PhoneNumber",
-                            event: "click",
-                            target_id: "modal-ok-button",
-                            tag: "button",
-                            text: "자리수 부족 모달창 확인",
-                        });
+                        if (sessionId) {
+                            addHistoryLog({
+                                sessionId,
+                                page: "PhoneNumber",
+                                event: "click",
+                                target_id: "modal-ok-button",
+                                tag: "button",
+                                text: "자리수 부족 모달창 확인",
+                            });
+                        }
                     }}
                 />
             )}

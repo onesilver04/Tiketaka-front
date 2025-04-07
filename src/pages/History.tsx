@@ -63,8 +63,30 @@ const History = () => {
                 location: "History",
                 previous_pages: ["PhoneNumber"],
             });
+
+            const sessionRaw = localStorage.getItem("currentHistorySession");
+            if (sessionRaw) {
+                const session = JSON.parse(sessionRaw);
+                const alreadyLogged = session.logs?.some(
+                    (log: any) =>
+                        log.page === "History" &&
+                        log.event === "navigate" &&
+                        log.target_id === "page-load"
+                );
+
+                if (!alreadyLogged) {
+                    addHistoryLog({
+                        sessionId,
+                        page: "History",
+                        event: "navigate",
+                        target_id: "page-load",
+                        tag: "system",
+                        text: "History 페이지 도착",
+                    });
+                }
+            }
         }
-    }, []);
+    }, [sessionId]);
 
     const toggleSelect = (id: string) => {
         setSelected((prev) =>
