@@ -52,7 +52,6 @@ const RefundSuccess = () => {
             // ✅ 세션 종료 + 목적 변경
             updateHistorySession({
                 status: "completed",
-                end_reason: "refund_completed",
                 purpose: "refund", // 환불 완료 후 pupose: "refund"로 변경
             });
         }

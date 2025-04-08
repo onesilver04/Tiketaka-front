@@ -5,7 +5,7 @@ import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import RefundModal from "../components/RefundModal";
-import { addHistoryLog } from "../utils/session";
+import { addHistoryLog, updateHistorySession } from "../utils/session";
 
 interface LocationState {
     reservations: Reservation[];
@@ -57,6 +57,11 @@ const BookingDetail = () => {
                 text: "RefundModal에서 yes 클릭, 환불 성공",
                 url: window.location.pathname,
             });
+
+            // ✅ 세션에 end_reason 추가
+        updateHistorySession({
+            end_reason: "refund_success",
+        });
         }
 
         reservations.forEach((res) => {

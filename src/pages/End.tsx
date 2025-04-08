@@ -40,11 +40,13 @@ const End = () => {
                 previous_pages: ["Payment"],
             });
 
-            const sessionRaw = localStorage.getItem("currentReservationLogSession");
+            const sessionRaw = localStorage.getItem(
+                "currentReservationLogSession"
+            );
             if (sessionRaw) {
                 const session = JSON.parse(sessionRaw);
                 const alreadyLogged = session.logs?.some(
-                    (log: { page: string; event: string; target_id: string; }) =>
+                    (log: { page: string; event: string; target_id: string }) =>
                         log.page === "End" &&
                         log.event === "navigate" &&
                         log.target_id === "page-load"
@@ -93,4 +95,3 @@ const End = () => {
 };
 
 export default End;
-
