@@ -4,6 +4,15 @@ export const RESERVATION_HISTORY_KEY = "reservationSessions";
 export const HISTORY_SESSION_KEY = "currentHistorySession";
 export const HISTORY_SESSIONS_KEY = "historySessions";
 
+export const getCurrentSessionLogs = () => { // Get the current session logs
+    const raw =
+        localStorage.getItem("currentReservationLogSession") ||
+        localStorage.getItem("currentHistorySession");
+    if (!raw) return null;
+    return JSON.parse(raw);
+};
+
+
 export const loadCurrentSession = () => {
     const session = localStorage.getItem(CURRENT_SESSION_KEY);
     return session ? JSON.parse(session) : null;
@@ -93,7 +102,7 @@ export const createHistorySession = () => {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        end_reason: null, // ✅ 추가
+        end_reason: null,
         location: "Start",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
