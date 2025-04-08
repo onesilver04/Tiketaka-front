@@ -94,7 +94,7 @@ export const createHistorySession = () => {
         purpose: "history",
         status: "active",
         end_reason: null, // ✅ 추가
-        current_page: "PhoneNumber",
+        location: "Start",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],

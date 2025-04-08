@@ -92,9 +92,10 @@ const History = () => {
             const headerEl = (e.target as HTMLElement)?.closest(".header-container");
             if (headerEl && sessionId) {
                 updateHistorySession({
-                    status: "incomplete",
+                    status: "complete",
                     purpose: "history",
-                    end_reason: "go-home",
+                    end_reason: "history_complete",
+                    location: "Start",
                 });
             }
         };
