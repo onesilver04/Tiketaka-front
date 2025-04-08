@@ -35,7 +35,6 @@ const End = () => {
 
     useEffect(() => {
         if (sessionId) {
-<<<<<<< HEAD
             updateReservationLogSession({
                 location: "End",
                 previous_pages: ["Payment"],
@@ -62,19 +61,6 @@ const End = () => {
                     });
                 }
             }
-=======
-            // 넘어온 페이지
-            updateReservationLogSession({ location: "End" });
-            // addReservationLog({
-            //     sessionId,
-            //     page: "End",
-            //     event: "navigate",
-            //     target_id: "page-load",
-            //     tag: "system",
-            //     text: "End 페이지 도착",
-            // });
-            // 없앨까 말까
->>>>>>> project/develop
         }
     }, [sessionId]);
 
