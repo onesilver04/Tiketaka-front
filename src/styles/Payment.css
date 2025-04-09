@@ -121,3 +121,36 @@ button.payment-next {
     cursor: pointer;
 }
 
+.payment-keypad-modal {
+    position: absolute;
+    top: 60%; /* 전화번호 입력 위치에 따라 조정 */
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: white;
+    border: 2px solid #ccc;
+    padding: 10px;
+    border-radius: 12px;
+    z-index: 1000;
+}
+
+.payment-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    gap: 8px;
+    justify-content: center;
+}
+
+.payment-keypad-button, .payment-keypad-confirm {
+    font-size: 18px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    background-color: #f7f7f7;
+}
+
+.payment-keypad-confirm {
+    grid-column: span 3;
+    background-color: #d3eafd;
+}
+
+
