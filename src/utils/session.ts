@@ -4,6 +4,62 @@ export const RESERVATION_HISTORY_KEY = "reservationSessions";
 export const HISTORY_SESSION_KEY = "currentHistorySession";
 export const HISTORY_SESSIONS_KEY = "historySessions";
 
+// Get the current session logs-LM 정보 넘기기
+export const getLatestSessionLogs = (): {
+    sessionId: string;
+    purpose: string;
+    location: string;
+    logs: any[];
+} | null => {
+    const reservationRaw = localStorage.getItem(RESERVATION_LOG_SESSION_KEY);
+    const historyRaw = localStorage.getItem(HISTORY_SESSION_KEY);
+
+    const reservation = reservationRaw ? JSON.parse(reservationRaw) : null;
+    const history = historyRaw ? JSON.parse(historyRaw) : null;
+
+    if (!reservation && !history) return null;
+
+    // 둘 다 있을 경우 마지막 상호작용 기준
+    if (reservation && history) {
+        return new Date(reservation.last_interaction) > new Date(history.last_interaction)
+            ? {
+                  sessionId: reservation.sessionId,
+                  purpose: reservation.purpose,
+                  location: reservation.location,
+                  logs: reservation.logs,
+              }
+            : {
+                  sessionId: history.sessionId,
+                  purpose: history.purpose,
+                  location: history.location,
+                  logs: history.logs,
+              };
+    }
+
+    // 하나만 있는 경우
+    if (reservation) {
+        return {
+            sessionId: reservation.sessionId,
+            purpose: reservation.purpose,
+            location: reservation.location,
+            logs: reservation.logs,
+        };
+    }
+
+    if (history) {
+        return {
+            sessionId: history.sessionId,
+            purpose: history.purpose,
+            location: history.location,
+            logs: history.logs,
+        };
+    }
+
+    return null;
+};
+
+
+
 export const loadCurrentSession = () => {
     const session = localStorage.getItem(CURRENT_SESSION_KEY);
     return session ? JSON.parse(session) : null;
@@ -93,8 +149,8 @@ export const createHistorySession = () => {
         sessionId: Date.now().toString(),
         purpose: "history",
         status: "active",
-        end_reason: null, // ✅ 추가
-        current_page: "PhoneNumber",
+        end_reason: null,
+        location: "Start",
         start_time: new Date().toISOString(),
         last_interaction: new Date().toISOString(),
         previous_pages: [],
