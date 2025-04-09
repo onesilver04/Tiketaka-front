@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getCurrentSessionLogs } from "../utils/session"; // ✅ 세션 로그 불러오기 유틸 추가 필요
+import { getLatestSessionLogs } from "../utils/session"; // 세션 로그 불러오기 유틸 추가 필요
 import "./TakaBox.css";
 
 interface Props {
     onClose: () => void;
-    onSendQuestion: (payload: any) => void; // ✅ 질문 클릭 시 payload 전달
+    onSendQuestion: (payload: any) => void; // 질문 클릭 시 payload 전달
 }
 
 const TakaBox = ({ onClose, onSendQuestion }: Props) => {
@@ -26,7 +26,7 @@ const TakaBox = ({ onClose, onSendQuestion }: Props) => {
     }, [isClosing, onClose]);
 
     const handleQuestionClick = (questionText: string) => {
-        const session = getCurrentSessionLogs();
+        const session = getLatestSessionLogs();
         if (!session) return;
 
         const payload = { // json 형태로 변환
