@@ -101,8 +101,10 @@ button.payment-next {
     margin-top: 20px;
 }
 
-.payment-card-img {
+.payment-card-img, .payment-add-card-plus {
     margin: 3px 7px;
+    width: 151px;
+    height: 96px;
 }
 
 .payment-card-prev, .payment-card-next {
@@ -152,5 +154,3 @@ button.payment-next {
     grid-column: span 3;
     background-color: #d3eafd;
 }
-
-

@@ -6,6 +6,7 @@ import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 import AddCard from "../assets/add-card-img.svg";
+import AddCardPlus from "../assets/add-card-plus-img.svg";
 
 interface Card {
     cardNumber: string;
@@ -333,7 +334,7 @@ const Payment: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                        <button className="payment-phonenumber-check" onClick={fetchCards} disabled={!isValidPhone}>
+                        <button className="payment-phonenumber-check" onClick={fetchCards}>
                             확인
                         </button>
                     </div>
@@ -396,7 +397,7 @@ const Payment: React.FC = () => {
                                 id="payment-add-card"
                                 onClick={navigateToAddCard}
                             >
-                                +
+                                <img className="payment-add-card-plus" id="payment-add-card-plus" src={AddCardPlus} alt="카드 추가 이미지"></img>
                             </div>
                         )}
                         <button className="payment-card-next" id="payment-addedcard-next" onClick={handleNext}>&gt;</button>
