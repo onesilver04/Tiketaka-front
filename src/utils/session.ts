@@ -23,17 +23,17 @@ export const getLatestSessionLogs = (): {
     if (reservation && history) {
         return new Date(reservation.last_interaction) > new Date(history.last_interaction)
             ? {
-                  sessionId: reservation.sessionId,
-                  purpose: reservation.purpose,
-                  location: reservation.location,
-                  logs: reservation.logs,
-              }
+                    sessionId: reservation.sessionId,
+                    purpose: reservation.purpose,
+                    location: reservation.location,
+                    logs: reservation.logs,
+            }
             : {
-                  sessionId: history.sessionId,
-                  purpose: history.purpose,
-                  location: history.location,
-                  logs: history.logs,
-              };
+                    sessionId: history.sessionId,
+                    purpose: history.purpose,
+                    location: history.location,
+                    logs: history.logs,
+            };
     }
 
     // 하나만 있는 경우

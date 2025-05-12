@@ -112,6 +112,7 @@ const SelectSeat = () => {
         updateCurrentSession({ selectedSeats: allSelectedSeats });
     }, [allSelectedSeats]);
 
+
     const toggleSeat = (seatNumber: string) => {
         setAllSelectedSeats((prev) => {
             const totalSelected = Object.values(prev).flat().length;
@@ -178,7 +179,11 @@ const SelectSeat = () => {
                             <select
                                 id="carriage"
                                 value={carriageNumber}
-                                onChange={(e) => setCarriageNumber(Number(e.target.value))}
+                                onChange={(e) => {
+                                    const selected = Number(e.target.value);
+                                    logClick(`carriage-select-${selected}`, `${selected}호차 선택`);
+                                    setCarriageNumber(selected);
+                                }}
                             >
                                 <option value={1}>1호차</option>
                                 <option value={2}>2호차</option>
