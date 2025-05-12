@@ -7,36 +7,23 @@ import trainaisle from "../assets/train-track-single.svg";
 import "../styles/SelectSeat.css";
 import styles from "../styles/Button.module.css";
 import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
+import axios from "axios";
 
 interface Seat {
     seatNumber: string;
     isAvailable: boolean;
 }
 
-const dummySeats: Seat[] = [
-    { seatNumber: "1A", isAvailable: true },
-    { seatNumber: "1B", isAvailable: true },
-    { seatNumber: "1C", isAvailable: true },
-    { seatNumber: "1D", isAvailable: true },
-    { seatNumber: "2A", isAvailable: true },
-    { seatNumber: "2B", isAvailable: true },
-    { seatNumber: "2C", isAvailable: true },
-    { seatNumber: "2D", isAvailable: true },
-    { seatNumber: "3A", isAvailable: true },
-    { seatNumber: "3B", isAvailable: true },
-    { seatNumber: "3C", isAvailable: true },
-    { seatNumber: "3D", isAvailable: true },
-    { seatNumber: "4A", isAvailable: true },
-    { seatNumber: "4B", isAvailable: true },
-    { seatNumber: "4C", isAvailable: true },
-    { seatNumber: "4D", isAvailable: true },
-];
-
 const SelectSeat = () => {
-    const navigate = useNavigate();
     const location = useLocation();
-    const { reservationData, trainInfo } = location.state;
-    const totalPassengers = reservationData.adultCount + reservationData.seniorCount + reservationData.teenCount;
+    const navigate = useNavigate();
+
+    const state = location.state || {};
+    const reservationData = state.reservationData;
+    const trainInfo = state.trainInfo;
+    const totalPassengers = reservationData
+        ? reservationData.adultCount + reservationData.seniorCount + reservationData.teenCount
+        : 0;
 
     const [carriageNumber, setCarriageNumber] = useState<number>(1);
     const [seatMap, setSeatMap] = useState<Record<number, Seat[]>>({});
@@ -97,21 +84,28 @@ const SelectSeat = () => {
     };
 
     useEffect(() => {
-        const newMap: Record<number, Seat[]> = {};
-        for (let i = 1; i <= 3; i++) {
-            const randomized = dummySeats.map((seat) => ({
-                ...seat,
-                isAvailable: Math.random() > 0.25,
-            }));
-            newMap[i] = randomized;
-        }
-        setSeatMap(newMap);
-    }, []);
+        const fetchSeats = async () => {
+            if (!trainInfo?.trainId) return;
+
+            const newMap: Record<number, Seat[]> = {};
+            for (let i = 1; i <= 3; i++) {
+                try {
+                    const res = await axios.get(`http://localhost:3000/seats/${trainInfo.trainId}/${i}`);
+                    newMap[i] = res.data?.availableSeats || [];
+                } catch (err) {
+                    console.error(`호차 ${i} 좌석 정보를 불러오지 못했습니다:`, err);
+                    newMap[i] = [];
+                }
+            }
+            setSeatMap(newMap);
+        };
+
+        fetchSeats();
+    }, [trainInfo]);
 
     useEffect(() => {
         updateCurrentSession({ selectedSeats: allSelectedSeats });
     }, [allSelectedSeats]);
-
 
     const toggleSeat = (seatNumber: string) => {
         setAllSelectedSeats((prev) => {
@@ -166,7 +160,6 @@ const SelectSeat = () => {
         navigate("/reservation/train-list");
     };
 
-
     return (
         <div>
             <div className={styleb.box}>
@@ -174,102 +167,108 @@ const SelectSeat = () => {
                     <h2 className="page-title">좌석 선택</h2>
                     <hr className="page-title-bar" />
 
-                    <div className="content-container">
-                        <div className="carriage-selection">
-                            <select
-                                id="carriage"
-                                value={carriageNumber}
-                                onChange={(e) => {
-                                    const selected = Number(e.target.value);
-                                    logClick(`carriage-select-${selected}`, `${selected}호차 선택`);
-                                    setCarriageNumber(selected);
-                                }}
-                            >
-                                <option value={1}>1호차</option>
-                                <option value={2}>2호차</option>
-                                <option value={3}>3호차</option>
-                            </select>
-                        </div>
-
-                        <div className="train-convenience-box">
-                            <img className="train-convenience-img" src={trainConvenience} alt="기차 편의 시설" />
-                        </div>
-
-                        <div className="seat-grid">
-                            <div className="seat-guide">
-                                <div>창측</div>
-                                <div>내측</div>
-                                <div></div>
-                                <div>내측</div>
-                                <div>창측</div>
+                    {reservationData && trainInfo ? (
+                        <div className="content-container">
+                            <div className="carriage-selection">
+                                <select
+                                    id="carriage"
+                                    value={carriageNumber}
+                                    onChange={(e) => {
+                                        const selected = Number(e.target.value);
+                                        logClick(`carriage-select-${selected}`, `${selected}호차 선택`);
+                                        setCarriageNumber(selected);
+                                    }}
+                                >
+                                    <option value={1}>1호차</option>
+                                    <option value={2}>2호차</option>
+                                    <option value={3}>3호차</option>
+                                </select>
                             </div>
 
-                            {[1, 2, 3, 4].map((row) => (
-                                <React.Fragment key={row}>
-                                    {["A", "B"].map((col) => {
-                                        const seat = availableSeats.find(
-                                            (s) => s.seatNumber === `${row}${col}`
-                                        );
-                                        return seat && (
-                                            <button
-                                                key={seat.seatNumber}
-                                                className={`seat ${selectedSeats.includes(seat.seatNumber) ? "selected" : ""}`}
-                                                onClick={() => seat.isAvailable && toggleSeat(seat.seatNumber)}
-                                                disabled={!seat.isAvailable}
-                                            >
-                                                <img
-                                                    src={seatImage}
-                                                    alt="Seat"
-                                                    className={`seat-icon ${!seat.isAvailable ? "disabled" : ""}`}
-                                                />
-                                                <div className="seat-number">{seat.seatNumber}</div>
-                                            </button>
-                                        );
-                                    })}
-                                    <div className="train-aisle">
-                                        <img src={trainaisle} alt="기차 통로 이미지" />
-                                    </div>
-                                    {["C", "D"].map((col) => {
-                                        const seat = availableSeats.find(
-                                            (s) => s.seatNumber === `${row}${col}`
-                                        );
-                                        return seat && (
-                                            <button
-                                                key={seat.seatNumber}
-                                                className={`seat ${selectedSeats.includes(seat.seatNumber) ? "selected" : ""}`}
-                                                onClick={() => seat.isAvailable && toggleSeat(seat.seatNumber)}
-                                                disabled={!seat.isAvailable}
-                                            >
-                                                <img
-                                                    src={seatImage}
-                                                    alt="Seat"
-                                                    className={`seat-icon ${!seat.isAvailable ? "disabled" : ""}`}
-                                                />
-                                                <div className="seat-number">{seat.seatNumber}</div>
-                                            </button>
-                                        );
-                                    })}
-                                </React.Fragment>
-                            ))}
-                        </div>
+                            <div className="train-convenience-box">
+                                <img className="train-convenience-img" src={trainConvenience} alt="기차 편의 시설" />
+                            </div>
 
-                        <div className="selected-seats">
-                            <h4>선택한 좌석: </h4>
-                            {Object.entries(allSelectedSeats).flatMap(([carNum, seats]) =>
-                                seats.map((seat) => (
-                                    <span key={`${carNum}-${seat}`} className="selected-seat">
-                                        {carNum}호차 - {seat}
-                                        <button
-                                            id="selected-seats-delete"
-                                            onClick={() => handleDelete(Number(carNum), seat)}
-                                        >
-                                            X
-                                        </button>
-                                    </span>
-                                ))
-                            )}
+                            <div className="seat-grid">
+                                <div className="seat-guide">
+                                    <div>창측</div>
+                                    <div>내측</div>
+                                    <div></div>
+                                    <div>내측</div>
+                                    <div>창측</div>
+                                </div>
+
+                                {[1, 2, 3, 4].map((row) => (
+                                    <React.Fragment key={row}>
+                                        {["A", "B"].map((col) => {
+                                            const seat = availableSeats.find(
+                                                (s) => s.seatNumber === `${row}${col}`
+                                            );
+                                            return seat && (
+                                                <button
+                                                    key={seat.seatNumber}
+                                                    className={`seat ${selectedSeats.includes(seat.seatNumber) ? "selected" : ""}`}
+                                                    onClick={() => seat.isAvailable && toggleSeat(seat.seatNumber)}
+                                                    disabled={!seat.isAvailable}
+                                                >
+                                                    <img
+                                                        src={seatImage}
+                                                        alt="Seat"
+                                                        className={`seat-icon ${!seat.isAvailable ? "disabled" : ""}`}
+                                                    />
+                                                    <div className="seat-number">{seat.seatNumber}</div>
+                                                </button>
+                                            );
+                                        })}
+                                        <div className="train-aisle">
+                                            <img src={trainaisle} alt="기차 통로 이미지" />
+                                        </div>
+                                        {["C", "D"].map((col) => {
+                                            const seat = availableSeats.find(
+                                                (s) => s.seatNumber === `${row}${col}`
+                                            );
+                                            return seat && (
+                                                <button
+                                                    key={seat.seatNumber}
+                                                    className={`seat ${selectedSeats.includes(seat.seatNumber) ? "selected" : ""}`}
+                                                    onClick={() => seat.isAvailable && toggleSeat(seat.seatNumber)}
+                                                    disabled={!seat.isAvailable}
+                                                >
+                                                    <img
+                                                        src={seatImage}
+                                                        alt="Seat"
+                                                        className={`seat-icon ${!seat.isAvailable ? "disabled" : ""}`}
+                                                    />
+                                                    <div className="seat-number">{seat.seatNumber}</div>
+                                                </button>
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            <div className="selected-seats">
+                                <h4>선택한 좌석: </h4>
+                                {Object.entries(allSelectedSeats).flatMap(([carNum, seats]) =>
+                                    seats.map((seat) => (
+                                        <span key={`${carNum}-${seat}`} className="selected-seat">
+                                            {carNum}호차 - {seat}
+                                            <button
+                                                id="selected-seats-delete"
+                                                onClick={() => handleDelete(Number(carNum), seat)}
+                                            >
+                                                X
+                                            </button>
+                                        </span>
+                                    ))
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div style={{ padding: "2rem", textAlign: "center" }}>
+                            <p>기차 정보가 없어 좌석 정보를 표시할 수 없습니다.</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
