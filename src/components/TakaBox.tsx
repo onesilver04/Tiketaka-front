@@ -50,23 +50,35 @@ const TakaBox = ({ onClose, onSendQuestion }: Props) => {
             </button>
             <div className="taka-questions">
                 <button
+                    id="taka-question-1"
                     className="taka-question"
                     onClick={() => handleQuestionClick("현재 페이지에서는 무엇을 해야 해?")}
                 >
                     현재 페이지에서는 무엇을 해야 해?
                 </button>
                 <button
+                    id="taka-question-2"
                     className="taka-question"
                     onClick={() => handleQuestionClick("앞으로는 무슨 단계가 남아있어?")}
                 >
                     앞으로는 무슨 단계가 남아있어?
                 </button>
                 <button
+                    id="taka-question-3"
                     className="taka-question"
                     onClick={() => handleQuestionClick("전체 과정을 알려줘")}
                 >
                     전체 과정을 알려줘
                 </button>
+                {/* 타카 질문 밑에 입력창 */}
+                {/* <div className="taka-question-input-wrapper">
+                    <input
+                        type="text"
+                        className="taka-question-input"
+                        placeholder="질문을 입력하세요"
+                    />
+                    <button className="taka-question-input-button">입력</button>
+                </div> */}
             </div>
         </div>
     );
