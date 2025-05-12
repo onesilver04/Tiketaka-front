@@ -68,6 +68,80 @@ const AddCard: React.FC = () => {
     const [cvc, setCvc] = useState("");
     const [expiry, setExpiry] = useState("");
     const [password, setPassword] = useState("");
+    const [showKeypad, setShowKeypad] = useState(false);
+    const [activeField, setActiveField] = useState<"cardNumber" | "cvc" | "expiry" | "password" | null>(null);
+
+    const updateFieldValue = (field: typeof activeField, value: string) => {
+        switch (field) {
+            case "cardNumber": {
+                const formattedCard = value.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1-");
+                setCardNumber(formattedCard);
+                logClick("addcard-card-number", `카드번호 입력: ${formattedCard}`);
+                break;
+            }
+            case "cvc": {
+                const cvcVal = value.replace(/\D/g, "").slice(0, 3);
+                setCvc(cvcVal);
+                logClick("addcard-card-cvc", `CVC 입력: ${cvcVal}`);
+                break;
+            }
+            case "expiry": {
+                const expiryVal = value.replace(/\D/g, "").slice(0, 4);
+                setExpiry(expiryVal);
+                logClick("addcard-card-period", `유효기간 입력: ${expiryVal}`);
+                break;
+            }
+            case "password": {
+                const passVal = value.replace(/\D/g, "").slice(0, 2);
+                setPassword(passVal);
+                logClick("addcard-card-password", `비밀번호 앞자리 입력: ${passVal}`);
+                break;
+            }
+            default:
+                break;
+        }
+    };
+    
+    const renderKeypad = () => (
+        <div className="payment-keypad-modal">
+            <div className="payment-keypad">
+                {[1,2,3,4,5,6,7,8,9,"",0,"←"].map((key, i) => (
+                <button
+                    key={i}
+                    className="payment-keypad-button"
+                    onClick={() => {
+                    const currentValue = (() => {
+                        switch (activeField) {
+                        case "cardNumber": return cardNumber.replace(/\D/g, "");
+                        case "cvc": return cvc;
+                        case "expiry": return expiry;
+                        case "password": return password;
+                        default: return "";
+                        }
+                    })();
+        
+                    if (key === "←") {
+                        updateFieldValue(activeField, currentValue.slice(0, -1));
+                    } else if (typeof key === "number") {
+                        updateFieldValue(activeField, currentValue + key.toString());
+                    }
+                    }}
+                >
+                    {key}
+                </button>
+                ))}
+                <button
+                className="payment-keypad-confirm"
+                onClick={() => {
+                    setShowKeypad(false);
+                    setActiveField(null);
+                }}
+                >
+                확인
+                </button>
+            </div>
+        </div>
+    );
 
     const handleSubmit = () => {
         if (!selectedCompany) return alert("카드사를 선택해주세요.");
@@ -77,7 +151,7 @@ const AddCard: React.FC = () => {
         if (password.length !== 2) return alert("카드 비밀번호 앞 2자리를 입력해주세요.");
 
         const rawCard = cardNumber.replace(/\D/g, "");
-        const maskedCardNumber = `****-****-****-${rawCard.slice(-4)}`;
+        const maskedCardNumber = `${rawCard.slice(0,4)}-****-****-${rawCard.slice(-4)}`;
 
         const storedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
         const newCard = {
@@ -106,30 +180,30 @@ const AddCard: React.FC = () => {
         });
     };
 
-    const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
-        const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1-");
-        setCardNumber(formatted);
-        logClick("addcard-card-number", `카드번호 입력: ${formatted}`);
-    };
+    // const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+    //     const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1-");
+    //     setCardNumber(formatted);
+    //     logClick("addcard-card-number", `카드번호 입력: ${formatted}`);
+    // };
     
-    const handleCVC = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "").slice(0, 3);
-        setCvc(digits);
-        logClick("addcard-card-cvc", `CVC 입력: ${"*".repeat(digits.length)}`);
-    };
+    // const handleCVC = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 3);
+    //     setCvc(digits);
+    //     logClick("addcard-card-cvc", `CVC 입력: ${"*".repeat(digits.length)}`);
+    // };
     
-    const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-        setExpiry(digits);
-        logClick("addcard-card-period", `유효기간 입력: ${digits}`);
-    };
+    // const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+    //     setExpiry(digits);
+    //     logClick("addcard-card-period", `유효기간 입력: ${digits}`);
+    // };
     
-    const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const digits = e.target.value.replace(/\D/g, "").slice(0, 2);
-        setPassword(digits);
-        logClick("addcard-card-password", `비밀번호 앞자리 입력: **`);
-    };
+    // const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 2);
+    //     setPassword(digits);
+    //     logClick("addcard-card-password", `비밀번호 앞자리 입력: **`);
+    // };
     
 
     const handleBack = () => {
@@ -167,13 +241,16 @@ const AddCard: React.FC = () => {
                             <input
                                 type="text"
                                 value={cardNumber}
-                                onChange={handleCardNumber}
-                                inputMode="numeric"
-                                maxLength={19}
+                                readOnly
+                                onClick={() => {
+                                    setActiveField("cardNumber");
+                                    setShowKeypad(true);
+                                }}
                                 placeholder="카드번호 16자리"
                                 className="addcard-inform-input"
                                 id="addcard-card-number"
                             />
+                            {showKeypad && activeField && renderKeypad()}
                         </div>
 
                         <div>
@@ -181,13 +258,16 @@ const AddCard: React.FC = () => {
                             <input
                                 type="password"
                                 value={cvc}
-                                onChange={handleCVC}
-                                inputMode="numeric"
-                                maxLength={3}
+                                readOnly
+                                onClick={() => {
+                                    setActiveField("cvc");
+                                    setShowKeypad(true);
+                                }}
                                 placeholder="cvc 번호 입력"
                                 className="addcard-inform-input"
                                 id="addcard-card-cvc"
                             />
+                            {showKeypad && activeField && renderKeypad()}
                         </div>
 
                         <div>
@@ -195,13 +275,16 @@ const AddCard: React.FC = () => {
                             <input
                                 type="password"
                                 value={expiry}
-                                onChange={handleExpiry}
-                                inputMode="numeric"
-                                maxLength={4}
+                                readOnly
+                                onClick={() => {
+                                    setActiveField("expiry");
+                                    setShowKeypad(true);
+                                }}
                                 placeholder="MMYY"
                                 className="addcard-inform-input"
                                 id="addcard-card-period"
                             />
+                            {showKeypad && activeField && renderKeypad()}
                         </div>
 
                         <div>
@@ -209,13 +292,16 @@ const AddCard: React.FC = () => {
                             <input
                                 type="password"
                                 value={password}
-                                onChange={handlePassword}
-                                inputMode="numeric"
-                                maxLength={2}
+                                readOnly
+                                onClick={() => {
+                                    setActiveField("password");
+                                    setShowKeypad(true);
+                                }}
                                 placeholder="비밀번호 앞 2자리"
                                 className="addcard-inform-input"
                                 id="addcard-card-password"
                             />
+                            {showKeypad && activeField && renderKeypad()}
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 import AddCard from "../assets/add-card-img.svg";
+import AddCardPlus from "../assets/add-card-plus-img.svg";
 
 interface Card {
     cardNumber: string;
@@ -116,10 +117,10 @@ const Payment: React.FC = () => {
 
     const isValidPhone = /^010-\d{4}-\d{4}$/.test(phoneNumber);
 
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPhoneNumber(formatPhone(e.target.value));
-        setPhoneConfirmed(false);
-    };
+    // const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     setPhoneNumber(formatPhone(e.target.value));
+    //     setPhoneConfirmed(false);
+    // };
 
     const fetchCards = () => {
         if (!isValidPhone) return alert("올바른 전화번호 형식을 입력해주세요.");
@@ -236,6 +237,7 @@ const Payment: React.FC = () => {
         + (reservationData?.teenCount ?? 0);
 
     const totalPrice = (trainInfo?.price ?? 0) * totalPassengers;
+    const [showKeypad, setShowKeypad] = useState(false);
 
     return (
         <div>
@@ -290,14 +292,49 @@ const Payment: React.FC = () => {
                         <input
                             className="payment-phonenumber-input"
                             id="payment-phonenumber-input"
-                            type="tel"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                            type="text"
+                            readOnly // 키보드 입력 막고 키패드로만 입력 받음
                             value={phoneNumber}
-                            onChange={handlePhoneChange}
+                            onClick={() => {
+                                logClick("payment-phone-keypad-open", "전화번호 입력창 클릭 - 키패드 열림");
+                                setShowKeypad(true);
+                            }}
                             placeholder="전화번호를 입력해주세요."
                         />
-                        <button className="payment-phonenumber-check" onClick={fetchCards} disabled={!isValidPhone}>
+                            {showKeypad && (
+                                <div className="payment-keypad-modal">
+                                    <div className="payment-keypad">
+                                        {[1,2,3,4,5,6,7,8,9,"",0,"←"].map((key, i) => (
+                                            <button
+                                                key={i}
+                                                className="payment-keypad-button"
+                                                onClick={() => {
+                                                    if (key === "←") {
+                                                        setPhoneNumber((prev) => prev.slice(0, -1));
+                                                        logClick("payment-phone-keypad-delete", "전화번호 한 자리 삭제", "keypad");
+                                                    } else {
+                                                        const newValue = phoneNumber + key.toString();
+                                                        setPhoneNumber(formatPhone(newValue));
+                                                        logClick(`payment-phone-keypad-${key}`, `키패드 입력: ${key}`, "keypad");
+                                                    }
+                                                }}
+                                            >
+                                                {key}
+                                            </button>
+                                        ))}
+                                        <button
+                                            className="payment-keypad-confirm"
+                                            onClick={() => {
+                                                logClick("payment-phone-keypad-close", "전화번호 키패드 닫기");
+                                                setShowKeypad(false);
+                                            }}
+                                        >
+                                            확인
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        <button className="payment-phonenumber-check" onClick={fetchCards}>
                             확인
                         </button>
                     </div>
@@ -360,7 +397,7 @@ const Payment: React.FC = () => {
                                 id="payment-add-card"
                                 onClick={navigateToAddCard}
                             >
-                                +
+                                <img className="payment-add-card-plus" id="payment-add-card-plus" src={AddCardPlus} alt="카드 추가 이미지"></img>
                             </div>
                         )}
                         <button className="payment-card-next" id="payment-addedcard-next" onClick={handleNext}>&gt;</button>
