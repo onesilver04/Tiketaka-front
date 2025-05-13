@@ -194,13 +194,9 @@ const Reservation = () => {
         if (departureStation === destinationStation) return alert("출발역과 도착역은 서로 달라야 합니다.");
         if (adultCount + seniorCount + teenCount < 1) return alert("최소 1명 이상의 인원이 필요합니다.");
 
-        // const dateObj = new Date(departureDate);
-        // dateObj.setHours(dateObj.getHours() + 9); // UTC → KST
-        // const formattedDate = dateObj.toISOString().split('T')[0];
-        const year = departureDate?.getFullYear();
-    const month = (departureDate?.getMonth() ?? 0) + 1;
-    const day = departureDate?.getDate();
-    const formattedDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const dateObj = new Date(departureDate);
+        dateObj.setHours(dateObj.getHours() + 9); // UTC → KST
+        const formattedDate = dateObj.toISOString().split('T')[0];
 
         try {
             const response = await axios.get("http://localhost:3000/trains", {

@@ -103,7 +103,11 @@ const TrainList = () => {
                     return;
                 }
 
-                const dateStr = reservationData.departureDate.toISOString().split("T")[0];
+                const departureDate = new Date(reservationData.departureDate);
+                const kstOffset = 9 * 60 * 60 * 1000;
+                const kstDate = new Date(departureDate.getTime() + kstOffset);
+                const dateStr = kstDate.toISOString().split("T")[0];
+
                 const response = await axios.get("http://localhost:3000/trains", {
                     params: {
                         departure: reservationData.departureStation,
@@ -153,6 +157,10 @@ const TrainList = () => {
             },
         });
     };
+
+    useEffect(() => {
+    console.log("trainIds", trains.map(t => t.trainId));
+    }, [trains]);
 
     return (
         <div>
