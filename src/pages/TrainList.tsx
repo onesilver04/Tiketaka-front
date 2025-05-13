@@ -4,6 +4,7 @@ import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import "../styles/TrainList.css";
 import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
+import axios from "axios";
 
 interface ReservationData {
     departureStation: string | null;
@@ -20,21 +21,20 @@ interface Train {
     arrivalTime: string;
     price: number;
     availableSeats: number;
-    disabled?: boolean;
 }
 
-const KTXTrains: Train[] = [
-    { trainId: "KTX1", departureTime: "05:13", arrivalTime: "07:14", price: 69000, availableSeats: 36 },
-    { trainId: "KTX2", departureTime: "06:21", arrivalTime: "08:20", price: 69000, availableSeats: 10 },
-    { trainId: "KTX3", departureTime: "08:36", arrivalTime: "10:02", price: 71600, availableSeats: 0, disabled: true },
-    { trainId: "KTX4", departureTime: "11:03", arrivalTime: "13:14", price: 69000, availableSeats: 29 },
-    { trainId: "KTX5", departureTime: "12:27", arrivalTime: "15:20", price: 69000, availableSeats: 12 },
-    { trainId: "KTX6", departureTime: "15:13", arrivalTime: "17:14", price: 54000, availableSeats: 97 },
-    { trainId: "KTX7", departureTime: "16:21", arrivalTime: "18:20", price: 69000, availableSeats: 23 },
-    { trainId: "KTX8", departureTime: "18:36", arrivalTime: "20:02", price: 71600, availableSeats: 0, disabled: true },
-    { trainId: "KTX9", departureTime: "21:03", arrivalTime: "23:14", price: 32000, availableSeats: 17 },
-    { trainId: "KTX10", departureTime: "22:27", arrivalTime: "01:20", price: 69000, availableSeats: 8 },
-];
+// const KTXTrains: Train[] = [
+//     { trainId: "KTX1", departureTime: "05:13", arrivalTime: "07:14", price: 69000, availableSeats: 36 },
+//     { trainId: "KTX2", departureTime: "06:21", arrivalTime: "08:20", price: 69000, availableSeats: 10 },
+//     { trainId: "KTX3", departureTime: "08:36", arrivalTime: "10:02", price: 71600, availableSeats: 0, disabled: true },
+//     { trainId: "KTX4", departureTime: "11:03", arrivalTime: "13:14", price: 69000, availableSeats: 29 },
+//     { trainId: "KTX5", departureTime: "12:27", arrivalTime: "15:20", price: 69000, availableSeats: 12 },
+//     { trainId: "KTX6", departureTime: "15:13", arrivalTime: "17:14", price: 54000, availableSeats: 97 },
+//     { trainId: "KTX7", departureTime: "16:21", arrivalTime: "18:20", price: 69000, availableSeats: 23 },
+//     { trainId: "KTX8", departureTime: "18:36", arrivalTime: "20:02", price: 71600, availableSeats: 0, disabled: true },
+//     { trainId: "KTX9", departureTime: "21:03", arrivalTime: "23:14", price: 32000, availableSeats: 17 },
+//     { trainId: "KTX10", departureTime: "22:27", arrivalTime: "01:20", price: 69000, availableSeats: 8 },
+// ];
 
 const TrainList = () => {
     const navigate = useNavigate();
@@ -42,6 +42,7 @@ const TrainList = () => {
     const reservationData = location.state as ReservationData;
 
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
+    const [trains, setTrains] = useState<Train[]>([]);
 
     const sessionId = (() => {
         try {
@@ -94,16 +95,45 @@ const TrainList = () => {
         }
     }, [sessionId]);
 
+    useEffect(() => {
+        const fetchTrains = async () => {
+            try {
+                if (!reservationData?.departureStation || !reservationData?.destinationStation || !reservationData?.departureDate) {
+                    console.warn("필수 정보 누락");
+                    return;
+                }
+
+                const dateStr = reservationData.departureDate.toISOString().split("T")[0];
+                const response = await axios.get("http://localhost:3000/trains", {
+                    params: {
+                        departure: reservationData.departureStation,
+                        destination: reservationData.destinationStation,
+                        date: dateStr,
+                    },
+                });
+
+                if (response.data?.trains) {
+                    setTrains(response.data.trains);
+                } else {
+                    console.warn("trains 데이터가 없음");
+                }
+            } catch (err) {
+                console.error("기차 정보 요청 실패:", err);
+            }
+        };
+
+        fetchTrains();
+    }, [reservationData]);
+
     const handleBack = () => {
         logClick("trainlist-to-reservation", "이전");
         navigate("/reservation");
     };
 
     const handleSelect = (train: Train) => {
-        if (!train.disabled) {
-            setSelectedTrain(train);
-            logClick(`select-trainlist-${train.trainId}`, `${train.trainId} 선택`, "tr");
-        }
+        if (train.availableSeats === 0) return; // 좌석 없으면 선택 불가
+        setSelectedTrain(train);
+        logClick(`select-trainlist-${train.trainId}`, `${train.trainId} 선택`, "tr");
     };
 
     const handleNext = () => {
@@ -141,18 +171,18 @@ const TrainList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {KTXTrains.map((train) => (
+                            {trains.map((train) => (
                                 <tr
                                     key={train.trainId}
                                     id={`select-trainlist-${train.trainId}`}
                                     onClick={() => handleSelect(train)}
                                     style={{
-                                        opacity: train.disabled ? 0.3 : 1,
+                                        opacity: train.availableSeats === 0 ? 0.3 : 1,
                                         backgroundColor:
                                             train.trainId === selectedTrain?.trainId
                                                 ? "#E3F2FD"
                                                 : "transparent",
-                                        cursor: train.disabled ? "not-allowed" : "pointer",
+                                        cursor: train.availableSeats === 0 ? "not-allowed" : "pointer",
                                         transition: "0.3s ease-in-out",
                                         borderRadius: "8px",
                                     }}
