@@ -157,7 +157,11 @@ const SelectSeat = () => {
 
     const handleBack = () => {
         logClick("selectseat-to-trainlist", "이전");
-        navigate("/reservation/train-list");
+        navigate("/reservation/train-list", {
+            state: {
+                reservationData,
+            },
+        });
     };
 
     return (
