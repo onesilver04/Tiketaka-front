@@ -175,25 +175,23 @@ const AddCard: React.FC = () => {
             cvc,
             password
         })
-        .then((res) => {
-            console.log("서버 응답:", res.data);
-            // navigate는 이미 아래에 존재하므로 중복하지 않음
+        .then(() => {
+            alert("카드 등록이 완료되었습니다!");
+            navigate("/reservation/payment", {
+                state: {
+                    fromAddCard: true,
+                    phoneNumber,
+                    phoneConfirmed,
+                    agree,
+                    reservationData,
+                    trainInfo,
+                    selectedSeats,
+                }
+            });
         })
         .catch((err) => {
             console.error("카드 등록 실패:", err);
             alert("서버에 카드 등록 중 오류가 발생했습니다.");
-        });
-
-        navigate("/reservation/payment", {
-            state: {
-                fromAddCard: true,
-                phoneNumber,
-                phoneConfirmed,
-                agree,
-                reservationData,
-                trainInfo,
-                selectedSeats,
-            }
         });
     };
 
