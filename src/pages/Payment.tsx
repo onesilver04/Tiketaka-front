@@ -184,21 +184,21 @@ const Payment: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (state?.fromAddCard) {
-            const savedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
-            const storedPhone = localStorage.getItem("verifiedPhoneNumber")?.replace(/-/g, "");
-            const filtered = savedCards.filter((card: Card) => card.ownerPhone === storedPhone);
-            setCards(filtered);
+        const storedPhone = localStorage.getItem("verifiedPhoneNumber");
+        if (state?.fromAddCard && storedPhone) {
+            setPhoneNumber(storedPhone);
+            setPhoneConfirmed(true);
+            fetchCards(); // ✅ 서버에서 카드 목록 다시 불러오기
         }
-    }, [state]);
+    }, [fetchCards, state]);
 
-    useEffect(() => {
-        if (state?.fromAddCard && cards.length > 0) {
-            setCurrentIndex(cards.length - 1);
-            setSelectedCardIndex(cards.length - 1);
-            setPaymentMethod("existing");
-        }
-    }, [cards, state]);
+    // useEffect(() => {
+    //     if (state?.fromAddCard && cards.length > 0) {
+    //         setCurrentIndex(cards.length - 1);
+    //         setSelectedCardIndex(cards.length - 1);
+    //         setPaymentMethod("existing");
+    //     }
+    // }, [cards, state]);
 
     const handleNext = () => {
         logClick("payment-addedcard-next", "카드 다음");
