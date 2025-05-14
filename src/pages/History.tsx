@@ -10,6 +10,7 @@ import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import HistoryTicket from "./HistoryTicket";
 import HistoryNone from "./HistoryNone";
+import axios from "axios";
 
 export interface Reservation {
     reservationId: string;
@@ -115,9 +116,95 @@ const History = () => {
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     };
 
-    const handleSearch = () => {
-        const matched: Reservation[] = [];
+    // const handleSearch = () => {
+    //     const matched: Reservation[] = [];
 
+    //     if (sessionId) {
+    //         addHistoryLog({
+    //             sessionId,
+    //             page: "History",
+    //             event: "click",
+    //             target_id: "history-search",
+    //             tag: "button",
+    //             text: "날짜 조회",
+    //         });
+    //     }
+
+    //     for (let i = 0; i < localStorage.length; i++) {
+    //         const key = localStorage.key(i);
+    //         if (!key) continue;
+
+    //         try {
+    //             const raw = localStorage.getItem(key);
+    //             if (!raw) continue;
+
+    //             const data = JSON.parse(raw);
+    //             const items = Array.isArray(data) ? data : [data];
+
+    //             items.forEach((item) => {
+    //                 if (
+    //                     item?.completed === true &&
+    //                     item?.paymentInfo?.phoneNumber === phoneNumber
+    //                 ) {
+    //                     const depDate = new Date(
+    //                         item.reservationData?.departureDate
+    //                     );
+    //                     if (depDate >= startDate && depDate <= endDate) {
+    //                         const selectedSeatsObj = item.selectedSeats || {};
+    //                         const seatNumbers: string[] = Object.values(
+    //                             selectedSeatsObj
+    //                         ).flat() as string[];
+    //                         const carriageNumber =
+    //                             Object.keys(selectedSeatsObj)[0] || "";
+
+    //                         matched.push({
+    //                             reservationId: item.id.toString(),
+    //                             departure:
+    //                                 item.reservationData.departureStation,
+    //                             arrival:
+    //                                 item.reservationData.destinationStation,
+    //                             departureDate:
+    //                                 item.reservationData.departureDate,
+    //                             departureTime:
+    //                                 item.trainInfo?.departureTime || "",
+    //                             arrivalTime: item.trainInfo?.arrivalTime || "",
+    //                             passengerCount: {
+    //                                 adult: item.reservationData.adultCount || 0,
+    //                                 senior:
+    //                                     item.reservationData.seniorCount || 0,
+    //                                 youth:
+    //                                     item.reservationData.seniorCount || 0,
+    //                             },
+    //                             carriageNumber,
+    //                             seatNumbers,
+    //                             trainInfo: item.trainInfo,
+    //                         });
+    //                     }
+    //                 }
+    //             });
+    //         } catch {
+    //             continue;
+    //         }
+    //     }
+
+    //     if (matched.length === 0 && sessionId) {
+    //         addHistoryLog({
+    //             sessionId,
+    //             page: "HistoryNone",
+    //             event: "navigate",
+    //             target_id: "history-search",
+    //             tag: "button",
+    //             text: "해당 기간 예매 내역 없음",
+    //             url: window.location.pathname,
+    //         });
+    //     }
+
+    //     setFilteredReservations(matched);
+    //     setSelected([]);
+    //     setHasSearched(true);
+    // };
+
+    const handleSearch = async () => {
         if (sessionId) {
             addHistoryLog({
                 sessionId,
@@ -129,80 +216,35 @@ const History = () => {
             });
         }
 
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (!key) continue;
-
-            try {
-                const raw = localStorage.getItem(key);
-                if (!raw) continue;
-
-                const data = JSON.parse(raw);
-                const items = Array.isArray(data) ? data : [data];
-
-                items.forEach((item) => {
-                    if (
-                        item?.completed === true &&
-                        item?.paymentInfo?.phoneNumber === phoneNumber
-                    ) {
-                        const depDate = new Date(
-                            item.reservationData?.departureDate
-                        );
-                        if (depDate >= startDate && depDate <= endDate) {
-                            const selectedSeatsObj = item.selectedSeats || {};
-                            const seatNumbers: string[] = Object.values(
-                                selectedSeatsObj
-                            ).flat() as string[];
-                            const carriageNumber =
-                                Object.keys(selectedSeatsObj)[0] || "";
-
-                            matched.push({
-                                reservationId: item.id.toString(),
-                                departure:
-                                    item.reservationData.departureStation,
-                                arrival:
-                                    item.reservationData.destinationStation,
-                                departureDate:
-                                    item.reservationData.departureDate,
-                                departureTime:
-                                    item.trainInfo?.departureTime || "",
-                                arrivalTime: item.trainInfo?.arrivalTime || "",
-                                passengerCount: {
-                                    adult: item.reservationData.adultCount || 0,
-                                    senior:
-                                        item.reservationData.seniorCount || 0,
-                                    youth:
-                                        item.reservationData.seniorCount || 0,
-                                },
-                                carriageNumber,
-                                seatNumbers,
-                                trainInfo: item.trainInfo,
-                            });
-                        }
-                    }
-                });
-            } catch {
-                continue;
-            }
-        }
-
-        if (matched.length === 0 && sessionId) {
-            addHistoryLog({
-                sessionId,
-                page: "HistoryNone",
-                event: "navigate",
-                target_id: "history-search",
-                tag: "button",
-                text: "해당 기간 예매 내역 없음",
-                url: window.location.pathname,
+        try {
+            const response = await axios.post("http://localhost:3000/reservations/search", {
+                phoneNumber: phoneNumber.replace(/-/g, ""), // 하이픈 제거
+                endDate: endDate.toISOString().split("T")[0], // 'YYYY-MM-DD'
             });
+
+            const data: Reservation[] = response.data;
+
+            if (data.length === 0 && sessionId) {
+                addHistoryLog({
+                    sessionId,
+                    page: "HistoryNone",
+                    event: "navigate",
+                    target_id: "history-search",
+                    tag: "button",
+                    text: "해당 기간 예매 내역 없음",
+                    url: window.location.pathname,
+                });
+            }
+
+            setFilteredReservations(data);
+            setSelected([]);
+            setHasSearched(true);
+        } catch (error) {
+            console.error("예매 내역 조회 실패:", error);
+            alert("예매 내역을 불러오는 데 실패했습니다.");
         }
-
-        setFilteredReservations(matched);
-        setSelected([]);
-        setHasSearched(true);
     };
-
+    
     const handleRefundClick = () => {
         const selectedRes = filteredReservations.filter((res) =>
             selected.includes(res.reservationId)
@@ -431,8 +473,8 @@ const History = () => {
                                             setSelected(
                                                 isChecked
                                                     ? filteredReservations.map(
-                                                          (r) => r.reservationId
-                                                      )
+                                                        (r) => r.reservationId
+                                                    )
                                                     : []
                                             );
                                         }}
