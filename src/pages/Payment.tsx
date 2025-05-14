@@ -273,6 +273,7 @@ const Payment: React.FC = () => {
     const teenCount = reservationData?.teenCount ?? 0;
 
     const totalPrice = adultCount * 50000 + seniorCount * 40000 + teenCount * 35000;
+    const totalPassengers = adultCount + seniorCount + teenCount;
     const [showKeypad, setShowKeypad] = useState(false);
 
     return (
