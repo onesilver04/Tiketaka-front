@@ -190,7 +190,7 @@ const Payment: React.FC = () => {
             setPhoneConfirmed(true);
             fetchCards(); // ✅ 서버에서 카드 목록 다시 불러오기
         }
-    }, [fetchCards, state]);
+    }, [state]);
 
     // useEffect(() => {
     //     if (state?.fromAddCard && cards.length > 0) {
@@ -268,11 +268,11 @@ const Payment: React.FC = () => {
         ? new Date(reservationData.departureDate).toLocaleDateString()
         : "선택 안됨";
 
-    const totalPassengers = (reservationData?.adultCount ?? 0)
-        + (reservationData?.seniorCount ?? 0)
-        + (reservationData?.teenCount ?? 0);
+    const adultCount = reservationData?.adultCount ?? 0;
+    const seniorCount = reservationData?.seniorCount ?? 0;
+    const teenCount = reservationData?.teenCount ?? 0;
 
-    const totalPrice = (trainInfo?.price ?? 0) * totalPassengers;
+    const totalPrice = adultCount * 50000 + seniorCount * 40000 + teenCount * 35000;
     const [showKeypad, setShowKeypad] = useState(false);
 
     return (
