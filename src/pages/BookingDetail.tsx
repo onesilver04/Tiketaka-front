@@ -12,15 +12,15 @@ interface LocationState {
     reservations: Reservation[];
 }
 
-const [refundDetails, setRefundDetails] = useState<any>(null);
 
 
 
 const BookingDetail = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { reservations } = location.state as LocationState;
-
+    const locationState = location.state as LocationState | null;
+    const reservations = locationState?.reservations ?? [];
+    const [refundDetails, setRefundDetails] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardNumber, setCardNumber] = useState<string | null>(null);
     const [totalPrice, setTotalPrice] = useState<number>(0);
