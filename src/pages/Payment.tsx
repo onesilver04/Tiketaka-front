@@ -108,11 +108,13 @@ const Payment: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState("");
     const [phoneConfirmed, setPhoneConfirmed] = useState(() => state?.phoneConfirmed || false);
     const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+    const selectedSeats = (state as any)?.selectedSeats || {};
 
     const formatPhone = (value: string) => {
         const digits = value.replace(/\D/g, "").slice(0, 11);
         if (digits.length <= 3) return digits;
-        if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+        if (digits.length <= 7)
+            return `${digits.slice(0, 3)}-${digits.slice(3)}`;
         return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
     };
 
@@ -136,7 +138,9 @@ const Payment: React.FC = () => {
         setPhoneConfirmed(true);
 
         try {
-            const response = await axios.get(`http://localhost:3000/cards/${formatted}`);
+            const response = await axios.get(
+                `http://localhost:3000/cards/${formatted}`
+            );
             const cardData = response.data;
 
             if (Array.isArray(cardData) && cardData.length > 0) {
@@ -146,7 +150,7 @@ const Payment: React.FC = () => {
                     id: idx,
                     last4Digits: card.cardNumber.slice(-4),
                     expirationDate: card.expirationDate,
-                    ownerPhone: formatted
+                    ownerPhone: formatted,
                 }));
                 setCards(converted);
             } else {
@@ -210,7 +214,9 @@ const Payment: React.FC = () => {
     const handlePrev = () => {
         logClick("payment-addedcard-prev", "카드 이전");
         if (cards.length > 0) {
-            setCurrentIndex((prev) => (prev - 1 + (cards.length + 1)) % (cards.length + 1));
+            setCurrentIndex(
+                (prev) => (prev - 1 + (cards.length + 1)) % (cards.length + 1)
+            );
         }
     };
 
@@ -220,13 +226,14 @@ const Payment: React.FC = () => {
         navigate("/reservation/select-seat", {
             state: {
                 reservationData,
-                trainInfo
-            }
+                trainInfo,
+            },
         });
     };
 
-    const handleEnd = () => {
+    const handleEnd = async () => {
         logClick("payment-to-end", "결제 완료");
+
         if (!agree) return alert("개인정보에 동의해주세요.");
         if (!isValidPhone) return alert("올바른 전화번호를 입력해주세요.");
         if (!phoneConfirmed) return alert("전화번호 확인을 해주세요.");
@@ -234,16 +241,41 @@ const Payment: React.FC = () => {
 
         const selectedCard = cards[selectedCardIndex];
 
-        updateCurrentSession({
-            paymentInfo: {
-                phoneNumber: phoneNumber.replace(/-/g, ""),
-                paymentMethod,
-                cardNumber: selectedCard ? selectedCard.cardNumber : null,
-            },
-        });
+        const phone = phoneNumber.replace(/-/g, "");
+        const seatNumbers = Object.values(selectedSeats).flat();
+        const firstCarriage = Number(Object.keys(selectedSeats)[0]) || 1;
 
-        alert("결제가 완료되었습니다.");
-        navigate("/reservation/payment/end");
+        const payload = {
+            trainId: trainInfo?.trainId,
+            carriageNumber: firstCarriage,
+            seatNumbers,
+            phoneNumber: phone,
+            passengerCount: {
+                adult: reservationData?.adultCount ?? 0,
+                senior: reservationData?.seniorCount ?? 0,
+                youth: reservationData?.teenCount ?? 0,
+            },
+            paymentMethod,
+            cardNumber: selectedCard?.cardNumber || null,
+        };
+
+        try {
+            await axios.post("http://localhost:3000/reservations", payload); // 예매 정보 저장 post 요청
+
+            updateCurrentSession({
+                paymentInfo: {
+                    phoneNumber: phone,
+                    paymentMethod,
+                    cardNumber: selectedCard?.cardNumber || null,
+                },
+            });
+
+            alert("결제가 완료되었습니다.");
+            navigate("/reservation/payment/end");
+        } catch (err) {
+            console.error("예매 정보 저장 실패:", err);
+            alert("예매 정보 저장 중 오류가 발생했습니다.");
+        }
     };
 
     const navigateToAddCard = () => {
