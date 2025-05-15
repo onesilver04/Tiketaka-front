@@ -159,7 +159,7 @@ const SelectSeat = () => {
         logClick("selectseat-to-trainlist", "이전");
         navigate("/reservation/train-list", {
             state: {
-                reservationData,
+                reservationData, // 이전 버튼 정보 유지
             },
         });
     };
