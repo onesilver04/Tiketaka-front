@@ -6,10 +6,15 @@ import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import RefundModal from "../components/RefundModal";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
+import axios from "axios";
 
 interface LocationState {
     reservations: Reservation[];
 }
+
+const [refundDetails, setRefundDetails] = useState<any>(null);
+
+
 
 const BookingDetail = () => {
     const navigate = useNavigate();
@@ -128,6 +133,24 @@ const BookingDetail = () => {
     const handleBack = () => {
         navigate(-1);
     };
+
+    useEffect(() => {
+        const fetchRefundDetails = async () => {
+            if (isModalOpen && reservations.length > 0) {
+                try {
+                    const reservationId = reservations[0].reservationId;
+                    const response = await axios.get(
+                        `http://localhost:3000/refunds/${reservationId}`
+                    );
+                    setRefundDetails(response.data);
+                } catch (err) {
+                    console.error("환불 상세 조회 실패:", err);
+                }
+            }
+        };
+
+        fetchRefundDetails();
+    }, [isModalOpen, reservations]);
 
     const totalPassengers = reservations.reduce(
         (acc, cur) =>
@@ -307,6 +330,7 @@ const BookingDetail = () => {
                 <RefundModal
                     onConfirm={confirmRefund}
                     onCancel={cancelRefund}
+                    refundDetails={refundDetails}
                 />
             )}
         </>
