@@ -220,6 +220,7 @@ const History = () => {
             const response = await axios.post("http://localhost:3000/reservations/search", {
                 phoneNumber: phoneNumber.replace(/-/g, ""), // 하이픈 제거
                 endDate: endDate.toISOString().split("T")[0], // 'YYYY-MM-DD'
+                startDate: startDate.toISOString().split("T")[0],
             });
 
             const data: Reservation[] = response.data;
