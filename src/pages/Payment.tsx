@@ -7,6 +7,7 @@ import styles from "../styles/Button.module.css";
 import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
 import AddCard from "../assets/add-card-img.svg";
 import AddCardPlus from "../assets/add-card-plus-img.svg";
+import axios from "axios";
 
 interface Card {
     cardNumber: string;
@@ -122,18 +123,53 @@ const Payment: React.FC = () => {
     //     setPhoneConfirmed(false);
     // };
 
-    const fetchCards = () => {
-        if (!isValidPhone) return alert("올바른 전화번호 형식을 입력해주세요.");
+    const fetchCards = async () => {
+        if (!isValidPhone) {
+            alert("올바른 전화번호 형식을 입력해주세요.");
+            return;
+        }
+
         logClick("payment-phonenumber-check", "전화번호 확인");
 
         const formatted = phoneNumber.replace(/-/g, "");
         localStorage.setItem("verifiedPhoneNumber", phoneNumber);
         setPhoneConfirmed(true);
 
-        const savedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
-        const filtered = savedCards.filter((card: Card) => card.ownerPhone === formatted);
-        setCards(filtered);
+        try {
+            const response = await axios.get(`http://localhost:3000/cards/${formatted}`);
+            const cardData = response.data;
+
+            if (Array.isArray(cardData) && cardData.length > 0) {
+                const converted = cardData.map((card: any, idx: number) => ({
+                    cardNumber: card.cardNumber,
+                    cardCompany: card.cardCompany,
+                    id: idx,
+                    last4Digits: card.cardNumber.slice(-4),
+                    expirationDate: card.expirationDate,
+                    ownerPhone: formatted
+                }));
+                setCards(converted);
+            } else {
+                setCards([]); // 카드 없을 경우 비움
+            }
+        } catch (error) {
+            console.error("카드 조회 중 오류:", error);
+            alert("카드 정보를 불러오는 데 실패했습니다.");
+        }
     };
+
+    // const fetchCards = () => {
+    //     if (!isValidPhone) return alert("올바른 전화번호 형식을 입력해주세요.");
+    //     logClick("payment-phonenumber-check", "전화번호 확인");
+
+    //     const formatted = phoneNumber.replace(/-/g, "");
+    //     localStorage.setItem("verifiedPhoneNumber", phoneNumber);
+    //     setPhoneConfirmed(true);
+
+    //     const savedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
+    //     const filtered = savedCards.filter((card: Card) => card.ownerPhone === formatted);
+    //     setCards(filtered);
+    // };
 
     useEffect(() => {
         const storedPhone = localStorage.getItem("verifiedPhoneNumber");
@@ -148,21 +184,21 @@ const Payment: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (state?.fromAddCard) {
-            const savedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
-            const storedPhone = localStorage.getItem("verifiedPhoneNumber")?.replace(/-/g, "");
-            const filtered = savedCards.filter((card: Card) => card.ownerPhone === storedPhone);
-            setCards(filtered);
+        const storedPhone = localStorage.getItem("verifiedPhoneNumber");
+        if (state?.fromAddCard && storedPhone) {
+            setPhoneNumber(storedPhone);
+            setPhoneConfirmed(true);
+            fetchCards(); // ✅ 서버에서 카드 목록 다시 불러오기
         }
     }, [state]);
 
-    useEffect(() => {
-        if (state?.fromAddCard && cards.length > 0) {
-            setCurrentIndex(cards.length - 1);
-            setSelectedCardIndex(cards.length - 1);
-            setPaymentMethod("existing");
-        }
-    }, [cards, state]);
+    // useEffect(() => {
+    //     if (state?.fromAddCard && cards.length > 0) {
+    //         setCurrentIndex(cards.length - 1);
+    //         setSelectedCardIndex(cards.length - 1);
+    //         setPaymentMethod("existing");
+    //     }
+    // }, [cards, state]);
 
     const handleNext = () => {
         logClick("payment-addedcard-next", "카드 다음");
@@ -232,11 +268,12 @@ const Payment: React.FC = () => {
         ? new Date(reservationData.departureDate).toLocaleDateString()
         : "선택 안됨";
 
-    const totalPassengers = (reservationData?.adultCount ?? 0)
-        + (reservationData?.seniorCount ?? 0)
-        + (reservationData?.teenCount ?? 0);
+    const adultCount = reservationData?.adultCount ?? 0;
+    const seniorCount = reservationData?.seniorCount ?? 0;
+    const teenCount = reservationData?.teenCount ?? 0;
 
-    const totalPrice = (trainInfo?.price ?? 0) * totalPassengers;
+    const totalPrice = adultCount * 50000 + seniorCount * 40000 + teenCount * 35000;
+    const totalPassengers = adultCount + seniorCount + teenCount;
     const [showKeypad, setShowKeypad] = useState(false);
 
     return (

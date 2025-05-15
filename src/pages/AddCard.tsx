@@ -4,6 +4,7 @@ import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import "../styles/AddCard.css";
 import { addReservationLog, updateReservationLogSession } from "../utils/session";
+import axios from "axios";
 
 const cardCompanies = ["NH농협", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
 
@@ -167,16 +168,30 @@ const AddCard: React.FC = () => {
 
         localStorage.setItem("customCards", JSON.stringify([...storedCards, newCard]));
 
-        navigate("/reservation/payment", {
-            state: {
-                fromAddCard: true,
-                phoneNumber,
-                phoneConfirmed,
-                agree,
-                reservationData,
-                trainInfo,
-                selectedSeats,
-            }
+        axios.post(`http://localhost:3000/cards/${phoneNumber.replace(/-/g, "")}`, {
+            cardCompany: selectedCompany,
+            cardNumber: rawCard.replace(/(\d{4})(?=\d)/g, "$1-"),
+            expirationDate: expiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
+            cvc,
+            password
+        })
+        .then(() => {
+            alert("카드 등록이 완료되었습니다!");
+            navigate("/reservation/payment", {
+                state: {
+                    fromAddCard: true,
+                    phoneNumber,
+                    phoneConfirmed,
+                    agree,
+                    reservationData,
+                    trainInfo,
+                    selectedSeats,
+                }
+            });
+        })
+        .catch((err) => {
+            console.error("카드 등록 실패:", err);
+            alert("서버에 카드 등록 중 오류가 발생했습니다.");
         });
     };
 
