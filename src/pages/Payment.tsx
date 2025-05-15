@@ -240,10 +240,11 @@ const Payment: React.FC = () => {
         if (!isCardSelected) return alert("결제 수단을 선택해주세요.");
 
         const selectedCard = cards[selectedCardIndex];
-
+        const normalizedMethod = paymentMethod === "existing" || paymentMethod === "credit" ? "card" : paymentMethod;
         const phone = phoneNumber.replace(/-/g, "");
         const seatNumbers = Object.values(selectedSeats).flat();
         const firstCarriage = Number(Object.keys(selectedSeats)[0]) || 1;
+        
 
         const payload = {
             trainId: trainInfo?.trainId,
@@ -255,9 +256,11 @@ const Payment: React.FC = () => {
                 senior: reservationData?.seniorCount ?? 0,
                 youth: reservationData?.teenCount ?? 0,
             },
-            paymentMethod,
+            paymentMethod: normalizedMethod,
             cardNumber: selectedCard?.cardNumber || null,
         };
+
+        console.log("서버로 보낼 예매 정보 payload:", payload);
 
         try {
             await axios.post("http://localhost:3000/reservations", payload); // 예매 정보 저장 post 요청
@@ -265,7 +268,7 @@ const Payment: React.FC = () => {
             updateCurrentSession({
                 paymentInfo: {
                     phoneNumber: phone,
-                    paymentMethod,
+                    paymentMethod: normalizedMethod,
                     cardNumber: selectedCard?.cardNumber || null,
                 },
             });
