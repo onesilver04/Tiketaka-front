@@ -6,6 +6,7 @@ import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
 import RefundModal from "../components/RefundModal";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
+import axios from "axios";
 
 interface LocationState {
     reservations: Reservation[];
@@ -14,8 +15,9 @@ interface LocationState {
 const BookingDetail = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { reservations } = location.state as LocationState;
-
+    const locationState = location.state as LocationState | null;
+    const reservations = locationState?.reservations ?? [];
+    const [refundDetails, setRefundDetails] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardNumber, setCardNumber] = useState<string | null>(null);
     const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -59,9 +61,9 @@ const BookingDetail = () => {
             });
 
             // ✅ 세션에 end_reason 추가
-        updateHistorySession({
-            end_reason: "refund_success",
-        });
+            updateHistorySession({
+                end_reason: "refund_success",
+            });
         }
 
         reservations.forEach((res) => {
@@ -128,6 +130,24 @@ const BookingDetail = () => {
     const handleBack = () => {
         navigate(-1);
     };
+
+    useEffect(() => {
+        const fetchRefundDetails = async () => {
+            if (isModalOpen && reservations.length > 0) {
+                try {
+                    const reservationId = reservations[0].reservationId;
+                    const response = await axios.get(
+                        `http://localhost:3000/refunds/${reservationId}`
+                    );
+                    setRefundDetails(response.data);
+                } catch (err) {
+                    console.error("환불 상세 조회 실패:", err);
+                }
+            }
+        };
+
+        fetchRefundDetails();
+    }, [isModalOpen, reservations]);
 
     const totalPassengers = reservations.reduce(
         (acc, cur) =>
@@ -209,6 +229,19 @@ const BookingDetail = () => {
 
         setTotalPrice(priceSum);
         setCardNumber(foundCard);
+    }, [reservations]);
+
+    useEffect(() => {
+        if (reservations.length > 0) {
+            const reservationId = reservations[0].reservationId;
+            axios
+                .get(`http://localhost:3000/refunds/${reservationId}`)
+                .then((res) => setRefundDetails(res.data))
+                .catch((err) => {
+                    console.error("환불 정보 조회 실패:", err);
+                    setRefundDetails(null);
+                });
+        }
     }, [reservations]);
 
     return (
