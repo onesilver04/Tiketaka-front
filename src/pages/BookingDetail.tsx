@@ -122,7 +122,12 @@ const BookingDetail = () => {
 
         // 백엔드 처리와 무관한 localStorage 삭제는 생략하거나 유지 방식 선택
         setIsModalOpen(false);
-        navigate("/history/refund-success");
+        navigate("/history/refund-success", {
+            state: {
+                reservations: [{ reservationId }], // 배열로 감싸야 RefundSuccess에서 map 가능
+            },
+        });
+
     };
 
     const cancelRefund = () => {
