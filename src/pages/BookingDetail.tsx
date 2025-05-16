@@ -23,7 +23,7 @@ interface RefundDetails {
     };
     refundAmount: number;
     paymentMethod: {
-        type: "card" | "kakao" | "phone";
+        type: "card" | "kakao" | "mobile";
         cardNumber: string;
     };
 }
@@ -218,7 +218,7 @@ const BookingDetail = () => {
                                     "kakao"
                                         ? "카카오페이"
                                         : refundDetails.paymentMethod.type ===
-                                          "phone"
+                                          "mobile"
                                         ? "휴대폰 결제"
                                         : "결제 정보"}
                                 </p>
