@@ -7,7 +7,8 @@ import RefundModal from "../components/RefundModal";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
 import axios from "axios";
 
-interface RefundDetails { // 결제 정보 인터페이스...
+interface RefundDetails {
+    // 결제 정보 인터페이스
     reservationId: string;
     departure: string;
     arrival: string;
@@ -22,7 +23,7 @@ interface RefundDetails { // 결제 정보 인터페이스...
     };
     refundAmount: number;
     paymentMethod: {
-        type: "card" | "kakaopay" | "phone";
+        type: "card" | "kakao" | "phone";
         cardNumber: string;
     };
 }
@@ -145,7 +146,11 @@ const BookingDetail = () => {
 
     return (
         <>
-            <div className={`${styleb.box} detail-box ${isModalOpen ? "blurred" : ""}`}>
+            <div
+                className={`${styleb.box} detail-box ${
+                    isModalOpen ? "blurred" : ""
+                }`}
+            >
                 <h3 className="page-title">티켓 상세 내역</h3>
                 <hr className="page-title-bar" />
 
@@ -154,19 +159,28 @@ const BookingDetail = () => {
                         <div className="route-box">
                             <div className="route-detail">
                                 <p>출발</p>
-                                <p className="booking-detail-station">{refundDetails.departure}역</p>
+                                <p className="booking-detail-station">
+                                    {refundDetails.departure}역
+                                </p>
                                 <span>{refundDetails.departureTime}</span>
                             </div>
                             <span className="arrow">→</span>
                             <div className="route-detail">
                                 <p>도착</p>
-                                <p className="booking-detail-station">{refundDetails.arrival}역</p>
+                                <p className="booking-detail-station">
+                                    {refundDetails.arrival}역
+                                </p>
                                 <span>{refundDetails.arrivalTime}</span>
                             </div>
                         </div>
 
                         <div className="passenger-info">
-                            <p><strong>총 인원 수: {refundDetails.passengerCount.total}명</strong></p>
+                            <p>
+                                <strong>
+                                    총 인원 수:{" "}
+                                    {refundDetails.passengerCount.total}명
+                                </strong>
+                            </p>
                             <p>성인: {refundDetails.passengerCount.adult}</p>
                             <p>노약자: {refundDetails.passengerCount.senior}</p>
                             <p>어린이: {refundDetails.passengerCount.youth}</p>
@@ -175,19 +189,29 @@ const BookingDetail = () => {
                         <hr className="page-title-bar" />
 
                         <div className="price-info">
-                            <strong>총 환불액: {refundDetails.refundAmount.toLocaleString()}원</strong>
+                            <strong>
+                                총 환불액:{" "}
+                                {refundDetails.refundAmount.toLocaleString()}원
+                            </strong>
                         </div>
 
-                        <p className="title-card-info">카드 정보</p>
-                        <hr className="page-title-bar" />
-                        <div className="card-number">
-                            <p>카드 번호</p>
-                            <p className="card-number-info">
-                                <strong>
-                                    {refundDetails.paymentMethod.cardNumber.replace(/\d{4}$/, "****")}
-                                </strong>
-                            </p>
-                        </div>
+                        {refundDetails.paymentMethod.type === "card" && (
+                            <>
+                                <p className="title-card-info">카드 정보</p>
+                                <hr className="page-title-bar" />
+                                <div className="card-number">
+                                    <p>카드 번호</p>
+                                    <p className="card-number-info">
+                                        <strong>
+                                            {refundDetails.paymentMethod.cardNumber.replace(
+                                                /\d{4}$/,
+                                                "****"
+                                            )}
+                                        </strong>
+                                    </p>
+                                </div>
+                            </>
+                        )}
                     </>
                 )}
             </div>
