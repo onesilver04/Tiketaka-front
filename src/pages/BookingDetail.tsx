@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Reservation } from "./History";
 import "../styles/BookingDetail.css";
 import styles from "../styles/Button.module.css";
 import styleb from "../styles/Box.module.css";
@@ -8,27 +7,83 @@ import RefundModal from "../components/RefundModal";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
 import axios from "axios";
 
-interface LocationState {
-    reservations: Reservation[];
+interface RefundDetails { // 결제 정보 인터페이스...
+    reservationId: string;
+    departure: string;
+    arrival: string;
+    departureDate: string;
+    departureTime: string;
+    arrivalTime: string;
+    passengerCount: {
+        adult: number;
+        senior: number;
+        youth: number;
+        total: number;
+    };
+    refundAmount: number;
+    paymentMethod: {
+        type: "card" | "kakaopay" | "phone";
+        cardNumber: string;
+    };
 }
 
-
-
+interface LocationState {
+    reservations: { reservationId: string }[];
+}
 
 const BookingDetail = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const locationState = location.state as LocationState | null;
-    const reservations = locationState?.reservations ?? [];
-    const [refundDetails, setRefundDetails] = useState<any>(null);
+    const reservationId = locationState?.reservations?.[0]?.reservationId ?? "";
+
+    const [refundDetails, setRefundDetails] = useState<RefundDetails | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [cardNumber, setCardNumber] = useState<string | null>(null);
-    const [totalPrice, setTotalPrice] = useState<number>(0);
+
+    // ✅ 환불 정보 조회 (결제 정보 포함)
+    useEffect(() => {
+        if (!reservationId) return;
+
+        axios
+            .get(`http://localhost:3000/refunds/${reservationId}`)
+            .then((res) => setRefundDetails(res.data))
+            .catch((err) => {
+                console.error("환불 정보 조회 실패:", err);
+                setRefundDetails(null);
+            });
+    }, [reservationId]);
+
+    // ✅ 페이지 방문 로그 기록
+    useEffect(() => {
+        const sessionRaw = localStorage.getItem("currentHistorySession");
+        if (!sessionRaw) return;
+
+        const session = JSON.parse(sessionRaw);
+        const sessionId = session.sessionId;
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "BookingDetail" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addHistoryLog({
+                sessionId,
+                page: "BookingDetail",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "BookingDetail 페이지 도착",
+                url: window.location.pathname,
+            });
+        }
+    }, []);
+
+    const handleBack = () => navigate(-1);
 
     const handleRefund = () => {
-        const session = JSON.parse(
-            localStorage.getItem("currentHistorySession") || "{}"
-        );
+        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
         const sessionId = session?.sessionId;
 
         if (sessionId) {
@@ -47,9 +102,7 @@ const BookingDetail = () => {
     };
 
     const confirmRefund = () => {
-        const session = JSON.parse(
-            localStorage.getItem("currentHistorySession") || "{}"
-        );
+        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
         const sessionId = session?.sessionId;
 
         if (sessionId) {
@@ -63,57 +116,16 @@ const BookingDetail = () => {
                 url: window.location.pathname,
             });
 
-            // ✅ 세션에 end_reason 추가
-            updateHistorySession({
-                end_reason: "refund_success",
-            });
+            updateHistorySession({ end_reason: "refund_success" });
         }
 
-        reservations.forEach((res) => {
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (!key) continue;
-
-                try {
-                    const raw = localStorage.getItem(key);
-                    if (!raw) continue;
-
-                    const data = JSON.parse(raw);
-
-                    // 배열인 경우: 해당 예약만 제거해서 다시 저장
-                    if (Array.isArray(data)) {
-                        const updated = data.filter(
-                            (item) =>
-                                item.id !== res.reservationId &&
-                                item.reservationId !== res.reservationId
-                        );
-
-                        if (updated.length !== data.length) {
-                            localStorage.setItem(key, JSON.stringify(updated));
-                        }
-                    }
-
-                    // 객체인 경우: 예약 ID가 일치하면 해당 key 통째로 제거
-                    else if (
-                        data.id === res.reservationId ||
-                        data.reservationId === res.reservationId
-                    ) {
-                        localStorage.removeItem(key);
-                    }
-                } catch {
-                    continue;
-                }
-            }
-        });
-
+        // 백엔드 처리와 무관한 localStorage 삭제는 생략하거나 유지 방식 선택
         setIsModalOpen(false);
         navigate("/history/refund-success");
     };
 
     const cancelRefund = () => {
-        const session = JSON.parse(
-            localStorage.getItem("currentHistorySession") || "{}"
-        );
+        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
         const sessionId = session?.sessionId;
 
         if (sessionId) {
@@ -127,201 +139,57 @@ const BookingDetail = () => {
                 url: window.location.pathname,
             });
         }
+
         setIsModalOpen(false);
     };
 
-    const handleBack = () => {
-        navigate(-1);
-    };
-
-    useEffect(() => {
-        const fetchRefundDetails = async () => {
-            if (isModalOpen && reservations.length > 0) {
-                try {
-                    const reservationId = reservations[0].reservationId;
-                    const response = await axios.get(
-                        `http://localhost:3000/refunds/${reservationId}`
-                    );
-                    setRefundDetails(response.data);
-                } catch (err) {
-                    console.error("환불 상세 조회 실패:", err);
-                }
-            }
-        };
-
-        fetchRefundDetails();
-    }, [isModalOpen, reservations]);
-
-    const totalPassengers = reservations.reduce(
-        (acc, cur) =>
-            acc +
-            cur.passengerCount.adult +
-            cur.passengerCount.senior +
-            cur.passengerCount.youth,
-        0
-    );
-
-    // 1. 페이지 진입 시 로그 기록 (navigate: BookingDetail 페이지 도착)
-    useEffect(() => {
-        const sessionRaw = localStorage.getItem("currentHistorySession");
-        if (sessionRaw) {
-            const session = JSON.parse(sessionRaw);
-            const sessionId = session.sessionId;
-
-            const alreadyLogged = session.logs?.some(
-                (log: any) =>
-                    log.page === "BookingDetail" &&
-                    log.event === "navigate" &&
-                    log.target_id === "page-load"
-            );
-
-            if (!alreadyLogged) {
-                addHistoryLog({
-                    sessionId,
-                    page: "BookingDetail",
-                    event: "navigate",
-                    target_id: "page-load",
-                    tag: "system",
-                    text: "BookingDetail 페이지 도착",
-                    url: window.location.pathname,
-                });
-            }
-        }
-    }, []);
-
-    // 2. 카드 번호 및 가격 계산용
-    useEffect(() => {
-        let priceSum = 0;
-        let foundCard: string | null = null;
-
-        reservations.forEach((res) => {
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (!key) continue;
-
-                try {
-                    const raw = localStorage.getItem(key);
-                    if (!raw) continue;
-
-                    const data = JSON.parse(raw);
-                    const items = Array.isArray(data) ? data : [data];
-
-                    items.forEach((item) => {
-                        const isMatched =
-                            item.id?.toString() === res.reservationId ||
-                            item.reservationId?.toString() ===
-                                res.reservationId;
-
-                        if (isMatched) {
-                            const count =
-                                res.passengerCount.adult +
-                                res.passengerCount.senior +
-                                res.passengerCount.youth;
-
-                            const pricePerPerson = item.trainInfo?.price ?? 0;
-                            priceSum += pricePerPerson * count;
-
-                            if (!foundCard && item.paymentInfo?.cardNumber) {
-                                foundCard = item.paymentInfo.cardNumber;
-                            }
-                        }
-                    });
-                } catch {}
-            }
-        });
-
-        setTotalPrice(priceSum);
-        setCardNumber(foundCard);
-    }, [reservations]);
-
-    useEffect(() => {
-        if (reservations.length > 0) {
-            const reservationId = reservations[0].reservationId;
-            axios
-                .get(`http://localhost:3000/refunds/${reservationId}`)
-                .then((res) => setRefundDetails(res.data))
-                .catch((err) => {
-                    console.error("환불 정보 조회 실패:", err);
-                    setRefundDetails(null);
-                });
-        }
-    }, [reservations]);
-
     return (
         <>
-            <div
-                className={`${styleb.box} detail-box ${
-                    isModalOpen ? "blurred" : ""
-                }`}
-            >
+            <div className={`${styleb.box} detail-box ${isModalOpen ? "blurred" : ""}`}>
                 <h3 className="page-title">티켓 상세 내역</h3>
                 <hr className="page-title-bar" />
 
-                {reservations.map((res) => (
-                    <div key={res.reservationId} className="route-box">
-                        <div className="route-detail">
-                            <p>출발</p>
-                            <p className="booking-detail-station">
-                                {res.departure}역
-                            </p>
-                            <span>{res.departureTime}</span>
+                {refundDetails && (
+                    <>
+                        <div className="route-box">
+                            <div className="route-detail">
+                                <p>출발</p>
+                                <p className="booking-detail-station">{refundDetails.departure}역</p>
+                                <span>{refundDetails.departureTime}</span>
+                            </div>
+                            <span className="arrow">→</span>
+                            <div className="route-detail">
+                                <p>도착</p>
+                                <p className="booking-detail-station">{refundDetails.arrival}역</p>
+                                <span>{refundDetails.arrivalTime}</span>
+                            </div>
                         </div>
-                        <span className="arrow">→</span>
-                        <div className="route-detail">
-                            <p>도착</p>
-                            <p className="booking-detail-station">
-                                {res.arrival}역
-                            </p>
-                            <span>{res.arrivalTime}</span>
+
+                        <div className="passenger-info">
+                            <p><strong>총 인원 수: {refundDetails.passengerCount.total}명</strong></p>
+                            <p>성인: {refundDetails.passengerCount.adult}</p>
+                            <p>노약자: {refundDetails.passengerCount.senior}</p>
+                            <p>어린이: {refundDetails.passengerCount.youth}</p>
                         </div>
-                    </div>
-                ))}
 
-                <div className="passenger-info">
-                    <p>
-                        <strong>총 인원 수: {totalPassengers}명</strong>
-                    </p>
-                    <p>
-                        성인:{" "}
-                        {reservations.reduce(
-                            (acc, cur) => acc + cur.passengerCount.adult,
-                            0
-                        )}
-                    </p>
-                    <p>
-                        노약자:{" "}
-                        {reservations.reduce(
-                            (acc, cur) => acc + cur.passengerCount.senior,
-                            0
-                        )}
-                    </p>
-                    <p>
-                        어린이:{" "}
-                        {reservations.reduce(
-                            (acc, cur) => acc + cur.passengerCount.youth,
-                            0
-                        )}
-                    </p>
-                </div>
+                        <hr className="page-title-bar" />
 
-                <hr className="page-title-bar" />
+                        <div className="price-info">
+                            <strong>총 환불액: {refundDetails.refundAmount.toLocaleString()}원</strong>
+                        </div>
 
-                <div className="price-info">
-                    <strong>총액: {totalPrice.toLocaleString()}원</strong>
-                </div>
-
-                <p className="title-card-info">카드 정보</p>
-                <hr className="page-title-bar" />
-                <div className="card-number">
-                    <p>카드 번호</p>
-                    <p className="card-number-info">
-                        <strong>
-                            {cardNumber
-                                ? cardNumber.replace(/\d{4}$/, "****")
-                                : "정보 없음"}
-                        </strong>
-                    </p>
-                </div>
+                        <p className="title-card-info">카드 정보</p>
+                        <hr className="page-title-bar" />
+                        <div className="card-number">
+                            <p>카드 번호</p>
+                            <p className="card-number-info">
+                                <strong>
+                                    {refundDetails.paymentMethod.cardNumber.replace(/\d{4}$/, "****")}
+                                </strong>
+                            </p>
+                        </div>
+                    </>
+                )}
             </div>
 
             <button
@@ -343,7 +211,6 @@ const BookingDetail = () => {
                 <RefundModal
                     onConfirm={confirmRefund}
                     onCancel={cancelRefund}
-                    refundDetails={refundDetails}
                 />
             )}
         </>
