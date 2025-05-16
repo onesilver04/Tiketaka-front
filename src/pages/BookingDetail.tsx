@@ -64,9 +64,9 @@ const BookingDetail = () => {
             });
 
             // ✅ 세션에 end_reason 추가
-        updateHistorySession({
-            end_reason: "refund_success",
-        });
+            updateHistorySession({
+                end_reason: "refund_success",
+            });
         }
 
         reservations.forEach((res) => {
@@ -232,6 +232,19 @@ const BookingDetail = () => {
 
         setTotalPrice(priceSum);
         setCardNumber(foundCard);
+    }, [reservations]);
+
+    useEffect(() => {
+        if (reservations.length > 0) {
+            const reservationId = reservations[0].reservationId;
+            axios
+                .get(`http://localhost:3000/refunds/${reservationId}`)
+                .then((res) => setRefundDetails(res.data))
+                .catch((err) => {
+                    console.error("환불 정보 조회 실패:", err);
+                    setRefundDetails(null);
+                });
+        }
     }, [reservations]);
 
     return (
