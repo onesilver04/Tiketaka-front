@@ -195,7 +195,7 @@ const BookingDetail = () => {
                             </strong>
                         </div>
 
-                        {refundDetails.paymentMethod.type === "card" && (
+                        {refundDetails.paymentMethod.type === "card" ? (
                             <>
                                 <p className="title-card-info">카드 정보</p>
                                 <hr className="page-title-bar" />
@@ -210,6 +210,18 @@ const BookingDetail = () => {
                                         </strong>
                                     </p>
                                 </div>
+                            </>
+                        ) : ( // 결제 수단이 카카오페이나 휴대폰 결제인 경우
+                            <>
+                                <p className="title-card-info">
+                                    {refundDetails.paymentMethod.type ===
+                                    "kakao"
+                                        ? "카카오페이"
+                                        : refundDetails.paymentMethod.type ===
+                                          "phone"
+                                        ? "휴대폰 결제"
+                                        : "결제 정보"}
+                                </p>
                             </>
                         )}
                     </>
