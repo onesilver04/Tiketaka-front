@@ -1,18 +1,36 @@
 import "../styles/RefundSuccess.css";
 import styles from "../styles/Button.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { addHistoryLog, updateHistorySession } from "../utils/session";
 import { useEffect } from "react";
+import axios from "axios";
 
 const RefundSuccess = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const reservations = (location.state as any)?.reservations || [];
 
     useEffect(() => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
-        if (sessionRaw) {
-            const session = JSON.parse(sessionRaw);
-            const sessionId = session.sessionId;
+        const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+        const sessionId = session?.sessionId;
 
+        // ✅ 예약 삭제 API 호출
+        const deleteReservations = async () => {
+            for (const res of reservations) {
+                try {
+                    await axios.delete(`http://localhost:3000/refunds/${res.reservationId}`);
+                    console.log(`환불 성공: ${res.reservationId}`);
+                } catch (err) {
+                    console.error(`환불 실패: ${res.reservationId}`, err);
+                }
+            }
+        };
+
+        deleteReservations();
+
+        // ✅ 페이지 진입 로그
+        if (sessionId) {
             const alreadyLogged = session.logs?.some(
                 (log: any) =>
                     log.page === "RefundSuccess" &&
@@ -31,7 +49,7 @@ const RefundSuccess = () => {
                 });
             }
         }
-    }, []);
+    }, [reservations]);
 
     const handleHome = () => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
@@ -52,7 +70,7 @@ const RefundSuccess = () => {
             // ✅ 세션 종료 + 목적 변경
             updateHistorySession({
                 status: "completed",
-                purpose: "refund", // 환불 완료 후 pupose: "refund"로 변경
+                purpose: "refund",
             });
         }
 
@@ -70,7 +88,6 @@ const RefundSuccess = () => {
                 <p>환불 처리가 완료되었습니다.</p>
                 <p>Tiketaka를 이용해주셔서 감사합니다.</p>
             </div>
-            {/* 환불 성공창에서 메인 화면으로 이동하는 버튼 */}
             <button
                 id="refundSuccess-to-home"
                 className={`${styles.button} go-main`}
