@@ -241,6 +241,7 @@ const Payment: React.FC = () => {
 
         const selectedCard = cards[selectedCardIndex];
         const normalizedMethod = paymentMethod === "existing" || paymentMethod === "credit" ? "card" : paymentMethod;
+        const isCardPayment = normalizedMethod === "card";
         const phone = phoneNumber.replace(/-/g, "");
         const seatNumbers = Object.values(selectedSeats).flat();
         const firstCarriage = Number(Object.keys(selectedSeats)[0]) || 1;
@@ -257,7 +258,7 @@ const Payment: React.FC = () => {
                 youth: reservationData?.teenCount ?? 0,
             },
             paymentMethod: normalizedMethod,
-            cardNumber: selectedCard?.cardNumber || null,
+            cardNumber: isCardPayment ? selectedCard?.cardNumber : null,
         };
 
         console.log("서버로 보낼 예매 정보 payload:", payload);
@@ -269,7 +270,7 @@ const Payment: React.FC = () => {
                 paymentInfo: {
                     phoneNumber: phone,
                     paymentMethod: normalizedMethod,
-                    cardNumber: selectedCard?.cardNumber || null,
+                    cardNumber: isCardPayment ? selectedCard?.cardNumber : null,
                 },
             });
 
