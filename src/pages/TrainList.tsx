@@ -39,9 +39,10 @@ interface Train {
 const TrainList = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const reservationData = location.state as ReservationData;
+    const reservationData = location.state?.reservationData as ReservationData;
+    const preselectedTrain = location.state?.selectedTrain as Train | undefined;
 
-    const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
+    const [selectedTrain, setSelectedTrain] = useState<Train | null>(preselectedTrain ?? null);
     const [trains, setTrains] = useState<Train[]>([]);
 
     const sessionId = (() => {
