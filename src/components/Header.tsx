@@ -1,6 +1,7 @@
 import "/src/styles/Header.css";
 import logoHeader from "../assets/header-logo.svg";
 import { useLocation, useNavigate } from "react-router-dom";
+import { markHistorySessionCompleted } from "../utils/session";
 import axios from "axios";
 
 const Header = () => {
@@ -12,10 +13,12 @@ const Header = () => {
     const handleHome = async () => {
         if (!isClickable) return;
         // 1. 예약 세션 종료
-        const reservationRaw = localStorage.getItem("currentReservationSession");
+        const reservationRaw = localStorage.getItem(
+            "currentReservationSession"
+        );
         if (reservationRaw) {
             const session = JSON.parse(reservationRaw);
-            const sessionId = session.sessionId;
+            const sessionId = session.sessionId ?? session.id?.toString?.();
             try {
                 await axios.patch("http://localhost:3000/sessions/end", {
                     sessionId,
@@ -32,23 +35,15 @@ const Header = () => {
         // 2. 조회/환불 세션 종료
         const historyRaw = localStorage.getItem("currentHistorySession");
         if (historyRaw) {
-            const session = JSON.parse(historyRaw);
-            const sessionId = session.sessionId;
+            const session = JSON.parse(historyRaw);            
             const purpose = session.purpose || "history";
-            let end_reason = "history_aborted";
-            if (purpose === "refund") end_reason = "refund_aborted";
+            const end_reason =
+                purpose === "refund" ? "refund_abandoned" : "history_abandoned";
 
-            try {
-                await axios.patch("http://localhost:3000/sessions/end", {
-                    sessionId,
-                    status: "completed",
-                    end_reason,
-                    current_page: "Header",
-                });
-                localStorage.removeItem("currentHistorySession");
-            } catch (error) {
-                console.error("조회/환불 세션 종료 실패:", error);
-            }
+            await markHistorySessionCompleted({
+                end_reason,
+                current_page: "Header",
+            });
         }
 
         navigate("/");
