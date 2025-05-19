@@ -168,6 +168,7 @@ export const addHistoryLog = ({
     event,
     target_id,
     tag,
+    url,
     text,
 }: {
     sessionId: string;
@@ -190,7 +191,7 @@ export const addHistoryLog = ({
         target_id,
         tag,
         text,
-        url: window.location.pathname,
+        url: url ?? window.location.pathname,
         timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
     };
 
@@ -219,6 +220,21 @@ export const addHistoryLog = ({
         sessions.push(session);
     }
     localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessions));
+
+    // ✅ 백엔드 로그 전송
+    axios
+        .post("http://localhost:3000/logs", {
+            sessionId,
+            location: page,
+            event,
+            target_id,
+            tag,
+            url: url ?? window.location.href,
+            text,
+        })
+        .catch((err) => {
+            console.error("History 로그 전송 실패:", err);
+        });
 };
 
 export const updateHistorySession = (updates: Partial<any>) => {
@@ -342,6 +358,21 @@ export const addReservationLog = ({
         RESERVATION_LOG_SESSIONS_KEY,
         JSON.stringify(sessions)
     );
+
+    // ✅ 백엔드 로그 전송
+    axios
+        .post("http://localhost:3000/logs", {
+            sessionId,
+            location: page,
+            event,
+            target_id,
+            tag,
+            url: url ?? window.location.href,
+            text,
+        })
+        .catch((err) => {
+            console.error("Reservation 로그 전송 실패:", err);
+        });
 };
 
 export const updateReservationLogSession = (updates: Partial<any>) => {
