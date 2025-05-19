@@ -74,13 +74,6 @@ const RefundSuccess = () => {
                     newPurpose: "refund",
                 });
 
-                await axios.patch("http://localhost:3000/sessions/end", {
-                    sessionId,
-                    status: "completed",
-                    end_reason: "refund_completed",
-                    current_page: "RefundSuccess",
-                });
-
             } catch (err) {
                 console.error("세션 목적 변경 실패:", err);
             }
