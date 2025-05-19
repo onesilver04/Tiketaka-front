@@ -196,6 +196,14 @@ const Payment: React.FC = () => {
         }
     }, [state]);
 
+    useEffect(() => {
+        if (state?.fromAddCard) {
+            if (state.agree !== undefined) setAgree(state.agree);
+            if (state.phoneNumber) setPhoneNumber(state.phoneNumber);
+            if (state.phoneConfirmed) setPhoneConfirmed(state.phoneConfirmed);
+        }
+    }, [state]);
+    
     // useEffect(() => {
     //     if (state?.fromAddCard && cards.length > 0) {
     //         setCurrentIndex(cards.length - 1);
