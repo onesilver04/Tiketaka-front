@@ -59,8 +59,6 @@ export const getLatestSessionLogs = (): {
     return null;
 };
 
-
-
 export const loadCurrentSession = () => {
     const session = localStorage.getItem(CURRENT_SESSION_KEY);
     return session ? JSON.parse(session) : null;

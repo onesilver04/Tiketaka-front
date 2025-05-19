@@ -19,24 +19,37 @@ const Start = () => {
     // 예매 버튼 클릭
     const handleStartReservation = async () => {
         createNewSession(); // ✅ 예매용 예약 데이터 세션 생성
-        const sessionId = createReservationLogSession(); // ✅ 예매용 로그 세션 생성
-
-        updateReservationLogSession({
-            previous_pages: [""],
-            location: "Start",
-        });
-
-        // ✅ 백엔드 세션 생성
+        let sessionId = "";
         try {
-            await axios.post("http://localhost:3000/sessions/start", {
-                purpose: "reservation",
-                current_page: "reservation",
-            });
-        } catch (error) {
-            console.error("예약 세션 생성 실패:", error);
+            const response = await axios.post(
+                "http://localhost:3000/sessions/start",
+                {
+                    purpose: "reservation",
+                    current_page: "reservation",
+                }
+            );
+
+            const newSession = response.data; // ✅ 백엔드가 반환한 전체 세션 객체
+            sessionId = newSession.sessionId;
+
+            localStorage.setItem(
+                "currentReservationLogSession",
+                JSON.stringify(newSession)
+            );
+
+            const sessionList = JSON.parse(
+                localStorage.getItem("reservationLogSessions") || "[]"
+            );
+            sessionList.push(newSession);
+            localStorage.setItem(
+                "reservationLogSessions",
+                JSON.stringify(sessionList)
+            );
+        } catch (err) {
+            console.error("세션 생성 실패:", err);
+            return;
         }
 
-        // ✅ 예매 로그 기록
         addReservationLog({
             sessionId,
             page: "Start",
@@ -46,24 +59,47 @@ const Start = () => {
             text: "예매하기 버튼 클릭",
         });
 
+        updateReservationLogSession({
+            current_page: "reservation",
+            previous_pages: ["Start"],
+        });
+
         navigate("/reservation", { state: { reset: true, sessionId } });
     };
 
     // 조회 버튼 클릭
     const handleStartSearch = async () => {
-        const sessionId = createHistorySession();
-
-        // ✅ 백엔드 세션 생성
+        let sessionId = "";
         try {
-            await axios.post("http://localhost:3000/sessions/start", {
-                purpose: "history",
-                current_page: "phone_number",
-            });
+            const response = await axios.post(
+                "http://localhost:3000/sessions/start",
+                {
+                    purpose: "history",
+                    current_page: "phone_number",
+                }
+            );
+
+            const newSession = response.data;
+            sessionId = newSession.sessionId;
+
+            localStorage.setItem(
+                "currentHistorySession",
+                JSON.stringify(newSession)
+            );
+
+            const sessionList = JSON.parse(
+                localStorage.getItem("historySessions") || "[]"
+            );
+            sessionList.push(newSession);
+            localStorage.setItem(
+                "historySessions",
+                JSON.stringify(sessionList)
+            );
         } catch (error) {
             console.error("조회 세션 생성 실패:", error);
+            return;
         }
 
-        // ✅ Start 페이지에서만 클릭 로그 기록
         addHistoryLog({
             sessionId,
             page: "Start",
@@ -74,13 +110,13 @@ const Start = () => {
         });
 
         updateHistorySession({
+            current_page: "phone_number",
             previous_pages: ["Start"],
-            location: "PhoneNumber",
         });
 
         navigate("/phonenumber", { state: { sessionId } });
     };
-
+    
     return (
         <div>
             <title>Start</title>
