@@ -14,7 +14,8 @@
 
 .react-calendar {
     border: none;
-    /* border-radius: 1px; */
+    background-color: rgba(43, 50, 178, 0.2);
+    border-radius: 8px;
     font-family: "Pretendard", sans-serif;
 }
 
@@ -72,12 +73,12 @@
     background-color: #00000000 !important;
     color: black !important;
     border: 1px solid #2b32b2;
-    border-radius: 50%;
+    border-radius: 8px;
 }
 
 .react-calendar__tile:enabled:focus {
     border: 1px solid #2b32b2;
-    border-radius: 50%;
+    border-radius: 8px;
 }
 
 .react-calendar__navigation button:enabled:hover,
