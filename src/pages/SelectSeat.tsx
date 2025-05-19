@@ -160,7 +160,6 @@ const SelectSeat = () => {
         navigate("/reservation/train-list", {
             state: {
                 reservationData, // 이전 버튼 정보 유지
-                selectedTrain: trainInfo,
             },
         });
     };
