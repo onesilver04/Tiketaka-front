@@ -177,50 +177,29 @@ export const updateCurrentSession = (updates: Partial<any>) => {
     }
 };
 
-export const createHistorySession = () => {
-    const prev = localStorage.getItem(HISTORY_SESSION_KEY);
-    if (prev) {
-        try {
-            const prevSession = JSON.parse(prev);
-            if (prevSession.status === "active") {
-                prevSession.status = "incomplete";
-                if (!prevSession.end_reason) {
-                    prevSession.end_reason = null;
-                }
+export const createHistorySession = async (): Promise<string | null> => {
+    try {
+        const response = await axios.post("http://localhost:3000/sessions/start", {
+            purpose: "history",
+            current_page: "phone_number",
+        });
 
-                const sessionList = JSON.parse(
-                    localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
-                );
-                const index = sessionList.findIndex(
-                    (s: any) => s.sessionId === prevSession.sessionId
-                );
-                if (index !== -1) {
-                    sessionList[index] = prevSession;
-                } else {
-                    sessionList.push(prevSession);
-                }
-                localStorage.setItem(
-                    HISTORY_SESSIONS_KEY,
-                    JSON.stringify(sessionList)
-                );
-            }
-        } catch {}
+        const newSession = response.data;
+        const sessionId = newSession.sessionId;
+
+        localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(newSession));
+
+        const sessionList = JSON.parse(
+            localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]"
+        );
+        sessionList.push(newSession);
+        localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessionList));
+
+        return sessionId;
+    } catch (error) {
+        console.error("히스토리 세션 생성 실패:", error);
+        return null;
     }
-
-    const newSession = {
-        sessionId: Date.now().toString(),
-        purpose: "history",
-        status: "active",
-        end_reason: null,
-        location: "Start",
-        start_time: new Date().toISOString(),
-        last_interaction: new Date().toISOString(),
-        previous_pages: [],
-        logs: [],
-    };
-
-    localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(newSession));
-    return newSession.sessionId;
 };
 
 export const addHistoryLog = ({
@@ -383,34 +362,37 @@ export const updateHistorySession = async (updates: Partial<any>) => {
 export const RESERVATION_LOG_SESSION_KEY = "currentReservationLogSession";
 export const RESERVATION_LOG_SESSIONS_KEY = "reservationLogSessions";
 
-export const createReservationLogSession = () => {
-    const newSession = {
-        sessionId: Date.now().toString(),
-        purpose: "reservation",
-        status: "active",
-        location: "Reservation",
-        start_time: new Date().toISOString(),
-        last_interaction: new Date().toISOString(),
-        previous_pages: [],
-        logs: [],
-    };
+export const createReservationLogSession = async (): Promise<string | null> => {
+    try {
+        const response = await axios.post("http://localhost:3000/sessions/start", {
+            purpose: "reservation",
+            current_page: "reservation",
+        });
 
-    localStorage.setItem(
-        RESERVATION_LOG_SESSION_KEY,
-        JSON.stringify(newSession)
-    );
+        const newSession = response.data;
+        const sessionId = newSession.sessionId;
 
-    const sessionList = JSON.parse(
-        localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
-    );
-    sessionList.push(newSession);
-    localStorage.setItem(
-        RESERVATION_LOG_SESSIONS_KEY,
-        JSON.stringify(sessionList)
-    );
+        localStorage.setItem(
+            RESERVATION_LOG_SESSION_KEY,
+            JSON.stringify(newSession)
+        );
 
-    return newSession.sessionId;
+        const sessionList = JSON.parse(
+            localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]"
+        );
+        sessionList.push(newSession);
+        localStorage.setItem(
+            RESERVATION_LOG_SESSIONS_KEY,
+            JSON.stringify(sessionList)
+        );
+
+        return sessionId;
+    } catch (error) {
+        console.error("예약 세션 생성 실패:", error);
+        return null;
+    }
 };
+
 
 export const addReservationLog = ({
     sessionId,
