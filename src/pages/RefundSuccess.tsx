@@ -73,6 +73,7 @@ const RefundSuccess = () => {
                     current_page: "RefundSuccess",
                     newPurpose: "refund",
                 });
+                console.log("세션 업데이트 성공");
 
             } catch (err) {
                 console.error("세션 목적 변경 실패:", err);

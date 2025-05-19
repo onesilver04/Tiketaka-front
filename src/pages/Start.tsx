@@ -19,7 +19,7 @@ const Start = () => {
     // 예매 버튼 클릭
     const handleStartReservation = async () => {
         createNewSession(); // ✅ 예매용 예약 데이터 세션 생성
-        const sessionId = createReservationLogSession(); // ✅ 예매용 로그 세션 생성
+        const logSessionId = createReservationLogSession();  // ✅ 예매용 로그 세션 생성
 
         updateReservationLogSession({
             previous_pages: [""],
@@ -27,18 +27,27 @@ const Start = () => {
         });
 
         // ✅ 백엔드 세션 생성
+        let backendSessionId: string | null = null;
+
         try {
-            await axios.post("http://localhost:3000/sessions/start", {
+            const response = await axios.post("http://localhost:3000/sessions/start", {
                 purpose: "reservation",
                 current_page: "reservation",
             });
+            backendSessionId = response.data.sessionId;
+
+            if (backendSessionId) {
+                localStorage.setItem("currentReservationBackendSessionId", backendSessionId);
+            } else {
+                console.warn("백엔드에서 sessionId가 반환되지 않음");
+            }
         } catch (error) {
-            console.error("예약 세션 생성 실패:", error);
+            console.error("세션 생성 실패:", error);
         }
 
         // ✅ 예매 로그 기록
         addReservationLog({
-            sessionId,
+            sessionId: logSessionId,
             page: "Start",
             event: "click",
             target_id: "start-to-reservation",
@@ -46,26 +55,37 @@ const Start = () => {
             text: "예매하기 버튼 클릭",
         });
 
-        navigate("/reservation", { state: { reset: true, sessionId } });
+        navigate("/reservation", {
+            state: { reset: true, sessionId: backendSessionId || logSessionId },
+        });
     };
 
     // 조회 버튼 클릭
     const handleStartSearch = async () => {
-        const sessionId = createHistorySession();
+        const localSessionId = createHistorySession(); // 로컬 세션 생성
+
+        let backendSessionId: string | null = null;
 
         // ✅ 백엔드 세션 생성
         try {
-            await axios.post("http://localhost:3000/sessions/start", {
+            const response = await axios.post("http://localhost:3000/sessions/start", {
                 purpose: "history",
                 current_page: "phone_number",
             });
+            backendSessionId = response.data.sessionId;
+
+            if (backendSessionId) {
+                localStorage.setItem("currentHistoryBackendSessionId", backendSessionId); // ✅ 저장
+            } else {
+                console.warn("백엔드에서 sessionId가 반환되지 않음");
+            }
         } catch (error) {
             console.error("조회 세션 생성 실패:", error);
         }
 
         // ✅ Start 페이지에서만 클릭 로그 기록
         addHistoryLog({
-            sessionId,
+            sessionId: localSessionId,
             page: "Start",
             event: "click",
             target_id: "start-to-phonenumber",
@@ -78,8 +98,11 @@ const Start = () => {
             location: "PhoneNumber",
         });
 
-        navigate("/phonenumber", { state: { sessionId } });
+        navigate("/phonenumber", {
+            state: { sessionId: backendSessionId || localSessionId },
+        });
     };
+
 
     return (
         <div>
