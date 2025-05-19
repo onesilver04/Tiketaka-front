@@ -54,7 +54,7 @@ const Start = () => {
             state: { reset: true, sessionId: backendSessionId },
         });
     };
-
+    
     // 조회 버튼 클릭
     const handleStartSearch = async () => {
         let backendSessionId: string | null = null;
@@ -64,17 +64,21 @@ const Start = () => {
                 purpose: "history",
                 current_page: "phone_number",
             });
-            backendSessionId = response.data.sessionId;
+            const sessionData = response.data;
+            backendSessionId = sessionData.sessionId;
 
             if (backendSessionId) {
-                localStorage.setItem("currentHistoryBackendSessionId", backendSessionId);
+                // ✅ reservation처럼 전체 세션 구조 저장
+                localStorage.setItem("currentHistorySession", JSON.stringify(sessionData));
 
+                // ✅ 이전 페이지, 현재 위치 업데이트
                 updateHistorySession({
                     sessionId: backendSessionId,
                     previous_pages: ["Start"],
                     location: "PhoneNumber",
                 });
 
+                // ✅ 로그 기록
                 addHistoryLog({
                     sessionId: backendSessionId,
                     page: "Start",
