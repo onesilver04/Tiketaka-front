@@ -51,7 +51,7 @@ const RefundSuccess = () => {
         }
     }, [reservations]);
 
-    const handleHome = () => {
+    const handleHome = async () => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
         if (sessionRaw) {
             const session = JSON.parse(sessionRaw);
@@ -66,6 +66,24 @@ const RefundSuccess = () => {
                 tag: "button",
                 text: "환불 완료 후 메인으로 돌아감",
             });
+
+            try {
+                await axios.patch("http://localhost:3000/sessions/update", {
+                    sessionId,
+                    current_page: "RefundSuccess",
+                    newPurpose: "refund",
+                });
+
+                await axios.patch("http://localhost:3000/sessions/end", {
+                    sessionId,
+                    status: "completed",
+                    end_reason: "refund_completed",
+                    current_page: "RefundSuccess",
+                });
+
+            } catch (err) {
+                console.error("세션 목적 변경 실패:", err);
+            }
 
             // ✅ 세션 종료 + 목적 변경
             updateHistorySession({

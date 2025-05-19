@@ -11,12 +11,13 @@ import {
     addReservationLog,
     addHistoryLog,
 } from "../utils/session";
+import axios from "axios";
 
 const Start = () => {
     const navigate = useNavigate();
 
     // 예매 버튼 클릭
-    const handleStartReservation = () => {
+    const handleStartReservation = async () => {
         createNewSession(); // ✅ 예매용 예약 데이터 세션 생성
         const sessionId = createReservationLogSession(); // ✅ 예매용 로그 세션 생성
 
@@ -24,6 +25,16 @@ const Start = () => {
             previous_pages: [""],
             location: "Start",
         });
+
+        // ✅ 백엔드 세션 생성
+        try {
+            await axios.post("http://localhost:3000/sessions/start", {
+                purpose: "reservation",
+                current_page: "reservation",
+            });
+        } catch (error) {
+            console.error("예약 세션 생성 실패:", error);
+        }
 
         // ✅ 예매 로그 기록
         addReservationLog({
@@ -39,8 +50,18 @@ const Start = () => {
     };
 
     // 조회 버튼 클릭
-    const handleStartSearch = () => {
+    const handleStartSearch = async () => {
         const sessionId = createHistorySession();
+
+        // ✅ 백엔드 세션 생성
+        try {
+            await axios.post("http://localhost:3000/sessions/start", {
+                purpose: "history",
+                current_page: "phone_number",
+            });
+        } catch (error) {
+            console.error("조회 세션 생성 실패:", error);
+        }
 
         // ✅ Start 페이지에서만 클릭 로그 기록
         addHistoryLog({
