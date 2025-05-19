@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getLatestSessionLogs } from "../utils/session"; // 세션 로그 불러오기 유틸 추가 필요
 import "./TakaBox.css";
+import axios from "axios";
 
 interface Props {
     onClose: () => void;
@@ -25,7 +26,7 @@ const TakaBox = ({ onClose, onSendQuestion }: Props) => {
         }
     }, [isClosing, onClose]);
 
-    const handleQuestionClick = (questionText: string) => {
+    const handleQuestionClick = async (questionText: string) => {
         const session = getLatestSessionLogs();
         if (!session) return;
 
@@ -39,8 +40,19 @@ const TakaBox = ({ onClose, onSendQuestion }: Props) => {
             },
         };
 
-        onSendQuestion(payload);
-        setIsClosing(true);
+        try {
+            // ✅ 백엔드에 POST 요청 보내기
+            await axios.post("http://localhost:3000/llm/ask", {
+                sessionId: session.sessionId,
+                question: questionText,
+            });
+
+            // 요청 후 콜백 실행
+            onSendQuestion(payload);
+            setIsClosing(true);
+        } catch (error) {
+            console.error("LLM 질문 전송 실패:", error);
+        }
     };
 
     return (
