@@ -4,9 +4,7 @@ import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
 import {
     createNewSession,
-    createHistorySession,
     updateHistorySession,
-    createReservationLogSession,
     updateReservationLogSession,
     addReservationLog,
     addHistoryLog,
@@ -18,15 +16,8 @@ const Start = () => {
 
     // 예매 버튼 클릭
     const handleStartReservation = async () => {
-        createNewSession(); // ✅ 예매용 예약 데이터 세션 생성
-        const logSessionId = createReservationLogSession();  // ✅ 예매용 로그 세션 생성
+        createNewSession(); // ✅ 예매 데이터 세션만 생성 (로컬용)
 
-        updateReservationLogSession({
-            previous_pages: [""],
-            location: "Start",
-        });
-
-        // ✅ 백엔드 세션 생성
         let backendSessionId: string | null = null;
 
         try {
@@ -38,6 +29,20 @@ const Start = () => {
 
             if (backendSessionId) {
                 localStorage.setItem("currentReservationBackendSessionId", backendSessionId);
+                updateReservationLogSession({
+                    sessionId: backendSessionId,
+                    previous_pages: [""],
+                    location: "Start",
+                });
+
+                addReservationLog({
+                    sessionId: backendSessionId,
+                    page: "Start",
+                    event: "click",
+                    target_id: "start-to-reservation",
+                    tag: "button",
+                    text: "예매하기 버튼 클릭",
+                });
             } else {
                 console.warn("백엔드에서 sessionId가 반환되지 않음");
             }
@@ -45,28 +50,15 @@ const Start = () => {
             console.error("세션 생성 실패:", error);
         }
 
-        // ✅ 예매 로그 기록
-        addReservationLog({
-            sessionId: logSessionId,
-            page: "Start",
-            event: "click",
-            target_id: "start-to-reservation",
-            tag: "button",
-            text: "예매하기 버튼 클릭",
-        });
-
         navigate("/reservation", {
-            state: { reset: true, sessionId: backendSessionId || logSessionId },
+            state: { reset: true, sessionId: backendSessionId },
         });
     };
 
     // 조회 버튼 클릭
     const handleStartSearch = async () => {
-        const localSessionId = createHistorySession(); // 로컬 세션 생성
-
         let backendSessionId: string | null = null;
 
-        // ✅ 백엔드 세션 생성
         try {
             const response = await axios.post("http://localhost:3000/sessions/start", {
                 purpose: "history",
@@ -75,7 +67,22 @@ const Start = () => {
             backendSessionId = response.data.sessionId;
 
             if (backendSessionId) {
-                localStorage.setItem("currentHistoryBackendSessionId", backendSessionId); // ✅ 저장
+                localStorage.setItem("currentHistoryBackendSessionId", backendSessionId);
+
+                updateHistorySession({
+                    sessionId: backendSessionId,
+                    previous_pages: ["Start"],
+                    location: "PhoneNumber",
+                });
+
+                addHistoryLog({
+                    sessionId: backendSessionId,
+                    page: "Start",
+                    event: "click",
+                    target_id: "start-to-phonenumber",
+                    tag: "button",
+                    text: "조회하기 버튼 클릭",
+                });
             } else {
                 console.warn("백엔드에서 sessionId가 반환되지 않음");
             }
@@ -83,26 +90,10 @@ const Start = () => {
             console.error("조회 세션 생성 실패:", error);
         }
 
-        // ✅ Start 페이지에서만 클릭 로그 기록
-        addHistoryLog({
-            sessionId: localSessionId,
-            page: "Start",
-            event: "click",
-            target_id: "start-to-phonenumber",
-            tag: "button",
-            text: "조회하기 버튼 클릭",
-        });
-
-        updateHistorySession({
-            previous_pages: ["Start"],
-            location: "PhoneNumber",
-        });
-
         navigate("/phonenumber", {
-            state: { sessionId: backendSessionId || localSessionId },
+            state: { sessionId: backendSessionId },
         });
     };
-
 
     return (
         <div>
