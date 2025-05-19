@@ -7,6 +7,7 @@ import {
     updateReservationLogSession,
     addReservationLog,
 } from "../utils/session";
+import axios from "axios";
 
 const End = () => {
     const navigate = useNavigate();
@@ -66,9 +67,22 @@ const End = () => {
         }
     }, [sessionId]);
 
-    const handleConfirm = () => {
+    const handleConfirm = async() => {
         logClick("end-to-home", "확인 클릭 후 메인으로 이동");
         markSessionCompleted();
+        if (sessionId) {
+            try {
+                await axios.patch("http://localhost:3000/sessions/end", {
+                    sessionId,
+                    status: "completed",
+                    end_reason: "booking_completed", // 이거 booking_completed로 꼭 해야 댐..?
+                    current_page: "End",
+                });
+                console.log("세션 종료 성공");
+            } catch (error) {
+                console.error("세션 종료 실패:", error);
+            }
+        }
         navigate("/");
     };
 
