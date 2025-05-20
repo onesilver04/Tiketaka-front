@@ -16,7 +16,7 @@ const Start = () => {
 
     // 예매 버튼 클릭
     const handleStartReservation = async () => {
-        createNewSession(); // ✅ 예매 데이터 세션만 생성 (로컬용)
+        // createNewSession(); // ✅ 예매 데이터 세션만 생성 (로컬용)
 
         let backendSessionId: string | null = null;
 
