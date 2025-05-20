@@ -40,6 +40,7 @@ const BookingDetail = () => {
 
     const [refundDetails, setRefundDetails] = useState<RefundDetails | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     // ✅ 환불 정보 조회 (결제 정보 포함)
     useEffect(() => {
@@ -58,9 +59,10 @@ const BookingDetail = () => {
     useEffect(() => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
         if (!sessionRaw) return;
-
         const session = JSON.parse(sessionRaw);
-        const sessionId = session.sessionId;
+        const sid = session.sessionId;
+        updateHistorySession({ sessionId: sid, current_page: "BookingDetail" });
+        
         const alreadyLogged = session.logs?.some(
             (log: any) =>
                 log.page === "BookingDetail" &&
@@ -70,7 +72,7 @@ const BookingDetail = () => {
 
         if (!alreadyLogged) {
             addHistoryLog({
-                sessionId,
+                sessionId: sid,
                 page: "BookingDetail",
                 event: "navigate",
                 target_id: "page-load",
@@ -84,9 +86,6 @@ const BookingDetail = () => {
     const handleBack = () => navigate(-1);
 
     const handleRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
-
         if (sessionId) {
             addHistoryLog({
                 sessionId,
@@ -98,14 +97,10 @@ const BookingDetail = () => {
                 url: window.location.pathname,
             });
         }
-
         setIsModalOpen(true);
     };
 
     const confirmRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
-
         if (sessionId) {
             addHistoryLog({
                 sessionId,
@@ -116,8 +111,7 @@ const BookingDetail = () => {
                 text: "RefundModal에서 yes 클릭, 환불 성공",
                 url: window.location.pathname,
             });
-
-            updateHistorySession({ end_reason: "refund_success" });
+            updateHistorySession({ sessionId, end_reason: "refund_success" });
         }
 
         // 백엔드 처리와 무관한 localStorage 삭제는 생략하거나 유지 방식 선택
@@ -131,9 +125,6 @@ const BookingDetail = () => {
     };
 
     const cancelRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
-
         if (sessionId) {
             addHistoryLog({
                 sessionId,
