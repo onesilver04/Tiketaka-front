@@ -253,21 +253,29 @@ export const updateReservationLogSession = async (updates: Partial<any>) => {
     if (!raw) return;
     const session = JSON.parse(raw);
     const sessionId = session.sessionId;
+    if (!sessionId) return;
+
     const patchPayload: {
         sessionId: string;
         current_page?: string;
         newPurpose?: "refund";
-    } = { sessionId };
-    if (updates.current_page) patchPayload.current_page = updates.current_page;
-    if (updates.newPurpose) patchPayload.newPurpose = updates.newPurpose;
+    } = {
+        sessionId,
+        current_page: updates.current_page ?? session.current_page ?? "unknown",
+    };
+
+    if (updates.newPurpose) {
+        patchPayload.newPurpose = updates.newPurpose;
+    }
+
     try {
         const response = await axios.patch("http://localhost:3000/sessions/update", patchPayload);
-        const updatedFromServer = response.data;
-        localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updatedFromServer));
+        const updated = response.data;
+        localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updated));
         const sessions = JSON.parse(localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]");
         const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
-        if (index !== -1) sessions[index] = updatedFromServer;
-        else sessions.push(updatedFromServer);
+        if (index !== -1) sessions[index] = updated;
+        else sessions.push(updated);
         localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
     } catch (error) {
         console.error("세션 업데이트 백엔드 전송 실패:", error);
@@ -277,10 +285,10 @@ export const updateReservationLogSession = async (updates: Partial<any>) => {
             last_interaction: new Date().toISOString(),
         };
         localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updated));
-        const sessions = JSON.parse(localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]");
-        const index = sessions.findIndex((s: any) => s.sessionId === updated.sessionId);
-        if (index !== -1) sessions[index] = updated;
-        else sessions.push(updated);
-        localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
+        // const sessions = JSON.parse(localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]");
+        // const index = sessions.findIndex((s: any) => s.sessionId === updated.sessionId);
+        // if (index !== -1) sessions[index] = updated;
+        // else sessions.push(updated);
+        // localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
     }
 };

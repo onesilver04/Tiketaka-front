@@ -1,4 +1,3 @@
-//Reservation.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -7,13 +6,43 @@ import styleb from "../styles/Box.module.css";
 import "../styles/Reservation.css";
 import StationSelector from "./StationSelector";
 import styles from "../styles/Button.module.css";
-import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
+import {
+    updateCurrentSession,
+    addReservationLog,
+    updateReservationLogSession,
+} from "../utils/session";
 import axios from "axios";
 
 const stations = [
-    "선택", "서울", "광명", "수원", "천안", "오송", "대전", "마산", "밀양", "구포",
-    "평창", "강릉", "전주", "목포", "여수", "용산", "원주", "평택", "안동", "서산",
-    "진주", "대구", "동해", "진부", "익산", "부산", "순천", "울산", "창원",
+    "선택",
+    "서울",
+    "광명",
+    "수원",
+    "천안",
+    "오송",
+    "대전",
+    "마산",
+    "밀양",
+    "구포",
+    "평창",
+    "강릉",
+    "전주",
+    "목포",
+    "여수",
+    "용산",
+    "원주",
+    "평택",
+    "안동",
+    "서산",
+    "진주",
+    "대구",
+    "동해",
+    "진부",
+    "익산",
+    "부산",
+    "순천",
+    "울산",
+    "창원",
 ];
 
 interface ReservationData {
@@ -31,45 +60,39 @@ const Reservation = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    const sessionId = (() => {
-        try {
-            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
-        } catch {
-            return null;
-        }
-    })();
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (sessionId) {
-            updateReservationLogSession({
-                location: "Reservation",
-                previous_pages: ["Start"],
+        const raw = localStorage.getItem("currentReservationLogSession");
+        if (!raw) return;
+        const session = JSON.parse(raw);
+        const sid = session?.sessionId;
+        if (!sid) return;
+        setSessionId(sid);
+
+        updateReservationLogSession({
+            sessionId: sid,
+            current_page: "Reservation",
+        });
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "Reservation" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addReservationLog({
+                sessionId: sid,
+                page: "Reservation",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "Reservation 페이지 도착",
             });
-
-            const sessionRaw = localStorage.getItem("currentReservationLogSession");
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                const alreadyLogged = session.logs?.some(
-                    (log: any) =>
-                        log.page === "Reservation" &&
-                        log.event === "navigate" &&
-                        log.target_id === "page-load"
-                );
-
-                if (!alreadyLogged) {
-                    addReservationLog({
-                        sessionId,
-                        page: "Reservation",
-                        event: "navigate",
-                        target_id: "page-load",
-                        tag: "system",
-                        text: "Reservation 페이지 도착",
-                    });
-                }
-            }
         }
-    }, [sessionId]);
+    }, []);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
@@ -79,7 +102,7 @@ const Reservation = () => {
             event: "click",
             target_id,
             tag,
-            text
+            text,
         });
     };
 
@@ -103,17 +126,21 @@ const Reservation = () => {
         return storedData ? JSON.parse(storedData) : null;
     };
 
-    const [reservationData, setReservationData] = useState<ReservationData>(() => {
-        const stored = loadStoredData();
-        return {
-            departureStation: stored?.departureStation || null,
-            destinationStation: stored?.destinationStation || null,
-            departureDate: stored?.departureDate ? new Date(stored.departureDate) : null,
-            adultCount: stored?.adultCount ?? 0,
-            seniorCount: stored?.seniorCount ?? 0,
-            teenCount: stored?.teenCount ?? 0,
-        };
-    });
+    const [reservationData, setReservationData] = useState<ReservationData>(
+        () => {
+            const stored = loadStoredData();
+            return {
+                departureStation: stored?.departureStation || null,
+                destinationStation: stored?.destinationStation || null,
+                departureDate: stored?.departureDate
+                    ? new Date(stored.departureDate)
+                    : null,
+                adultCount: stored?.adultCount ?? 0,
+                seniorCount: stored?.seniorCount ?? 0,
+                teenCount: stored?.teenCount ?? 0,
+            };
+        }
+    );
 
     const {
         departureStation,
@@ -124,7 +151,9 @@ const Reservation = () => {
         teenCount,
     } = reservationData;
 
-    const [showStationSelector, setShowStationSelector] = useState<"departure" | "arrival" | null>(null);
+    const [showStationSelector, setShowStationSelector] = useState<
+        "departure" | "arrival" | null
+    >(null);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
@@ -132,7 +161,10 @@ const Reservation = () => {
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
                 setShowStationSelector(null);
             }
         };
@@ -144,19 +176,38 @@ const Reservation = () => {
         };
     }, [showStationSelector]);
 
-    const handleStationChange = (type: "departure" | "arrival", value: string) => {
-        const id = type === "departure" ? "select-departure-station" : "select-arrival-station";
-        logClick(id, `${type === "departure" ? "출발역" : "도착역"} 선택: ${value}`);
+    const handleStationChange = (
+        type: "departure" | "arrival",
+        value: string
+    ) => {
+        const id =
+            type === "departure"
+                ? "select-departure-station"
+                : "select-arrival-station";
+        logClick(
+            id,
+            `${type === "departure" ? "출발역" : "도착역"} 선택: ${value}`
+        );
         setReservationData((prev) => ({
             ...prev,
-            [type === "departure" ? "departureStation" : "destinationStation"]: value,
+            [type === "departure" ? "departureStation" : "destinationStation"]:
+                value,
         }));
     };
 
     const handleDateChange = (value: Date | Date[] | null) => {
-        const dateValue = value instanceof Date ? value : Array.isArray(value) ? value[0] : null;
+        const dateValue =
+            value instanceof Date
+                ? value
+                : Array.isArray(value)
+                ? value[0]
+                : null;
         if (dateValue) {
-            logClick("calendar-tile", `날짜 선택: ${dateValue.toLocaleDateString()}`, "tile");
+            logClick(
+                "calendar-tile",
+                `날짜 선택: ${dateValue.toLocaleDateString()}`,
+                "tile"
+            );
         }
         setReservationData((prev) => ({
             ...prev,
@@ -168,7 +219,10 @@ const Reservation = () => {
         type: "adultCount" | "seniorCount" | "teenCount",
         delta: number
     ) => {
-        const id = `${delta > 0 ? "increase" : "decrease"}-${type.replace("Count", "")}`;
+        const id = `${delta > 0 ? "increase" : "decrease"}-${type.replace(
+            "Count",
+            ""
+        )}`;
         const labelMap = {
             adultCount: "성인",
             seniorCount: "노약자",
@@ -191,12 +245,14 @@ const Reservation = () => {
         if (!departureStation) return alert("출발역은 필수입니다.");
         if (!destinationStation) return alert("도착역은 필수입니다.");
         if (!departureDate) return alert("날짜는 필수입니다.");
-        if (departureStation === destinationStation) return alert("출발역과 도착역은 서로 달라야 합니다.");
-        if (adultCount + seniorCount + teenCount < 1) return alert("최소 1명 이상의 인원이 필요합니다.");
+        if (departureStation === destinationStation)
+            return alert("출발역과 도착역은 서로 달라야 합니다.");
+        if (adultCount + seniorCount + teenCount < 1)
+            return alert("최소 1명 이상의 인원이 필요합니다.");
 
         const dateObj = new Date(departureDate);
         dateObj.setHours(dateObj.getHours() + 9); // UTC → KST
-        const formattedDate = dateObj.toISOString().split('T')[0];
+        const formattedDate = dateObj.toISOString().split("T")[0];
 
         try {
             const response = await axios.get("http://localhost:3000/trains", {
@@ -206,8 +262,6 @@ const Reservation = () => {
                     date: formattedDate,
                 },
             });
-
-            console.log("서버 응답:", response.data);
 
             const trainList = response.data.trains;
             updateCurrentSession({ reservationData });
@@ -219,7 +273,6 @@ const Reservation = () => {
             alert("열차 정보를 불러오는 데 실패했습니다.");
         }
     };
-
 
     return (
         <div>
@@ -250,7 +303,7 @@ const Reservation = () => {
                                 />
                             </button>
                         </div>
-                        
+
                         <div className="station-selection-arrow">→</div>
 
                         <div className="station-selection">
@@ -305,7 +358,9 @@ const Reservation = () => {
 
                     <div>
                         <h4 className="reservation-detail-select">
-                            <p className="reservation-detail-select-inform">출발일</p>
+                            <p className="reservation-detail-select-inform">
+                                출발일
+                            </p>
                             {departureDate
                                 ? new Date(departureDate).toLocaleDateString()
                                 : "날짜를 선택해주세요."}
@@ -314,28 +369,36 @@ const Reservation = () => {
                             <Calendar
                                 calendarType="gregory"
                                 onChange={(value) =>
-                                    handleDateChange(value as Date | Date[] | null)
+                                    handleDateChange(
+                                        value as Date | Date[] | null
+                                    )
                                 }
                                 value={
-                                    departureDate ? new Date(departureDate) : null
+                                    departureDate
+                                        ? new Date(departureDate)
+                                        : null
                                 }
                                 selectRange={false}
                                 minDate={new Date()} // 지나간 날 막기
                                 tileClassName={({ date: tileDate }) => {
                                     const isSelected =
                                         departureDate &&
-                                        tileDate.toDateString() === new Date(departureDate).toDateString();
-                                
+                                        tileDate.toDateString() ===
+                                            new Date(
+                                                departureDate
+                                            ).toDateString();
+
                                     return isSelected ? "selected-date" : "";
                                 }}
-                                
                             />
                         </div>
                     </div>
 
                     <div>
                         <h4 className="reservation-detail-select">
-                            <p className="reservation-detail-select-inform">인원 선택</p>
+                            <p className="reservation-detail-select-inform">
+                                인원 선택
+                            </p>
                             <span>
                                 성인 {adultCount}명, 노약자 {seniorCount}명,
                                 청소년 {teenCount}명
