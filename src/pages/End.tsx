@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
@@ -7,20 +7,11 @@ import {
     updateReservationLogSession,
     addReservationLog,
 } from "../utils/session";
-import axios from "axios";
+// import axios from "axios";
 
 const End = () => {
     const navigate = useNavigate();
-
-    const sessionId = (() => {
-        try {
-            return JSON.parse(
-                localStorage.getItem("currentReservationLogSession") || "null"
-            )?.sessionId;
-        } catch {
-            return null;
-        }
-    })();
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
@@ -35,39 +26,38 @@ const End = () => {
     };
 
     useEffect(() => {
-        if (sessionId) {
-            updateReservationLogSession({
-                location: "End",
-                previous_pages: ["Payment"],
+        const sessionRaw = localStorage.getItem("currentReservationLogSession");
+        if (!sessionRaw) return;
+        const session = JSON.parse(sessionRaw);
+        const sid = session.sessionId;
+        setSessionId(sid);
+
+        // ✅ current_page 업데이트
+        updateReservationLogSession({
+            sessionId: sid,
+            current_page: "End",
+        });
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "End" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addReservationLog({
+                sessionId: sid,
+                page: "End",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "End 페이지 도착",
             });
-
-            const sessionRaw = localStorage.getItem(
-                "currentReservationLogSession"
-            );
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                const alreadyLogged = session.logs?.some(
-                    (log: { page: string; event: string; target_id: string }) =>
-                        log.page === "End" &&
-                        log.event === "navigate" &&
-                        log.target_id === "page-load"
-                ); // ts에서 any 쓰는 건 ts의 장점을 해치는거고, any 자체에 자꾸 오류나니까 type 위에 처럼 바꿈. 이상하면 다시 log: any로 변경ㄱㄱ
-
-                if (!alreadyLogged) {
-                    addReservationLog({
-                        sessionId,
-                        page: "End",
-                        event: "navigate",
-                        target_id: "page-load",
-                        tag: "system",
-                        text: "End 페이지 도착",
-                    });
-                }
-            }
         }
-    }, [sessionId]);
+    }, []);
 
-    const handleConfirm = async() => {
+    const handleConfirm = async () => {
         logClick("end-to-home", "확인 클릭 후 메인으로 이동");
         markSessionCompleted();
         navigate("/");

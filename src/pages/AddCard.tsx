@@ -24,7 +24,7 @@ const AddCard: React.FC = () => {
     useEffect(() => {
         if (sessionId) {
             updateReservationLogSession({
-                location: "Addcard",
+                current_page: "Addcard",
                 previous_pages: ["Payment"],
             });
 

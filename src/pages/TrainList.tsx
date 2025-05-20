@@ -30,14 +30,7 @@ const TrainList = () => {
 
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
     const [trains, setTrains] = useState<Train[]>([]);
-
-    const sessionId = (() => {
-        try {
-            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
-        } catch {
-            return null;
-        }
-    })();
+    const [sessionId, setSessionId] = useState<string | null>(null); // 세션 아이디 가져옴
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
@@ -52,36 +45,37 @@ const TrainList = () => {
     };
 
     useEffect(() => {
-        if (sessionId) {
-            updateReservationLogSession({
-                location: "TrainList",
-                previous_pages: ["Reservation"],
+        const sessionRaw = localStorage.getItem("currentReservationLogSession");
+        if (!sessionRaw) return;
+
+        const session = JSON.parse(sessionRaw);
+        const sid = session.sessionId;
+        setSessionId(sid);
+
+        updateReservationLogSession({
+            sessionId: sid,
+            current_page: "TrainList",
+        });
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "TrainList" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addReservationLog({
+                sessionId: sid,
+                page: "TrainList",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "TrainList 페이지 도착",
             });
-
-            const sessionRaw = localStorage.getItem("currentReservationLogSession");
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                const alreadyLogged = session.logs?.some(
-                    (log: any) =>
-                        log.page === "TrainList" &&
-                        log.event === "navigate" &&
-                        log.target_id === "page-load"
-                );
-
-                if (!alreadyLogged) {
-                    addReservationLog({
-                        sessionId,
-                        page: "TrainList",
-                        event: "navigate",
-                        target_id: "page-load",
-                        tag: "system",
-                        text: "TrainList 페이지 도착",
-                    });
-                }
-            }
         }
-    }, [sessionId]);
-
+    }, []);
+    
     useEffect(() => {
         const fetchTrains = async () => {
             try {
@@ -112,7 +106,6 @@ const TrainList = () => {
                 console.error("기차 정보 요청 실패:", err);
             }
         };
-
         fetchTrains();
     }, [reservationData]);
 
@@ -144,10 +137,6 @@ const TrainList = () => {
             },
         });
     };
-
-    useEffect(() => {
-    console.log("trainIds", trains.map(t => t.trainId));
-    }, [trains]);
 
     return (
         <div>

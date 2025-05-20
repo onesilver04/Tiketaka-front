@@ -9,42 +9,43 @@ import PhoneModal from "../components/PhoneModal";
 const PhoneNumber = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const sessionId = location.state?.sessionId;
-
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const [inputDigits, setInputDigits] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // ✅ useEffect: sessionId가 존재하면 로그 기록
     useEffect(() => {
-        if (!sessionId) return;
-
         const raw = localStorage.getItem("currentHistorySession");
-        if (raw) {
-            const session = JSON.parse(raw);
-            const alreadyLogged = session.logs?.some(
-                (log: any) =>
-                    log.page === "PhoneNumber" &&
-                    log.event === "navigate" &&
-                    log.target_id === "page-load"
-            );
+        if (!raw) return;
 
-            if (!alreadyLogged) {
-                addHistoryLog({
-                    sessionId,
-                    page: "PhoneNumber",
-                    event: "navigate",
-                    target_id: "page-load",
-                    tag: "system",
-                    text: "PhoneNumber 페이지 도착",
-                });
-            }
-        }
+        const session = JSON.parse(raw);
+        const sid = session.sessionId;
+        setSessionId(sid);
 
         updateHistorySession({
-            location: "PhoneNumber",
+            sessionId: sid,
+            current_page: "PhoneNumber",
             previous_pages: ["Start"],
         });
-    }, [sessionId]);
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "PhoneNumber" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addHistoryLog({
+                sessionId: sid,
+                page: "PhoneNumber",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "PhoneNumber 페이지 도착",
+            });
+        }
+    }, []);
 
     const handleNumberClick = (num: string) => {
         if (inputDigits.length >= 11) return;
@@ -74,7 +75,7 @@ const PhoneNumber = () => {
                 event: "click",
                 target_id: "delete-button",
                 tag: "button",
-                text: `전화번호 지움: ${newDigits}`,
+                text: `번호 지움: ${newDigits}`,
             });
         }
     };

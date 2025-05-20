@@ -41,11 +41,13 @@ const SelectSeat = () => {
     })();
 
     useEffect(() => {
-        if (sessionId) {
-            updateReservationLogSession({
-                location: "SelectSeat",
-                previous_pages: ["TrainList"],
-            });
+        if (!sessionId) return;
+
+        updateReservationLogSession({
+            sessionId,
+            current_page: "SelectSeat",
+            previous_pages: ["TrainList"],
+        });
 
             const sessionRaw = localStorage.getItem("currentReservationLogSession");
             if (sessionRaw) {
@@ -67,7 +69,6 @@ const SelectSeat = () => {
                         text: "SelectSeat 페이지 도착",
                     });
                 }
-            }
         }
     }, [sessionId]);
 

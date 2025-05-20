@@ -56,43 +56,47 @@ const History = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const navigate = useNavigate();
-    const sessionId = location.state?.sessionId;
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (sessionId) {
-            updateHistorySession({
-                location: "History",
-                previous_pages: ["PhoneNumber"],
+        const sessionRaw = localStorage.getItem("currentHistorySession");
+        if (!sessionRaw) return;
+
+        const session = JSON.parse(sessionRaw);
+        const sid = session.sessionId;
+        setSessionId(sid);
+
+        updateHistorySession({
+            sessionId: sid,
+            current_page: "History",
+            previous_pages: ["PhoneNumber"],
+        });
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "History" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addHistoryLog({
+                sessionId: sid,
+                page: "History",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "History 페이지 도착",
             });
-
-            const sessionRaw = localStorage.getItem("currentHistorySession");
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                const alreadyLogged = session.logs?.some(
-                    (log: any) =>
-                        log.page === "History" &&
-                        log.event === "navigate" &&
-                        log.target_id === "page-load"
-                );
-
-                if (!alreadyLogged) {
-                    addHistoryLog({
-                        sessionId,
-                        page: "History",
-                        event: "navigate",
-                        target_id: "page-load",
-                        tag: "system",
-                        text: "History 페이지 도착",
-                    });
-                }
-            }
         }
 
-        // ✅ 헤더 클릭 감지용 이벤트 리스너 등록
         const onClickHeader = (e: MouseEvent) => {
-            const headerEl = (e.target as HTMLElement)?.closest(".header-container");
-            if (headerEl && sessionId) {
+            const headerEl = (e.target as HTMLElement)?.closest(
+                ".header-container"
+            );
+            if (headerEl && sid) {
                 updateHistorySession({
+                    sessionId: sid,
                     status: "complete",
                     purpose: "history",
                     end_reason: "history_complete",
@@ -103,8 +107,8 @@ const History = () => {
 
         document.addEventListener("click", onClickHeader);
         return () => document.removeEventListener("click", onClickHeader);
-    }, [sessionId]);
-
+    }, []);
+    
     const toggleSelect = (id: string) => {
         setSelected((prev) =>
             prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]

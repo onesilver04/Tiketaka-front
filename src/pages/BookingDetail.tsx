@@ -38,29 +38,20 @@ const BookingDetail = () => {
     const locationState = location.state as LocationState | null;
     const reservationId = locationState?.reservations?.[0]?.reservationId ?? "";
 
-    const [refundDetails, setRefundDetails] = useState<RefundDetails | null>(null);
+    const [refundDetails, setRefundDetails] = useState<RefundDetails | null>(
+        null
+    );
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
-    // ✅ 환불 정보 조회 (결제 정보 포함)
-    useEffect(() => {
-        if (!reservationId) return;
-
-        axios
-            .get(`http://localhost:3000/refunds/${reservationId}`)
-            .then((res) => setRefundDetails(res.data))
-            .catch((err) => {
-                console.error("환불 정보 조회 실패:", err);
-                setRefundDetails(null);
-            });
-    }, [reservationId]);
-
-    // ✅ 페이지 방문 로그 기록
+    // ✅ 세션 ID를 백엔드에서 받아오기
     useEffect(() => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
         if (!sessionRaw) return;
 
         const session = JSON.parse(sessionRaw);
-        const sessionId = session.sessionId;
+        setSessionId(session.sessionId);
+
         const alreadyLogged = session.logs?.some(
             (log: any) =>
                 log.page === "BookingDetail" &&
@@ -70,192 +61,221 @@ const BookingDetail = () => {
 
         if (!alreadyLogged) {
             addHistoryLog({
-                sessionId,
+                sessionId: session.sessionId,
                 page: "BookingDetail",
                 event: "navigate",
                 target_id: "page-load",
                 tag: "system",
                 text: "BookingDetail 페이지 도착",
-                url: window.location.pathname,
             });
         }
+
+        updateHistorySession({
+            sessionId: session.sessionId,
+            current_page: "BookingDetail",
+        });
     }, []);
 
-    const handleBack = () => navigate(-1);
+// ✅ 환불 정보 조회 (결제 정보 포함)
+useEffect(() => {
+    if (!reservationId) return;
 
-    const handleRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
+    axios
+        .get(`http://localhost:3000/refunds/${reservationId}`)
+        .then((res) => setRefundDetails(res.data))
+        .catch((err) => {
+            console.error("환불 정보 조회 실패:", err);
+            setRefundDetails(null);
+        });
+}, [reservationId]);
 
-        if (sessionId) {
-            addHistoryLog({
-                sessionId,
-                page: "BookingDetail",
-                event: "click",
-                target_id: "detail-to-refund",
-                tag: "button",
-                text: "bookingdetail에서 환불하기 버튼 클릭",
-                url: window.location.pathname,
-            });
-        }
+// ✅ 페이지 방문 로그 기록
+// useEffect(() => {
+//     const sessionRaw = localStorage.getItem("currentHistorySession");
+//     if (!sessionRaw) return;
 
-        setIsModalOpen(true);
-    };
+//     const session = JSON.parse(sessionRaw);
+//     const sessionId = session.sessionId;
+//     const alreadyLogged = session.logs?.some(
+//         (log: any) =>
+//             log.page === "BookingDetail" &&
+//             log.event === "navigate" &&
+//             log.target_id === "page-load"
+//     );
 
-    const confirmRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
+//     if (!alreadyLogged) {
+//         addHistoryLog({
+//             sessionId,
+//             page: "BookingDetail",
+//             event: "navigate",
+//             target_id: "page-load",
+//             tag: "system",
+//             text: "BookingDetail 페이지 도착",
+//             url: window.location.pathname,
+//         });
+//     }
+// }, []);
 
-        if (sessionId) {
-            addHistoryLog({
-                sessionId,
-                page: "RefundModal",
-                event: "click",
-                target_id: "refundModal-yes-to-success",
-                tag: "button",
-                text: "RefundModal에서 yes 클릭, 환불 성공",
-                url: window.location.pathname,
-            });
+const handleBack = () => navigate(-1);
 
-            updateHistorySession({ end_reason: "refund_success" });
-        }
+const handleRefund = () => {
+    if (sessionId) {
+        addHistoryLog({
+            sessionId,
+            page: "BookingDetail",
+            event: "click",
+            target_id: "detail-to-refund",
+            tag: "button",
+            text: "bookingdetail에서 환불하기 버튼 클릭",
+        });
+    }
+    setIsModalOpen(true);
+};
 
-        // 백엔드 처리와 무관한 localStorage 삭제는 생략하거나 유지 방식 선택
-        setIsModalOpen(false);
-        navigate("/history/refund-success", {
-            state: {
-                reservations: [{ reservationId }], // 배열로 감싸야 RefundSuccess에서 map 가능
-            },
+const confirmRefund = () => {
+    if (sessionId) {
+        addHistoryLog({
+            sessionId, // 백엔드에서 받은 세션 ID
+            page: "RefundModal",
+            event: "click",
+            target_id: "refundModal-yes-to-success",
+            tag: "button",
+            text: "RefundModal에서 yes 클릭, 환불 성공",
         });
 
-    };
+        updateHistorySession({
+            sessionId, // 세션 상태 업데이트
+            end_reason: "refund_success",
+        });
+    }
 
-    const cancelRefund = () => {
-        const session = JSON.parse(localStorage.getItem("currentHistorySession") || "{}");
-        const sessionId = session?.sessionId;
+    // 백엔드 처리와 무관한 localStorage 삭제는 생략하거나 유지 방식 선택
+    setIsModalOpen(false);
+    navigate("/history/refund-success", {
+        state: {
+            reservations: [{ reservationId }], // 배열로 감싸야 RefundSuccess에서 map 가능
+        },
+    });
+};
 
-        if (sessionId) {
-            addHistoryLog({
-                sessionId,
-                page: "RefundModal",
-                event: "click",
-                target_id: "refundModal-no-to-success",
-                tag: "button",
-                text: "RefundModal에서 no 클릭으로 환불 취소",
-                url: window.location.pathname,
-            });
-        }
+const cancelRefund = () => {
+    if (sessionId) {
+        addHistoryLog({
+            sessionId,
+            page: "RefundModal",
+            event: "click",
+            target_id: "refundModal-no-to-success",
+            tag: "button",
+            text: "RefundModal에서 no 클릭으로 환불 취소",
+        });
+    }
+    setIsModalOpen(false);
+};
 
-        setIsModalOpen(false);
-    };
+return (
+    <>
+        <div
+            className={`${styleb.box} detail-box ${
+                isModalOpen ? "blurred" : ""
+            }`}
+        >
+            <h3 className="page-title">티켓 상세 내역</h3>
+            <hr className="page-title-bar" />
 
-    return (
-        <>
-            <div
-                className={`${styleb.box} detail-box ${
-                    isModalOpen ? "blurred" : ""
-                }`}
-            >
-                <h3 className="page-title">티켓 상세 내역</h3>
-                <hr className="page-title-bar" />
-
-                {refundDetails && (
-                    <>
-                        <div className="route-box">
-                            <div className="route-detail">
-                                <p>출발</p>
-                                <p className="booking-detail-station">
-                                    {refundDetails.departure}역
-                                </p>
-                                <span>{refundDetails.departureTime}</span>
-                            </div>
-                            <span className="arrow">→</span>
-                            <div className="route-detail">
-                                <p>도착</p>
-                                <p className="booking-detail-station">
-                                    {refundDetails.arrival}역
-                                </p>
-                                <span>{refundDetails.arrivalTime}</span>
-                            </div>
-                        </div>
-
-                        <div className="passenger-info">
-                            <p>
-                                <strong>
-                                    총 인원 수:{" "}
-                                    {refundDetails.passengerCount.total}명
-                                </strong>
+            {refundDetails && (
+                <>
+                    <div className="route-box">
+                        <div className="route-detail">
+                            <p>출발</p>
+                            <p className="booking-detail-station">
+                                {refundDetails.departure}역
                             </p>
-                            <p>성인: {refundDetails.passengerCount.adult}</p>
-                            <p>노약자: {refundDetails.passengerCount.senior}</p>
-                            <p>어린이: {refundDetails.passengerCount.youth}</p>
+                            <span>{refundDetails.departureTime}</span>
                         </div>
+                        <span className="arrow">→</span>
+                        <div className="route-detail">
+                            <p>도착</p>
+                            <p className="booking-detail-station">
+                                {refundDetails.arrival}역
+                            </p>
+                            <span>{refundDetails.arrivalTime}</span>
+                        </div>
+                    </div>
 
-                        <hr className="page-title-bar" />
-
-                        <div className="price-info">
+                    <div className="passenger-info">
+                        <p>
                             <strong>
-                                총 환불액:{" "}
-                                {refundDetails.refundAmount.toLocaleString()}원
+                                총 인원 수: {refundDetails.passengerCount.total}
+                                명
                             </strong>
-                        </div>
+                        </p>
+                        <p>성인: {refundDetails.passengerCount.adult}</p>
+                        <p>노약자: {refundDetails.passengerCount.senior}</p>
+                        <p>어린이: {refundDetails.passengerCount.youth}</p>
+                    </div>
 
-                        {refundDetails.paymentMethod.type === "card" ? (
-                            <>
-                                <p className="title-card-info">카드 정보</p>
-                                <hr className="page-title-bar" />
-                                <div className="card-number">
-                                    <p>카드 번호</p>
-                                    <p className="card-number-info">
-                                        <strong>
-                                            {refundDetails.paymentMethod.cardNumber.replace(
-                                                /\d{4}$/,
-                                                "****"
-                                            )}
-                                        </strong>
-                                    </p>
-                                </div>
-                            </>
-                        ) : ( // 결제 수단이 카카오페이나 휴대폰 결제인 경우
-                            <>
-                                <p className="title-card-info">
-                                    {refundDetails.paymentMethod.type ===
-                                    "kakao"
-                                        ? "카카오페이"
-                                        : refundDetails.paymentMethod.type ===
-                                          "mobile"
-                                        ? "휴대폰 결제"
-                                        : "결제 정보"}
+                    <hr className="page-title-bar" />
+
+                    <div className="price-info">
+                        <strong>
+                            총 환불액:{" "}
+                            {refundDetails.refundAmount.toLocaleString()}원
+                        </strong>
+                    </div>
+
+                    {refundDetails.paymentMethod.type === "card" ? (
+                        <>
+                            <p className="title-card-info">카드 정보</p>
+                            <hr className="page-title-bar" />
+                            <div className="card-number">
+                                <p>카드 번호</p>
+                                <p className="card-number-info">
+                                    <strong>
+                                        {refundDetails.paymentMethod.cardNumber.replace(
+                                            /\d{4}$/,
+                                            "****"
+                                        )}
+                                    </strong>
                                 </p>
-                            </>
-                        )}
-                    </>
-                )}
-            </div>
-
-            <button
-                id="detail-to-history"
-                className={`${styles.button} detail-to-history`}
-                onClick={handleBack}
-            >
-                이전
-            </button>
-            <button
-                id="detail-to-refund"
-                className={`${styles.button} detail-to-refund`}
-                onClick={handleRefund}
-            >
-                환불하기
-            </button>
-
-            {isModalOpen && (
-                <RefundModal
-                    onConfirm={confirmRefund}
-                    onCancel={cancelRefund}
-                />
+                            </div>
+                        </>
+                    ) : (
+                        // 결제 수단이 카카오페이나 휴대폰 결제인 경우
+                        <>
+                            <p className="title-card-info">
+                                {refundDetails.paymentMethod.type === "kakao"
+                                    ? "카카오페이"
+                                    : refundDetails.paymentMethod.type ===
+                                      "mobile"
+                                    ? "휴대폰 결제"
+                                    : "결제 정보"}
+                            </p>
+                        </>
+                    )}
+                </>
             )}
-        </>
-    );
+        </div>
+
+        <button
+            id="detail-to-history"
+            className={`${styles.button} detail-to-history`}
+            onClick={handleBack}
+        >
+            이전
+        </button>
+        <button
+            id="detail-to-refund"
+            className={`${styles.button} detail-to-refund`}
+            onClick={handleRefund}
+        >
+            환불하기
+        </button>
+
+        {isModalOpen && (
+            <RefundModal onConfirm={confirmRefund} onCancel={cancelRefund} />
+        )}
+    </>
+);
 };
 
 export default BookingDetail;

@@ -23,16 +23,16 @@ const Start = () => {
         try {
             const response = await axios.post("http://localhost:3000/sessions/start", {
                 purpose: "reservation",
-                current_page: "reservation",
+                current_page: "Reservation",
             });
             backendSessionId = response.data.sessionId;
 
             if (backendSessionId) {
-                localStorage.setItem("currentReservationBackendSessionId", backendSessionId);
+                localStorage.setItem("currentReservationBackendSessionId", backendSessionId); // ID만 저장
                 updateReservationLogSession({
                     sessionId: backendSessionId,
                     previous_pages: [""],
-                    location: "Start",
+                    current_page: "Start",
                 });
 
                 addReservationLog({
@@ -62,9 +62,10 @@ const Start = () => {
         try {
             const response = await axios.post("http://localhost:3000/sessions/start", {
                 purpose: "history",
-                current_page: "phone_number",
+                current_page: "PhoneNnumber",
             });
             const sessionData = response.data;
+            localStorage.setItem("currentHistorySession", JSON.stringify(sessionData)); // sessionid 로컬에 저장
             backendSessionId = sessionData.sessionId;
 
             if (backendSessionId) {
@@ -75,7 +76,7 @@ const Start = () => {
                 updateHistorySession({
                     sessionId: backendSessionId,
                     previous_pages: ["Start"],
-                    location: "PhoneNumber",
+                    current_page: "PhoneNumber",
                 });
 
                 // ✅ 로그 기록

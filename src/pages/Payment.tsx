@@ -37,45 +37,40 @@ interface TrainInfo {
 const Payment: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
-    const sessionId = (() => {
-        try {
-            return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
-        } catch {
-            return null;
-        }
-    })();
-
+    // ✅ 서버에서 세션 ID 가져오고 current_page 업데이트 + 로그 기록
     useEffect(() => {
-        if (sessionId) {
-            updateReservationLogSession({
-                location: "Payment",
-                previous_pages: ["SelectSeat"],
+        const sessionRaw = localStorage.getItem("currentReservationLogSession");
+        if (!sessionRaw) return;
+
+        const session = JSON.parse(sessionRaw);
+        const sid = session.sessionId;
+        setSessionId(sid);
+
+        updateReservationLogSession({
+            sessionId: sid,
+            current_page: "Payment",
+        });
+
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "Payment" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
+
+        if (!alreadyLogged) {
+            addReservationLog({
+                sessionId: sid,
+                page: "Payment",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "Payment 페이지 도착",
             });
-
-            const sessionRaw = localStorage.getItem("currentReservationLogSession");
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                const alreadyLogged = session.logs?.some(
-                    (log: any) =>
-                        log.page === "Payment" &&
-                        log.event === "navigate" &&
-                        log.target_id === "page-load"
-                );
-
-                if (!alreadyLogged) {
-                    addReservationLog({
-                        sessionId,
-                        page: "Payment",
-                        event: "navigate",
-                        target_id: "page-load",
-                        tag: "system",
-                        text: "Payment 페이지 도착",
-                    });
-                }
-            }
         }
-    }, [sessionId]);
+    }, []);
 
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
