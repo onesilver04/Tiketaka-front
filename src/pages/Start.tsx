@@ -97,13 +97,6 @@ const handleStartReservation = async () => {
                 // ✅ reservation처럼 전체 세션 구조 저장
                 localStorage.setItem("currentHistorySession", JSON.stringify(sessionData));
 
-                // ✅ 이전 페이지, 현재 위치 업데이트
-                updateHistorySession({
-                    sessionId: backendSessionId,
-                    previous_pages: ["Start"],
-                    location: "Start",
-                });
-
                 // ✅ 로그 기록
                 addHistoryLog({
                     sessionId: backendSessionId,
