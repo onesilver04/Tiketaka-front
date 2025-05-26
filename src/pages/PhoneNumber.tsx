@@ -18,6 +18,13 @@ const PhoneNumber = () => {
     useEffect(() => {
         if (!sessionId) return;
 
+        // 1. 먼저 백엔드 세션 상태 업데이트
+        updateHistorySession({
+            location: "PhoneNumber",
+            previous_pages: ["Start"],
+        });
+
+        // 2. 그런 다음 로컬 세션 정보 가져와서 로그 추가
         const raw = localStorage.getItem("currentHistorySession");
         if (raw) {
             const session = JSON.parse(raw);

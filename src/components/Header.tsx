@@ -23,7 +23,7 @@ const Header = () => {
                 await axios.patch("http://localhost:3000/sessions/end", {
                     sessionId,
                     status: "completed",
-                    end_reason: "booking_aborted", // 또는 session_abandoned
+                    end_reason: "click_header", // 또는 session_abandoned
                     current_page: "Start",
                 });
                 localStorage.removeItem("currentReservationLogSession");
