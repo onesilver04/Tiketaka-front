@@ -15,55 +15,89 @@ const Start = () => {
     const navigate = useNavigate();
 
     // 예매 버튼 클릭
-    const handleStartReservation = async () => {
-        // createNewSession(); // ✅ 예매 데이터 세션만 생성 (로컬용)
+const handleStartReservation = async () => {
+    let backendSessionId: string | null = null;
 
-        let backendSessionId: string | null = null;
-
-        try {
-            const response = await axios.post("http://localhost:3000/sessions/start", {
+    try {
+        const response = await axios.post(
+            "http://localhost:3000/sessions/start",
+            {
                 purpose: "reservation",
                 current_page: "reservation",
-            });
-            backendSessionId = response.data.sessionId;
-
-            if (backendSessionId) {
-                localStorage.setItem("currentReservationBackendSessionId", backendSessionId);
-                updateReservationLogSession({
-                    sessionId: backendSessionId,
-                    previous_pages: [""],
-                    location: "Start",
-                });
-
-                addReservationLog({
-                    sessionId: backendSessionId,
-                    page: "Start",
-                    event: "click",
-                    target_id: "start-to-reservation",
-                    tag: "button",
-                    text: "예매하기 버튼 클릭",
-                });
-            } else {
-                console.warn("백엔드에서 sessionId가 반환되지 않음");
             }
-        } catch (error) {
-            console.error("세션 생성 실패:", error);
-        }
+        );
 
-        navigate("/reservation", {
-            state: { reset: true, sessionId: backendSessionId },
-        });
-    };
+        const sessionData = response.data;
+        backendSessionId = sessionData.sessionId;
+
+        if (backendSessionId) {
+            // ✅ 새로운 세션 객체 구성
+            const newSession = {
+                sessionId: backendSessionId,
+                status: "active",
+                purpose: "reservation",
+                current_page: "reservation",
+                start_time: new Date().toISOString(),
+                last_interaction: new Date().toISOString(),
+                previous_pages: [],
+                logs: [],
+            };
+
+            // ✅ 현재 세션 저장 (로그 추적용)
+            localStorage.setItem(
+                "currentReservationLogSession",
+                JSON.stringify(newSession)
+            );
+
+            // ✅ 전체 세션 목록에 추가
+            const allSessions = JSON.parse(
+                localStorage.getItem("reservationLogSessions") || "[]"
+            );
+            allSessions.push(newSession);
+            localStorage.setItem(
+                "reservationLogSessions",
+                JSON.stringify(allSessions)
+            );
+
+            // ✅ 페이지 위치 업데이트
+            await updateReservationLogSession({
+                sessionId: backendSessionId,
+                current_page: "reservation",
+            });
+
+            // ✅ 클릭 로그 추가
+            addReservationLog({
+                sessionId: backendSessionId,
+                page: "Start",
+                event: "click",
+                target_id: "start-to-reservation",
+                tag: "button",
+                text: "예매하기 버튼 클릭",
+            });
+        } else {
+            console.warn("백엔드에서 sessionId가 반환되지 않음");
+        }
+    } catch (error) {
+        console.error("세션 생성 실패:", error);
+    }
+
+    navigate("/reservation", {
+        state: { reset: true, sessionId: backendSessionId },
+    });
+};
     
     // 조회 버튼 클릭
     const handleStartSearch = async () => {
         let backendSessionId: string | null = null;
 
         try {
-            const response = await axios.post("http://localhost:3000/sessions/start", {
-                purpose: "history",
-                current_page: "phone_number",
-            });
+            const response = await axios.post(
+                "http://localhost:3000/sessions/start",
+                {
+                    purpose: "history",
+                    current_page: "start",
+                }
+            );
             const sessionData = response.data;
             backendSessionId = sessionData.sessionId;
 

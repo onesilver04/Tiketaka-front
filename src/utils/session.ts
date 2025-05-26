@@ -69,6 +69,8 @@ export const markSessionCompleted = async () => {
     if (!session) return;
     updateCurrentSession({ completed: true });
     localStorage.removeItem(CURRENT_SESSION_KEY);
+    localStorage.removeItem(RESERVATION_LOG_SESSION_KEY);
+
     const sessionId = session.sessionId || session.id?.toString?.();
     if (!sessionId) return;
     try {
@@ -121,19 +123,41 @@ export const markHistorySessionCompleted = async ({
 // ✅ 히스토리 세션 상태 업데이트
 export const updateHistorySession = async (updates: Partial<any>) => {
     const raw = localStorage.getItem(HISTORY_SESSION_KEY);
-    if (!raw) return;
-    const session = JSON.parse(raw);
+    const now = new Date().toISOString();
+
+    let session: any;
+    if (raw) {
+        session = JSON.parse(raw);
+    } else if (updates.sessionId) {
+        session = {
+            sessionId: updates.sessionId,
+            status: "active",
+            purpose: "history",
+            current_page: updates.current_page ?? "unknown",
+            start_time: now,
+            last_interaction: now,
+            previous_pages: [],
+            logs: [],
+        };
+    } else {
+        return;
+    }
+
     const sessionId = session.sessionId;
+
     const patchPayload: {
         sessionId: string;
         current_page?: string;
         newPurpose?: "refund";
     } = { sessionId };
+
     if (updates.current_page) patchPayload.current_page = updates.current_page;
     if (updates.newPurpose) patchPayload.newPurpose = updates.newPurpose;
+
     try {
         const response = await axios.patch("http://localhost:3000/sessions/update", patchPayload);
         const updated = response.data;
+
         localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(updated));
         const sessions = JSON.parse(localStorage.getItem(HISTORY_SESSIONS_KEY) || "[]");
         const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
@@ -141,11 +165,12 @@ export const updateHistorySession = async (updates: Partial<any>) => {
         else sessions.push(updated);
         localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(sessions));
     } catch (error) {
-        console.error("히스토리 세션 PATCH 실패:", error);
+        console.error("히스토리 세션 업데이트 실패:", error);
+
         const updated = {
             ...session,
             ...updates,
-            last_interaction: new Date().toISOString(),
+            last_interaction: now,
         };
         localStorage.setItem(HISTORY_SESSION_KEY, JSON.stringify(updated));
     }
@@ -250,10 +275,28 @@ export const addReservationLog = ({
 // ✅ 예매 세션 상태 업데이트
 export const updateReservationLogSession = async (updates: Partial<any>) => {
     const raw = localStorage.getItem(RESERVATION_LOG_SESSION_KEY);
-    if (!raw) return;
-    const session = JSON.parse(raw);
+    const now = new Date().toISOString();
+
+    let session: any;
+    if (raw) {
+        session = JSON.parse(raw);
+    } else if (updates.sessionId) {
+        // 새 세션 초기화
+        session = {
+            sessionId: updates.sessionId,
+            status: "active",
+            purpose: "reservation",
+            current_page: updates.current_page ?? "unknown",
+            start_time: now,
+            last_interaction: now,
+            previous_pages: [],
+            logs: [],
+        };
+    } else {
+        return; // sessionId가 없으면 아무것도 못함
+    }
+
     const sessionId = session.sessionId;
-    if (!sessionId) return;
 
     const patchPayload: {
         sessionId: string;
@@ -261,34 +304,30 @@ export const updateReservationLogSession = async (updates: Partial<any>) => {
         newPurpose?: "refund";
     } = {
         sessionId,
-        current_page: updates.current_page ?? session.current_page ?? "unknown",
+        current_page: updates.current_page ?? session.current_page,
     };
 
-    if (updates.newPurpose) {
-        patchPayload.newPurpose = updates.newPurpose;
-    }
+    if (updates.newPurpose) patchPayload.newPurpose = updates.newPurpose;
 
     try {
         const response = await axios.patch("http://localhost:3000/sessions/update", patchPayload);
         const updated = response.data;
+
         localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updated));
+
         const sessions = JSON.parse(localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]");
         const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
         if (index !== -1) sessions[index] = updated;
         else sessions.push(updated);
         localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
     } catch (error) {
-        console.error("세션 업데이트 백엔드 전송 실패:", error);
+        console.error("세션 업데이트 실패:", error);
+
         const updated = {
             ...session,
             ...updates,
-            last_interaction: new Date().toISOString(),
+            last_interaction: now,
         };
         localStorage.setItem(RESERVATION_LOG_SESSION_KEY, JSON.stringify(updated));
-        // const sessions = JSON.parse(localStorage.getItem(RESERVATION_LOG_SESSIONS_KEY) || "[]");
-        // const index = sessions.findIndex((s: any) => s.sessionId === updated.sessionId);
-        // if (index !== -1) sessions[index] = updated;
-        // else sessions.push(updated);
-        // localStorage.setItem(RESERVATION_LOG_SESSIONS_KEY, JSON.stringify(sessions));
     }
 };
