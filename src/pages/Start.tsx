@@ -23,7 +23,7 @@ const handleStartReservation = async () => {
             "http://localhost:3000/sessions/start",
             {
                 purpose: "reservation",
-                current_page: "reservation",
+                current_page: "start",
             }
         );
 
@@ -36,7 +36,7 @@ const handleStartReservation = async () => {
                 sessionId: backendSessionId,
                 status: "active",
                 purpose: "reservation",
-                current_page: "reservation",
+                current_page: "start",
                 start_time: new Date().toISOString(),
                 last_interaction: new Date().toISOString(),
                 previous_pages: [],
@@ -62,7 +62,7 @@ const handleStartReservation = async () => {
             // ✅ 페이지 위치 업데이트
             await updateReservationLogSession({
                 sessionId: backendSessionId,
-                current_page: "reservation",
+                current_page: "start",
             });
 
             // ✅ 클릭 로그 추가

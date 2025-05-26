@@ -14,7 +14,7 @@ const Header = () => {
         if (!isClickable) return;
         // 1. 예약 세션 종료
         const reservationRaw = localStorage.getItem(
-            "currentReservationSession"
+            "currentReservationLogSession"
         );
         if (reservationRaw) {
             const session = JSON.parse(reservationRaw);
@@ -24,9 +24,9 @@ const Header = () => {
                     sessionId,
                     status: "completed",
                     end_reason: "booking_aborted", // 또는 session_abandoned
-                    current_page: "Header",
+                    current_page: "Start",
                 });
-                localStorage.removeItem("currentReservationSession");
+                localStorage.removeItem("currentReservationLogSession");
             } catch (error) {
                 console.error("예약 세션 종료 실패:", error);
             }
@@ -42,7 +42,7 @@ const Header = () => {
 
             await markHistorySessionCompleted({
                 end_reason,
-                current_page: "Header",
+                current_page: "Start",
             });
         }
 
