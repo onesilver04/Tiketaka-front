@@ -3,6 +3,7 @@ import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
 import {
+    updateHistorySession,
     addReservationLog,
     addHistoryLog, // 로그 기록 함수
 } from "../utils/session";
@@ -97,11 +98,11 @@ const handleStartReservation = async () => {
                 localStorage.setItem("currentHistorySession", JSON.stringify(sessionData));
 
                 // ✅ 이전 페이지, 현재 위치 업데이트
-                // updateHistorySession({
-                //     sessionId: backendSessionId,
-                //     previous_pages: ["Start"],
-                //     location: "PhoneNumber",
-                // });
+                updateHistorySession({
+                    sessionId: backendSessionId,
+                    previous_pages: ["Start"],
+                    location: "Start",
+                });
 
                 // ✅ 로그 기록
                 addHistoryLog({

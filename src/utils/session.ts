@@ -63,27 +63,6 @@ export const updateCurrentSession = (updates: Partial<any>) => {
     }
 };
 
-// ✅ 예매 세션 종료
-// export const markSessionCompleted = async () => {
-//     const session = getCurrentSession();
-//     if (!session) return;
-//     updateCurrentSession({ completed: true });
-//     localStorage.removeItem(CURRENT_SESSION_KEY);
-//     localStorage.removeItem(RESERVATION_LOG_SESSION_KEY);
-
-//     const sessionId = session.sessionId || session.id?.toString?.();
-//     if (!sessionId) return;
-//     try {
-//         await axios.patch("http://localhost:3000/sessions/end", {
-//             sessionId,
-//             status: "completed",
-//             end_reason: "booking_completed",
-//             current_page: "end",
-//         });
-//     } catch (error) {
-//         console.error("세션 종료 요청 실패:", error);
-//     }
-// };
 
 export const markSessionCompleted = async () => {
     // ✅ reservation 로그 세션 기준으로 동작
@@ -107,7 +86,7 @@ export const markSessionCompleted = async () => {
             sessionId,
             status: "completed",
             end_reason: "booking_completed",
-            current_page: "end",
+            current_page: "Start",
         });
     } catch (error) {
         console.error("세션 종료 요청 실패:", error);
