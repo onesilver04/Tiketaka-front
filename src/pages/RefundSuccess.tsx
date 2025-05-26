@@ -74,7 +74,7 @@ const RefundSuccess = () => {
                     sessionId,
                     status: "completed",
                     end_reason: "refund_completed",
-                    current_page: "RefundSuccess",
+                    current_page: "Start",
                 });
 
                 // ✅ historySessions 배열 업데이트
