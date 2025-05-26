@@ -3,11 +3,8 @@ import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
 import {
-    createNewSession,
-    updateHistorySession,
-    updateReservationLogSession,
     addReservationLog,
-    addHistoryLog,
+    addHistoryLog, // 로그 기록 함수
 } from "../utils/session";
 import axios from "axios";
 
@@ -23,7 +20,7 @@ const handleStartReservation = async () => {
             "http://localhost:3000/sessions/start",
             {
                 purpose: "reservation",
-                current_page: "start",
+                current_page: "Start",
             }
         );
 
@@ -59,12 +56,6 @@ const handleStartReservation = async () => {
                 JSON.stringify(allSessions)
             );
 
-            // ✅ 페이지 위치 업데이트
-            await updateReservationLogSession({
-                sessionId: backendSessionId,
-                current_page: "start",
-            });
-
             // ✅ 클릭 로그 추가
             addReservationLog({
                 sessionId: backendSessionId,
@@ -95,7 +86,7 @@ const handleStartReservation = async () => {
                 "http://localhost:3000/sessions/start",
                 {
                     purpose: "history",
-                    current_page: "start",
+                    current_page: "Start",
                 }
             );
             const sessionData = response.data;
@@ -106,11 +97,11 @@ const handleStartReservation = async () => {
                 localStorage.setItem("currentHistorySession", JSON.stringify(sessionData));
 
                 // ✅ 이전 페이지, 현재 위치 업데이트
-                updateHistorySession({
-                    sessionId: backendSessionId,
-                    previous_pages: ["Start"],
-                    location: "PhoneNumber",
-                });
+                // updateHistorySession({
+                //     sessionId: backendSessionId,
+                //     previous_pages: ["Start"],
+                //     location: "PhoneNumber",
+                // });
 
                 // ✅ 로그 기록
                 addHistoryLog({
