@@ -64,15 +64,44 @@ export const updateCurrentSession = (updates: Partial<any>) => {
 };
 
 // ✅ 예매 세션 종료
-export const markSessionCompleted = async () => {
-    const session = getCurrentSession();
-    if (!session) return;
-    updateCurrentSession({ completed: true });
-    localStorage.removeItem(CURRENT_SESSION_KEY);
-    localStorage.removeItem(RESERVATION_LOG_SESSION_KEY);
+// export const markSessionCompleted = async () => {
+//     const session = getCurrentSession();
+//     if (!session) return;
+//     updateCurrentSession({ completed: true });
+//     localStorage.removeItem(CURRENT_SESSION_KEY);
+//     localStorage.removeItem(RESERVATION_LOG_SESSION_KEY);
 
-    const sessionId = session.sessionId || session.id?.toString?.();
+//     const sessionId = session.sessionId || session.id?.toString?.();
+//     if (!sessionId) return;
+//     try {
+//         await axios.patch("http://localhost:3000/sessions/end", {
+//             sessionId,
+//             status: "completed",
+//             end_reason: "booking_completed",
+//             current_page: "end",
+//         });
+//     } catch (error) {
+//         console.error("세션 종료 요청 실패:", error);
+//     }
+// };
+
+export const markSessionCompleted = async () => {
+    // ✅ reservation 로그 세션 기준으로 동작
+    const raw = localStorage.getItem("currentReservationLogSession");
+    if (!raw) return;
+
+    const session = JSON.parse(raw);
+    const sessionId = session.sessionId;
     if (!sessionId) return;
+
+    // ✅ 종료 정보 갱신
+    session.status = "completed";
+    session.end_reason = "booking_completed";
+    session.current_page = "end";
+    session.last_interaction = new Date().toISOString();
+    localStorage.setItem("currentReservationLogSession", JSON.stringify(session));
+
+    // ✅ 백엔드 종료 요청
     try {
         await axios.patch("http://localhost:3000/sessions/end", {
             sessionId,
@@ -83,7 +112,12 @@ export const markSessionCompleted = async () => {
     } catch (error) {
         console.error("세션 종료 요청 실패:", error);
     }
+
+    // ✅ 프론트 세션도 제거
+    localStorage.removeItem("currentReservationLogSession");
+    localStorage.removeItem("currentReservationSession");
 };
+
 
 // ✅ 히스토리 세션 종료
 export const markHistorySessionCompleted = async ({
