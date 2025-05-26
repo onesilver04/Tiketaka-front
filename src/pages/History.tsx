@@ -60,11 +60,13 @@ const History = () => {
 
     useEffect(() => {
         if (sessionId) {
+            // 1. 세션 먼저 업데이트
             updateHistorySession({
                 location: "History",
-                previous_pages: ["PhoneNumber"],
+                previous_pages: ["Start"],
             });
 
+            // 2. 업데이트 완료 후 로그 추가
             const sessionRaw = localStorage.getItem("currentHistorySession");
             if (sessionRaw) {
                 const session = JSON.parse(sessionRaw);
@@ -90,7 +92,9 @@ const History = () => {
 
         // ✅ 헤더 클릭 감지용 이벤트 리스너 등록
         const onClickHeader = (e: MouseEvent) => {
-            const headerEl = (e.target as HTMLElement)?.closest(".header-container");
+            const headerEl = (e.target as HTMLElement)?.closest(
+                ".header-container"
+            );
             if (headerEl && sessionId) {
                 updateHistorySession({
                     status: "complete",
