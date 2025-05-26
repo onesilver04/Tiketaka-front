@@ -15,7 +15,6 @@ const RefundSuccess = () => {
         const session = sessionRaw ? JSON.parse(sessionRaw) : null;
         const sessionId = session?.sessionId;
 
-        // ✅ 예약 삭제 API 호출
         const deleteReservations = async () => {
             for (const res of reservations) {
                 try {
@@ -29,7 +28,6 @@ const RefundSuccess = () => {
 
         deleteReservations();
 
-        // ✅ 페이지 진입 로그
         if (sessionId) {
             const alreadyLogged = session?.logs?.some(
                 (log: any) =>
@@ -58,7 +56,7 @@ const RefundSuccess = () => {
             const session = JSON.parse(sessionRaw);
             const sessionId = session.sessionId;
 
-            // ✅ 로그 기록
+            // ✅ 클릭 로그
             addHistoryLog({
                 sessionId,
                 page: "RefundSuccess",
@@ -69,22 +67,32 @@ const RefundSuccess = () => {
             });
 
             try {
-                // ✅ 세션 종료 API 호출
+                // ✅ 1단계: 목적을 'refund'로 변경
+                await axios.patch("http://localhost:3000/sessions/update", {
+                    sessionId,
+                    newPurpose: "refund",
+                    current_page: "RefundSuccess",
+                });
+
+                console.log("세션 목적 변경 성공");
+
+                // ✅ 2단계: 세션 종료
                 await axios.patch("http://localhost:3000/sessions/end", {
                     sessionId,
                     status: "completed",
                     end_reason: "refund_completed",
-                    current_page: "RefundSuccess",
+                    current_page: "Start",
                 });
 
-                // ✅ historySessions 배열 업데이트
+                // ✅ 3단계: 로컬 세션 업데이트
                 const sessions = JSON.parse(localStorage.getItem("historySessions") || "[]");
                 const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
                 const updated = {
                     ...session,
                     status: "completed",
+                    purpose: "refund",
                     end_reason: "refund_completed",
-                    current_page: "RefundSuccess",
+                    current_page: "Start",
                     last_interaction: new Date().toISOString(),
                 };
                 if (index !== -1) {
@@ -94,16 +102,15 @@ const RefundSuccess = () => {
                 }
                 localStorage.setItem("historySessions", JSON.stringify(sessions));
 
-                // ✅ 현재 세션 제거
+                // ✅ 세션 제거
                 localStorage.removeItem("currentHistorySession");
 
-                console.log("세션 정상 종료 완료");
+                console.log("세션 종료 완료");
             } catch (err) {
-                console.error("세션 종료 실패:", err);
+                console.error("세션 업데이트 또는 종료 실패:", err);
             }
         }
 
-        // ✅ 마지막에 페이지 이동 (Start)
         navigate("/");
     };
 

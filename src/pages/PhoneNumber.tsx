@@ -15,43 +15,32 @@ const PhoneNumber = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // ✅ useEffect: sessionId가 존재하면 로그 기록
-    useEffect(() => {
-        if (!sessionId) return;
+useEffect(() => {
+    if (!sessionId) return;
 
-        // 1. 먼저 백엔드 세션 상태 업데이트
-        // updateHistorySession({
-        //     location: "PhoneNumber",
-        //     previous_pages: ["Start"],
-        // });
+    // 로그는 그 다음에 기록 (업데이트 이후에만)
+    const raw = localStorage.getItem("currentHistorySession");
+    if (raw) {
+        const session = JSON.parse(raw);
+        const alreadyLogged = session.logs?.some(
+            (log: any) =>
+                log.page === "PhoneNumber" &&
+                log.event === "navigate" &&
+                log.target_id === "page-load"
+        );
 
-        // 2. 그런 다음 로컬 세션 정보 가져와서 로그 추가
-        const raw = localStorage.getItem("currentHistorySession");
-        if (raw) {
-            const session = JSON.parse(raw);
-            const alreadyLogged = session.logs?.some(
-                (log: any) =>
-                    log.page === "PhoneNumber" &&
-                    log.event === "navigate" &&
-                    log.target_id === "page-load"
-            );
-
-            if (!alreadyLogged) {
-                addHistoryLog({
-                    sessionId,
-                    page: "PhoneNumber",
-                    event: "navigate",
-                    target_id: "page-load",
-                    tag: "system",
-                    text: "PhoneNumber 페이지 도착",
-                });
-            }
+        if (!alreadyLogged) {
+            addHistoryLog({
+                sessionId,
+                page: "PhoneNumber",
+                event: "navigate",
+                target_id: "page-load",
+                tag: "system",
+                text: "PhoneNumber 페이지 도착",
+            });
         }
-
-        updateHistorySession({
-            location: "PhoneNumber",
-            previous_pages: ["Start"],
-        });
-    }, [sessionId]);
+    }
+}, [sessionId]);
 
     const handleNumberClick = (num: string) => {
         if (inputDigits.length >= 11) return;
