@@ -38,7 +38,7 @@ const Header = () => {
             const session = JSON.parse(historyRaw);            
             const purpose = session.purpose || "history";
             const end_reason =
-                purpose === "refund" ? "refund_abandoned" : "history_abandoned";
+                purpose === "refund" ? "refund_abandoned" : "history_completed";
 
             await markHistorySessionCompleted({
                 end_reason,

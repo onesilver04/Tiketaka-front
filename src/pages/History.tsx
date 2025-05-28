@@ -105,7 +105,7 @@ const History = () => {
         if (sessionId) {
             addHistoryLog({
                 sessionId,
-                page: "History",
+                page: "HistoryTicket",
                 event: "click",
                 target_id: "history-search",
                 tag: "button",
