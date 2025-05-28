@@ -1,5 +1,5 @@
 import React from "react";
-import { addHistoryLog, updateHistorySession } from "../utils/session";
+import { addHistoryLog, markHistorySessionCompleted, updateHistorySession } from "../utils/session";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../styles/Button.module.css";
 import "../styles/History.css";
@@ -17,7 +17,7 @@ const HistoryNone = () => {
             // ✅ 로그 기록
             addHistoryLog({
                 sessionId,
-                page: "Start",
+                page: "HistoryNone",
                 event: "click",
                 target_id: "historyNone-to-home",
                 tag: "button",
@@ -26,10 +26,9 @@ const HistoryNone = () => {
             });
 
             // ✅ 세션 종료 처리
-            updateHistorySession({
-                status: "completed",
-                purpose: "history",
+            markHistorySessionCompleted({
                 end_reason: "history_completed",
+                current_page: "Start",
             });
         }
 
