@@ -120,11 +120,6 @@ const Payment: React.FC = () => {
 
     const isValidPhone = /^010-\d{4}-\d{4}$/.test(phoneNumber);
 
-    // const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     setPhoneNumber(formatPhone(e.target.value));
-    //     setPhoneConfirmed(false);
-    // };
-
     const fetchCards = async () => {
         if (!isValidPhone) {
             alert("올바른 전화번호 형식을 입력해주세요.");
@@ -162,19 +157,6 @@ const Payment: React.FC = () => {
         }
     };
 
-    // const fetchCards = () => {
-    //     if (!isValidPhone) return alert("올바른 전화번호 형식을 입력해주세요.");
-    //     logClick("payment-phonenumber-check", "전화번호 확인");
-
-    //     const formatted = phoneNumber.replace(/-/g, "");
-    //     localStorage.setItem("verifiedPhoneNumber", phoneNumber);
-    //     setPhoneConfirmed(true);
-
-    //     const savedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
-    //     const filtered = savedCards.filter((card: Card) => card.ownerPhone === formatted);
-    //     setCards(filtered);
-    // };
-
     useEffect(() => {
         const storedPhone = localStorage.getItem("verifiedPhoneNumber");
         if (!state?.fromAddCard && storedPhone) {
@@ -204,14 +186,6 @@ const Payment: React.FC = () => {
         }
     }, [state]);
     
-    // useEffect(() => {
-    //     if (state?.fromAddCard && cards.length > 0) {
-    //         setCurrentIndex(cards.length - 1);
-    //         setSelectedCardIndex(cards.length - 1);
-    //         setPaymentMethod("existing");
-    //     }
-    // }, [cards, state]);
-
     const handleNext = () => {
         logClick("payment-addedcard-next", "카드 다음");
         if (cards.length > 0) {
