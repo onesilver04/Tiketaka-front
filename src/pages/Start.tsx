@@ -3,7 +3,6 @@ import logoMain from "../assets/lolgo_main.svg";
 import styles from "../styles/Button.module.css";
 import "../styles/Start.css";
 import {
-    updateHistorySession,
     addReservationLog,
     addHistoryLog, // 로그 기록 함수
 } from "../utils/session";

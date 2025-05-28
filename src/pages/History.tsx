@@ -63,7 +63,6 @@ const History = () => {
             // 1. 세션 먼저 업데이트
             updateHistorySession({
                 location: "History",
-                previous_pages: ["Start"],
             });
 
             // 2. 업데이트 완료 후 로그 추가
@@ -89,24 +88,6 @@ const History = () => {
                 }
             }
         }
-
-        // ✅ 헤더 클릭 감지용 이벤트 리스너 등록
-        const onClickHeader = (e: MouseEvent) => {
-            const headerEl = (e.target as HTMLElement)?.closest(
-                ".header-container"
-            );
-            if (headerEl && sessionId) {
-                updateHistorySession({
-                    status: "complete",
-                    purpose: "history",
-                    end_reason: "history_complete",
-                    location: "Start",
-                });
-            }
-        };
-
-        document.addEventListener("click", onClickHeader);
-        return () => document.removeEventListener("click", onClickHeader);
     }, [sessionId]);
 
     const toggleSelect = (id: string) => {
@@ -119,94 +100,6 @@ const History = () => {
         if (!date) return "날짜 없음";
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     };
-
-    // const handleSearch = () => {
-    //     const matched: Reservation[] = [];
-
-    //     if (sessionId) {
-    //         addHistoryLog({
-    //             sessionId,
-    //             page: "History",
-    //             event: "click",
-    //             target_id: "history-search",
-    //             tag: "button",
-    //             text: "날짜 조회",
-    //         });
-    //     }
-
-    //     for (let i = 0; i < localStorage.length; i++) {
-    //         const key = localStorage.key(i);
-    //         if (!key) continue;
-
-    //         try {
-    //             const raw = localStorage.getItem(key);
-    //             if (!raw) continue;
-
-    //             const data = JSON.parse(raw);
-    //             const items = Array.isArray(data) ? data : [data];
-
-    //             items.forEach((item) => {
-    //                 if (
-    //                     item?.completed === true &&
-    //                     item?.paymentInfo?.phoneNumber === phoneNumber
-    //                 ) {
-    //                     const depDate = new Date(
-    //                         item.reservationData?.departureDate
-    //                     );
-    //                     if (depDate >= startDate && depDate <= endDate) {
-    //                         const selectedSeatsObj = item.selectedSeats || {};
-    //                         const seatNumbers: string[] = Object.values(
-    //                             selectedSeatsObj
-    //                         ).flat() as string[];
-    //                         const carriageNumber =
-    //                             Object.keys(selectedSeatsObj)[0] || "";
-
-    //                         matched.push({
-    //                             reservationId: item.id.toString(),
-    //                             departure:
-    //                                 item.reservationData.departureStation,
-    //                             arrival:
-    //                                 item.reservationData.destinationStation,
-    //                             departureDate:
-    //                                 item.reservationData.departureDate,
-    //                             departureTime:
-    //                                 item.trainInfo?.departureTime || "",
-    //                             arrivalTime: item.trainInfo?.arrivalTime || "",
-    //                             passengerCount: {
-    //                                 adult: item.reservationData.adultCount || 0,
-    //                                 senior:
-    //                                     item.reservationData.seniorCount || 0,
-    //                                 youth:
-    //                                     item.reservationData.seniorCount || 0,
-    //                             },
-    //                             carriageNumber,
-    //                             seatNumbers,
-    //                             trainInfo: item.trainInfo,
-    //                         });
-    //                     }
-    //                 }
-    //             });
-    //         } catch {
-    //             continue;
-    //         }
-    //     }
-
-    //     if (matched.length === 0 && sessionId) {
-    //         addHistoryLog({
-    //             sessionId,
-    //             page: "HistoryNone",
-    //             event: "navigate",
-    //             target_id: "history-search",
-    //             tag: "button",
-    //             text: "해당 기간 예매 내역 없음",
-    //             url: window.location.pathname,
-    //         });
-    //     }
-
-    //     setFilteredReservations(matched);
-    //     setSelected([]);
-    //     setHasSearched(true);
-    // };
 
     const handleSearch = async () => {
         if (sessionId) {
@@ -291,7 +184,6 @@ const History = () => {
         });
         }
         
-
         const keysToRemove: string[] = [];
         const keysToUpdate: { key: string; data: any[] }[] = [];
         const deleted: Reservation[] = [];
