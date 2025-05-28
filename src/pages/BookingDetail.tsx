@@ -45,7 +45,7 @@ const BookingDetail = () => {
     const [sessionId, setSessionId] = useState<string | null>(null);
 
     // ✅ 세션 ID를 백엔드에서 받아오기
-useEffect(() => {
+    useEffect(() => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
         if (!sessionRaw) return;
         const session = JSON.parse(sessionRaw);
@@ -76,61 +76,36 @@ useEffect(() => {
             });
         }
     }, []);
-// ✅ 환불 정보 조회 (결제 정보 포함)
-useEffect(() => {
-    if (!reservationId) return;
+    
+    // ✅ 환불 정보 조회 (결제 정보 포함)
+    useEffect(() => {
+        if (!reservationId) return;
 
-    axios
-        .get(`http://localhost:3000/refunds/${reservationId}`)
-        .then((res) => setRefundDetails(res.data))
-        .catch((err) => {
-            console.error("환불 정보 조회 실패:", err);
-            setRefundDetails(null);
-        });
-}, [reservationId]);
+        axios
+            .get(`http://localhost:3000/refunds/${reservationId}`)
+            .then((res) => setRefundDetails(res.data))
+            .catch((err) => {
+                console.error("환불 정보 조회 실패:", err);
+                setRefundDetails(null);
+            });
+    }, [reservationId]);
 
-// ✅ 페이지 방문 로그 기록
-// useEffect(() => {
-//     const sessionRaw = localStorage.getItem("currentHistorySession");
-//     if (!sessionRaw) return;
 
-//     const session = JSON.parse(sessionRaw);
-//     const sessionId = session.sessionId;
-//     const alreadyLogged = session.logs?.some(
-//         (log: any) =>
-//             log.page === "BookingDetail" &&
-//             log.event === "navigate" &&
-//             log.target_id === "page-load"
-//     );
+    const handleBack = () => navigate(-1);
 
-//     if (!alreadyLogged) {
-//         addHistoryLog({
-//             sessionId,
-//             page: "BookingDetail",
-//             event: "navigate",
-//             target_id: "page-load",
-//             tag: "system",
-//             text: "BookingDetail 페이지 도착",
-//             url: window.location.pathname,
-//         });
-//     }
-// }, []);
-
-const handleBack = () => navigate(-1);
-
-const handleRefund = () => {
-    if (sessionId) {
-        addHistoryLog({
-            sessionId,
-            page: "BookingDetail",
-            event: "click",
-            target_id: "detail-to-refund",
-            tag: "button",
-            text: "bookingdetail에서 환불하기 버튼 클릭",
-        });
-    }
-    setIsModalOpen(true);
-};
+    const handleRefund = () => {
+        if (sessionId) {
+            addHistoryLog({
+                sessionId,
+                page: "BookingDetail",
+                event: "click",
+                target_id: "detail-to-refund",
+                tag: "button",
+                text: "bookingdetail에서 환불하기 버튼 클릭",
+            });
+        }
+        setIsModalOpen(true);
+    };
 
 const confirmRefund = () => {
     if (sessionId) {

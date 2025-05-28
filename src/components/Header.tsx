@@ -50,7 +50,7 @@ const Header = () => {
     };
 
     return (
-        <div className="header-container">
+        <div id="header-container" className="header-container">
             <img
                 src={logoHeader}
                 onClick={handleHome}
