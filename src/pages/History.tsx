@@ -61,10 +61,10 @@ const History = () => {
     useEffect(() => {
         if (sessionId) {
             // 1. 세션 먼저 업데이트
-            // updateHistorySession({
-            //     location: "History",
-            //     previous_pages: ["Start"],
-            // });
+            updateHistorySession({
+                location: "History",
+                previous_pages: ["Start"],
+            });
 
             // 2. 업데이트 완료 후 로그 추가
             const sessionRaw = localStorage.getItem("currentHistorySession");
