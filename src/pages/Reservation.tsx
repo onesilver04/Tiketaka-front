@@ -1,3 +1,5 @@
+// [LLM] 기차 예매를 위한 페이지입니다. 출발역, 도착역, 날짜, 인원을 선택할 수 있습니다.
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -13,6 +15,7 @@ import {
 } from "../utils/session";
 import axios from "axios";
 
+// [LLM] 선택 가능한 역 리스트
 const stations = [
     "선택",
     "서울",
@@ -62,6 +65,7 @@ const Reservation = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
 
+    // [LLM] 페이지 진입 시 세션 ID 확인 및 로그 기록
     useEffect(() => {
         const raw = localStorage.getItem("currentReservationLogSession");
         if (!raw) return;
@@ -94,6 +98,7 @@ const Reservation = () => {
         }
     }, []);
 
+    // [LLM] 클릭 이벤트 로깅 함수
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
         addReservationLog({
@@ -106,6 +111,7 @@ const Reservation = () => {
         });
     };
 
+    // [LLM] 처음 시작할 때 상태 초기화 여부 확인 (reset 여부)
     useEffect(() => {
         const shouldReset = location.state?.reset === true;
         if (shouldReset) {
@@ -126,6 +132,7 @@ const Reservation = () => {
         return storedData ? JSON.parse(storedData) : null;
     };
 
+    // [LLM] 예약 데이터 상태 초기화
     const [reservationData, setReservationData] = useState<ReservationData>(
         () => {
             const stored = loadStoredData();
@@ -151,14 +158,17 @@ const Reservation = () => {
         teenCount,
     } = reservationData;
 
+    // [LLM] 역 선택 모달 상태
     const [showStationSelector, setShowStationSelector] = useState<
         "departure" | "arrival" | null
     >(null);
 
+    // [LLM] 예약 데이터를 localStorage에 저장
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(reservationData));
     }, [reservationData]);
 
+    // [LLM] 역 선택 외부 클릭 시 팝업 닫기
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (
@@ -176,6 +186,7 @@ const Reservation = () => {
         };
     }, [showStationSelector]);
 
+    // [LLM] 역 선택 핸들러
     const handleStationChange = (
         type: "departure" | "arrival",
         value: string
@@ -194,7 +205,7 @@ const Reservation = () => {
                 value,
         }));
     };
-
+    // [LLM] 날짜 선택 핸들러
     const handleDateChange = (value: Date | Date[] | null) => {
         const dateValue =
             value instanceof Date
@@ -215,6 +226,7 @@ const Reservation = () => {
         }));
     };
 
+    // [LLM] 인원 수 증감 핸들러
     const handleCountChange = (
         type: "adultCount" | "seniorCount" | "teenCount",
         delta: number
@@ -235,11 +247,13 @@ const Reservation = () => {
         }));
     };
 
+    // [LLM] 홈으로 돌아가기
     const handleBack = () => {
         logClick("reservation-to-home", "이전");
         navigate("/");
     };
 
+    // [LLM] 기차 조회 버튼 클릭 시 처리
     const handleSearch = async () => {
         logClick("reservation-to-trainlist", "조회");
         if (!departureStation) return alert("출발역은 필수입니다.");
