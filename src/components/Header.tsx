@@ -45,7 +45,6 @@ const Header = () => {
                 current_page: "Start",
             });
         }
-
         navigate("/");
     };
 

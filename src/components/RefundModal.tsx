@@ -5,7 +5,6 @@ import styles from "../styles/Button.module.css";
 interface Props {
     onConfirm: () => void;
     onCancel: () => void;
-    refundDetails: any;
 }
 
 const RefundModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
