@@ -104,7 +104,7 @@ const HistoryTicket: React.FC<HistoryTicketProps> = ({
                     onClick={handleTicketClick}
                     style={{ cursor: "pointer" }}
                 >
-                    {/* [LLM] 상단에 출발, 도착 표시 */}
+                    {/* [LLM] 상단에 출발, 도착 표시하여 출발역과 도착역에 대한 정보 제공 */}
                     <div className="route-row">
                         <span className="start-label">출발</span>
                         <div className="station-block">
