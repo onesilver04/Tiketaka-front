@@ -1,3 +1,5 @@
+// [LLM] 환불 성공 시 사용자에게 안내 메시지를 보여주는 페이지입니다. 예약 데이터를 기반으로 백엔드 환불 처리 및 세션 종료까지 수행합니다.
+
 import "../styles/RefundSuccess.css";
 import styles from "../styles/Button.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,13 +10,17 @@ import axios from "axios";
 const RefundSuccess = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    // [LLM] 이전 페이지(예: History.tsx)에서 전달된 환불 대상 예약 목록을 가져옵니다.
     const reservations = (location.state as any)?.reservations || [];
 
+    // [LLM] 페이지 진입 시: 환불 API 호출 + 페이지 방문 로그 기록
     useEffect(() => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
         const session = sessionRaw ? JSON.parse(sessionRaw) : null;
         const sessionId = session?.sessionId;
 
+        // [LLM] 환불 요청 처리 (예약 ID 기준 삭제)
         const deleteReservations = async () => {
             for (const res of reservations) {
                 try {
@@ -28,6 +34,7 @@ const RefundSuccess = () => {
 
         deleteReservations();
 
+        // [LLM] 세션 로그 기록
         if (sessionId) {
             const alreadyLogged = session?.logs?.some(
                 (log: any) =>
@@ -49,6 +56,7 @@ const RefundSuccess = () => {
         }
     }, [reservations]);
 
+    // [LLM] "메인 화면으로" 버튼 클릭 시: 세션 업데이트 → 종료 → 이동
     const handleHome = async () => {
         const sessionRaw = localStorage.getItem("currentHistorySession");
 
@@ -56,7 +64,7 @@ const RefundSuccess = () => {
             const session = JSON.parse(sessionRaw);
             const sessionId = session.sessionId;
 
-            // ✅ 클릭 로그
+            // [LLM] 환불 완료 후 버튼 클릭 로그 기록
             addHistoryLog({
                 sessionId,
                 page: "RefundSuccess",
@@ -67,7 +75,7 @@ const RefundSuccess = () => {
             });
 
             try {
-                // ✅ 1단계: 목적을 'refund'로 변경
+                // [LLM] 1단계: 세션 목적을 'refund'로 업데이트
                 await axios.patch("http://localhost:3000/sessions/update", {
                     sessionId,
                     newPurpose: "refund",
@@ -76,7 +84,7 @@ const RefundSuccess = () => {
 
                 console.log("세션 목적 변경 성공");
 
-                // ✅ 2단계: 세션 종료
+                // [LLM] 2단계: 세션 종료
                 await axios.patch("http://localhost:3000/sessions/end", {
                     sessionId,
                     status: "completed",
@@ -84,7 +92,7 @@ const RefundSuccess = () => {
                     current_page: "Start",
                 });
 
-                // ✅ 3단계: 로컬 세션 업데이트
+                // [LLM] 3단계: 로컬 세션 히스토리 업데이트
                 const sessions = JSON.parse(localStorage.getItem("historySessions") || "[]");
                 const index = sessions.findIndex((s: any) => s.sessionId === sessionId);
                 const updated = {
@@ -102,7 +110,7 @@ const RefundSuccess = () => {
                 }
                 localStorage.setItem("historySessions", JSON.stringify(sessions));
 
-                // ✅ 세션 제거
+                // [LLM] 현재 세션 삭제
                 localStorage.removeItem("currentHistorySession");
 
                 console.log("세션 종료 완료");
@@ -111,20 +119,27 @@ const RefundSuccess = () => {
             }
         }
 
+        // [LLM] 메인 페이지로 이동
         navigate("/");
     };
 
+    // [LLM] 화면 구성: 환불 완료 안내 + 버튼 제공
     return (
         <div className="refund-success">
+            {/* [LLM] 환불 성공 이미지 */}
             <img
                 src="/src/assets/success-button.svg"
                 className="success-image"
                 alt="환불 성공 이미지"
             />
+
+            {/* [LLM] 사용자에게 환불 완료를 알리는 텍스트 */}
             <div className="ment">
                 <p>환불 처리가 완료되었습니다.</p>
                 <p>Tiketaka를 이용해주셔서 감사합니다.</p>
             </div>
+
+            {/* [LLM] 환불 성공 후 메인으로 이동하는 버튼 */}
             <button
                 id="refundSuccess-to-home"
                 className={`${styles.button} go-main`}

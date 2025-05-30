@@ -1,3 +1,4 @@
+// [LLM] 전화번호를 입력받아 예매 내역을 조회하는 페이지입니다.
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { updateHistorySession, addHistoryLog } from "../utils/session";
@@ -14,41 +15,40 @@ const PhoneNumber = () => {
     const [inputDigits, setInputDigits] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // ✅ useEffect: sessionId가 존재하면 로그 기록
-useEffect(() => {
-    if (!sessionId) return;
+    // [LLM] PhoneNumber 페이지 진입 시 세션 업데이트 및 페이지 도착 로그 기록
+    useEffect(() => {
+        if (!sessionId) return;
 
-    // ✅ 1. 백엔드 세션 상태 먼저 업데이트
-    updateHistorySession({
-        sessionId,
-        current_page: "PhoneNumber",
-        previous_pages: ["Start"],
-    });
+        updateHistorySession({
+            sessionId,
+            current_page: "PhoneNumber",
+            previous_pages: ["Start"],
+        });
 
-    // ✅ 2. 로그는 그 다음에 기록 (업데이트 이후에만)
-    const raw = localStorage.getItem("currentHistorySession");
-    if (raw) {
-        const session = JSON.parse(raw);
-        const alreadyLogged = session.logs?.some(
-            (log: any) =>
-                log.page === "PhoneNumber" &&
-                log.event === "navigate" &&
-                log.target_id === "page-load"
-        );
+        const raw = localStorage.getItem("currentHistorySession");
+        if (raw) {
+            const session = JSON.parse(raw);
+            const alreadyLogged = session.logs?.some(
+                (log: any) =>
+                    log.page === "PhoneNumber" &&
+                    log.event === "navigate" &&
+                    log.target_id === "page-load"
+            );
 
-        if (!alreadyLogged) {
-            addHistoryLog({
-                sessionId,
-                page: "PhoneNumber",
-                event: "navigate",
-                target_id: "page-load",
-                tag: "system",
-                text: "PhoneNumber 페이지 도착",
-            });
+            if (!alreadyLogged) {
+                addHistoryLog({
+                    sessionId,
+                    page: "PhoneNumber",
+                    event: "navigate",
+                    target_id: "page-load",
+                    tag: "system",
+                    text: "PhoneNumber 페이지 도착",
+                });
+            }
         }
-    }
-}, [sessionId]);
+    }, [sessionId]);
 
+    // [LLM] 숫자 버튼 클릭 시 전화번호 입력 처리 및 로그
     const handleNumberClick = (num: string) => {
         if (inputDigits.length >= 11) return;
         const newDigits = inputDigits + num;
@@ -66,6 +66,7 @@ useEffect(() => {
         }
     };
 
+    // [LLM] 지우기 버튼 클릭 시 마지막 자리 삭제 및 로그
     const handleDelete = () => {
         const newDigits = inputDigits.slice(0, -1);
         setInputDigits(newDigits);
@@ -82,6 +83,7 @@ useEffect(() => {
         }
     };
 
+    // [LLM] 전화번호 형식 (3-4-4)으로 변환하여 표시합니다.
     const getFormattedPhone = () => {
         const d = inputDigits;
         if (d.length <= 3) return d;
@@ -89,6 +91,7 @@ useEffect(() => {
         return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
     };
 
+    // [LLM] 다음 버튼 클릭 시 유효성 검사 후 조회 페이지로 이동 또는 모달/알림
     const handleNextClick = () => {
         if (inputDigits.length !== 11) {
             if (sessionId) {
@@ -120,6 +123,7 @@ useEffect(() => {
             return;
         }
 
+        // [LLM] localStorage에서 전화번호와 일치하는 예매 데이터 존재 여부 확인
         let found = false;
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -128,7 +132,6 @@ useEffect(() => {
             try {
                 const raw = localStorage.getItem(key);
                 if (!raw) continue;
-
                 const data = JSON.parse(raw);
 
                 if (Array.isArray(data)) {
@@ -189,10 +192,12 @@ useEffect(() => {
         }
     };
 
+    // [LLM] UI 구성: 제목, 입력창, 키패드, 버튼, 모달 포함
     return (
         <div className="phone-number">
             <p className="phone-number-title">전화번호 입력</p>
 
+            {/* [LLM] 입력된 전화번호를 표시하는 읽기 전용 input */}
             <input
                 className="phone-number-input"
                 type="text"
@@ -201,56 +206,75 @@ useEffect(() => {
                 placeholder="전화번호를 입력해주세요."
             />
 
+            {/* [LLM] 숫자 키패드 UI */}
             <div className="keypad">
                 {[
-                    ["1", "2", "3"],
-                    ["4", "5", "6"],
-                    ["7", "8", "9"],
-                    ["empty", "0", "del"],
-                ].map((row, i) => (
-                    <div key={i} className="keypad-row">
-                        {row.map((key, j) => {
-                            if (key === "empty") {
-                                return (
-                                    <button
-                                        className="phone-key"
-                                        key={`empty-${i}-${j}`}
-                                        disabled
-                                        style={{ visibility: "hidden" }}
-                                    ></button>
-                                );
-                            }
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "empty",
+                    "0",
+                    "del",
+                ]
+                    .reduce((rows, key, idx) => {
+                        const rowIdx = Math.floor(idx / 3);
+                        if (!rows[rowIdx]) rows[rowIdx] = [];
+                        rows[rowIdx].push(key);
+                        return rows;
+                    }, [] as string[][])
+                    .map((row, i) => (
+                        <div key={i} className="keypad-row">
+                            {row.map((key, j) => {
+                                if (key === "empty") {
+                                    return (
+                                        <button
+                                            className="phone-key"
+                                            key={`empty-${i}-${j}`}
+                                            disabled
+                                            style={{ visibility: "hidden" }}
+                                        ></button>
+                                    );
+                                }
 
-                            if (key === "del") {
+                                if (key === "del") {
+                                    return (
+                                        <button
+                                            id="phone-key-delete"
+                                            className="phone-key-delete"
+                                            key={`del-${i}-${j}`}
+                                            onClick={handleDelete}
+                                        >
+                                            <img
+                                                className="delete-img"
+                                                src={deleteIcon}
+                                                alt="delete"
+                                            />
+                                        </button>
+                                    );
+                                }
+
                                 return (
                                     <button
-                                        className="phone-key-delete"
-                                        key={`del-${i}-${j}`}
-                                        onClick={handleDelete}
+                                        id="phone-key"
+                                        className="phone-key"
+                                        key={`num-${i}-${j}`}
+                                        onClick={() => handleNumberClick(key)}
                                     >
-                                        <img
-                                            className="delete-img"
-                                            src={deleteIcon}
-                                            alt="delete"
-                                        />
+                                        {key}
                                     </button>
                                 );
-                            }
-
-                            return (
-                                <button
-                                    className="phone-key"
-                                    key={`num-${i}-${j}`}
-                                    onClick={() => handleNumberClick(key)}
-                                >
-                                    {key}
-                                </button>
-                            );
-                        })}
-                    </div>
-                ))}
+                            })}
+                        </div>
+                    ))}
             </div>
 
+            {/* [LLM] 이전 / 다음 버튼 */}
             <div className="nav-buttons">
                 <button
                     id="phoneNumber-to-home"
@@ -268,6 +292,7 @@ useEffect(() => {
                 </button>
             </div>
 
+            {/* [LLM] 전화번호 자리수 부족 시 PhoneModal 모달창 열림 */}
             {isModalOpen && (
                 <PhoneModal
                     onClose={() => {

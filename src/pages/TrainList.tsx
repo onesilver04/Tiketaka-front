@@ -1,11 +1,19 @@
+// [LLM] 사용자가 기차를 선택하는 TrainList 페이지입니다.
+// 선택 가능한 기차 목록을 표시하고, 좌석 선택 페이지로 이동할 수 있습니다.
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styleb from "../styles/Box.module.css";
 import styles from "../styles/Button.module.css";
 import "../styles/TrainList.css";
-import { updateCurrentSession, addReservationLog, updateReservationLogSession } from "../utils/session";
+import {
+    updateCurrentSession,
+    addReservationLog,
+    updateReservationLogSession,
+} from "../utils/session";
 import axios from "axios";
 
+// [LLM] 예약 데이터 타입 정의
 interface ReservationData {
     departureStation: string | null;
     destinationStation: string | null;
@@ -15,6 +23,7 @@ interface ReservationData {
     teenCount: number;
 }
 
+// [LLM] 기차 정보 타입 정의
 interface Train {
     trainId: string;
     departureTime: string;
@@ -26,11 +35,15 @@ interface Train {
 const TrainList = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    // [LLM] 이전 페이지에서 전달된 예약 데이터를 가져옵니다.
     const reservationData = location.state as ReservationData;
 
+    // [LLM] 선택된 기차 정보와 기차 목록 상태 정의
     const [selectedTrain, setSelectedTrain] = useState<Train | null>(null);
     const [trains, setTrains] = useState<Train[]>([]);
 
+    // [LLM] 현재 세션 ID를 localStorage에서 가져옵니다.
     const sessionId = (() => {
         try {
             return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
@@ -39,6 +52,7 @@ const TrainList = () => {
         }
     })();
 
+    // [LLM] 공통 클릭 로그 기록 함수
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
         addReservationLog({
@@ -51,6 +65,7 @@ const TrainList = () => {
         });
     };
 
+    // [LLM] 페이지 진입 시 로그 기록 및 세션 위치 업데이트
     useEffect(() => {
         if (sessionId) {
             updateReservationLogSession({
@@ -82,14 +97,20 @@ const TrainList = () => {
         }
     }, [sessionId]);
 
+    // [LLM] 기차 목록 API 요청 및 상태 설정
     useEffect(() => {
         const fetchTrains = async () => {
             try {
-                if (!reservationData?.departureStation || !reservationData?.destinationStation || !reservationData?.departureDate) {
+                if (
+                    !reservationData?.departureStation ||
+                    !reservationData?.destinationStation ||
+                    !reservationData?.departureDate
+                ) {
                     console.warn("필수 정보 누락");
                     return;
                 }
 
+                // [LLM] 날짜를 KST 기준 문자열로 변환
                 const departureDate = new Date(reservationData.departureDate);
                 const kstOffset = 9 * 60 * 60 * 1000;
                 const kstDate = new Date(departureDate.getTime() + kstOffset);
@@ -116,17 +137,20 @@ const TrainList = () => {
         fetchTrains();
     }, [reservationData]);
 
+    // [LLM] 이전 버튼 클릭 시 예약 정보 입력 페이지로 이동
     const handleBack = () => {
         logClick("trainlist-to-reservation", "이전");
         navigate("/reservation");
     };
 
+    // [LLM] 기차 선택 시 상태 업데이트 및 로그 기록
     const handleSelect = (train: Train) => {
-        if (train.availableSeats === 0) return; // 좌석 없으면 선택 불가
+        if (train.availableSeats === 0) return; // [LLM] 좌석이 없으면 선택 불가
         setSelectedTrain(train);
         logClick(`select-trainlist-${train.trainId}`, `${train.trainId} 선택`, "tr");
     };
 
+    // [LLM] 다음 버튼 클릭 시 좌석 선택 페이지로 이동
     const handleNext = () => {
         logClick("trainlist-to-selectseat", "다음");
 
@@ -145,16 +169,19 @@ const TrainList = () => {
         });
     };
 
+    // [LLM] 기차 ID 확인용 콘솔 로그
     useEffect(() => {
-    console.log("trainIds", trains.map(t => t.trainId));
+        console.log("trainIds", trains.map((t) => t.trainId));
     }, [trains]);
 
     return (
         <div>
+            {/* [LLM] 기차 리스트 상단 박스 */}
             <div className={styleb.box}>
                 <h2 className="page-title">시간대 선택</h2>
                 <hr className="page-title-bar" />
 
+                {/* [LLM] 기차 정보 테이블 */}
                 <div className="content-container">
                     <table style={{ borderCollapse: "collapse", width: "100%" }}>
                         <thead>
@@ -167,6 +194,7 @@ const TrainList = () => {
                         </thead>
                         <tbody>
                             {trains.map((train) => (
+                                // [LLM] 기차 한 줄을 클릭 시 선택됨. 이미 선택된 기차는 배경색 강조.
                                 <tr
                                     key={train.trainId}
                                     id={`select-trainlist-${train.trainId}`}
@@ -202,6 +230,7 @@ const TrainList = () => {
                 </div>
             </div>
 
+            {/* [LLM] 하단 이동 버튼: 이전, 다음 */}
             <div className="display-button">
                 <button
                     className={`${styles.button} train-list-back`}
