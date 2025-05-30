@@ -1,3 +1,5 @@
+// [LLM] 카드 등록 페이지 - 사용자로부터 카드 정보를 받아 저장하고, 등록된 카드 정보를 로컬 및 서버에 저장하는 컴포넌트
+
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/Button.module.css";
@@ -6,13 +8,17 @@ import "../styles/AddCard.css";
 import { addReservationLog, updateReservationLogSession } from "../utils/session";
 import axios from "axios";
 
+// [LLM] 카드사 목록 정의
 const cardCompanies = ["NH농협", "KB국민", "카카오", "신한", "우리", "하나", "토스", "기업", "새마을"];
 
 const AddCard: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    // [LLM] 이전 페이지에서 전달받은 결제 관련 정보 추출
     const { phoneNumber, phoneConfirmed, agree, reservationData, trainInfo, selectedSeats } = location.state || {};
 
+    // [LLM] 로컬 스토리지에서 세션 ID 가져오기 (예외 처리 포함)
     const sessionId = (() => {
         try {
             return JSON.parse(localStorage.getItem("currentReservationLogSession") || "null")?.sessionId;
@@ -21,6 +27,7 @@ const AddCard: React.FC = () => {
         }
     })();
 
+    // [LLM] 세션 상태 업데이트 및 페이지 진입 로그 기록
     useEffect(() => {
         if (sessionId) {
             updateReservationLogSession({
@@ -52,6 +59,7 @@ const AddCard: React.FC = () => {
         }
     }, [sessionId]);
 
+    // [LLM] 버튼 클릭 로그 기록 함수
     const logClick = (target_id: string, text: string, tag = "button") => {
         if (!sessionId) return;
         addReservationLog({
@@ -64,14 +72,18 @@ const AddCard: React.FC = () => {
         });
     };
 
+    // [LLM] 사용자 입력 상태 변수 정의
     const [selectedCompany, setSelectedCompany] = useState("");
     const [cardNumber, setCardNumber] = useState("");
     const [cvc, setCvc] = useState("");
     const [expiry, setExpiry] = useState("");
     const [password, setPassword] = useState("");
+
+    // [LLM] 키패드 표시 여부 및 활성 필드 상태
     const [showKeypad, setShowKeypad] = useState(false);
     const [activeField, setActiveField] = useState<"cardNumber" | "cvc" | "expiry" | "password" | null>(null);
 
+    // [LLM] 키패드를 통해 각 입력 필드의 값을 업데이트하고 로그 기록
     const updateFieldValue = (field: typeof activeField, value: string) => {
         switch (field) {
             case "cardNumber": {
@@ -102,7 +114,8 @@ const AddCard: React.FC = () => {
                 break;
         }
     };
-    
+
+    // [LLM] 가상 키패드 렌더링 함수 - 숫자와 삭제 버튼 포함
     const renderKeypad = () => (
         <div className="payment-keypad-modal">
             <div className="payment-keypad">
@@ -111,129 +124,125 @@ const AddCard: React.FC = () => {
                     key={i}
                     className="payment-keypad-button"
                     onClick={() => {
-                    const currentValue = (() => {
-                        switch (activeField) {
-                        case "cardNumber": return cardNumber.replace(/\D/g, "");
-                        case "cvc": return cvc;
-                        case "expiry": return expiry;
-                        case "password": return password;
-                        default: return "";
+                        const currentValue = (() => {
+                            switch (activeField) {
+                                case "cardNumber": return cardNumber.replace(/\D/g, "");
+                                case "cvc": return cvc;
+                                case "expiry": return expiry;
+                                case "password": return password;
+                                default: return "";
+                            }
+                        })();
+
+                        if (key === "←") {
+                            updateFieldValue(activeField, currentValue.slice(0, -1));
+                        } else if (typeof key === "number") {
+                            updateFieldValue(activeField, currentValue + key.toString());
                         }
-                    })();
-        
-                    if (key === "←") {
-                        updateFieldValue(activeField, currentValue.slice(0, -1));
-                    } else if (typeof key === "number") {
-                        updateFieldValue(activeField, currentValue + key.toString());
-                    }
                     }}
                 >
                     {key}
                 </button>
                 ))}
                 <button
-                className="payment-keypad-confirm"
-                onClick={() => {
-                    setShowKeypad(false);
-                    setActiveField(null);
-                }}
+                    className="payment-keypad-confirm"
+                    onClick={() => {
+                        setShowKeypad(false);
+                        setActiveField(null);
+                    }}
                 >
-                확인
+                    확인
                 </button>
             </div>
         </div>
     );
 
+    // [LLM] 카드 입력 검증 → 로컬 및 서버에 카드 저장 후 결제 페이지로 이동
     const handleSubmit = () => {
         if (!selectedCompany) return alert("카드사를 선택해주세요.");
-        if (cardNumber.replace(/\D/g, "").length !== 16) return alert("카드 번호 16자리를 정확히 입력해주세요.");
-        if (cvc.length !== 3) return alert("CVC 번호 3자리를 정확히 입력해주세요.");
-        if (!/^\d{4}$/.test(expiry)) return alert("유효기간 4자리(MMYY)를 입력해주세요.");
-        if (password.length !== 2) return alert("카드 비밀번호 앞 2자리를 입력해주세요.");
+        if (cardNumber.replace(/\D/g, "").length !== 16)
+            return alert("카드 번호 16자리를 정확히 입력해주세요.");
+        if (cvc.length !== 3)
+            return alert("CVC 번호 3자리를 정확히 입력해주세요.");
+        if (!/^\d{4}$/.test(expiry))
+            return alert("유효기간 4자리(MMYY)를 입력해주세요.");
+        if (password.length !== 2)
+            return alert("카드 비밀번호 앞 2자리를 입력해주세요.");
 
         const rawCard = cardNumber.replace(/\D/g, "");
-        const maskedCardNumber = `${rawCard.slice(0,4)}-****-****-${rawCard.slice(-4)}`;
+        const maskedCardNumber = `${rawCard.slice(
+            0,
+            4
+        )}-****-****-${rawCard.slice(-4)}`;
 
-        const storedCards = JSON.parse(localStorage.getItem("customCards") || "[]");
+        const storedCards = JSON.parse(
+            localStorage.getItem("customCards") || "[]"
+        );
         const newCard = {
             id: Date.now(),
             cardCompany: selectedCompany,
             cardNumber: maskedCardNumber,
             last4Digits: rawCard.slice(-4),
             expirationDate: expiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
-            ownerPhone: phoneNumber.replace(/-/g, "")
+            ownerPhone: phoneNumber.replace(/-/g, ""),
         };
 
         logClick("addcard-success", "카드 등록");
 
-        localStorage.setItem("customCards", JSON.stringify([...storedCards, newCard]));
+        localStorage.setItem(
+            "customCards",
+            JSON.stringify([...storedCards, newCard])
+        );
 
-        axios.post(`http://localhost:3000/cards/${phoneNumber.replace(/-/g, "")}`, {
-            cardCompany: selectedCompany,
-            cardNumber: rawCard.replace(/(\d{4})(?=\d)/g, "$1-"),
-            expirationDate: expiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
-            cvc,
-            password
-        })
-        .then(() => {
-            alert("카드 등록이 완료되었습니다!");
-            navigate("/reservation/payment", {
-                state: {
-                    fromAddCard: true,
-                    phoneNumber,
-                    phoneConfirmed,
-                    agree,
-                    reservationData,
-                    trainInfo,
-                    selectedSeats,
+        axios
+            .post(
+                `http://localhost:3000/cards/${phoneNumber.replace(/-/g, "")}`,
+                {
+                    cardCompany: selectedCompany,
+                    cardNumber: rawCard.replace(/(\d{4})(?=\d)/g, "$1-"),
+                    expirationDate: expiry.replace(/(\d{2})(\d{2})/, "$1/$2"),
+                    cvc,
+                    password,
                 }
+            )
+            .then(() => {
+                alert("카드 등록이 완료되었습니다!");
+                navigate("/reservation/payment", {
+                    state: {
+                        fromAddCard: true,
+                        phoneNumber,
+                        phoneConfirmed,
+                        agree,
+                        reservationData,
+                        trainInfo,
+                        selectedSeats,
+                    },
+                });
+            })
+            .catch((err) => {
+                console.error("카드 등록 실패:", err);
+                alert("서버에 카드 등록 중 오류가 발생했습니다.");
             });
-        })
-        .catch((err) => {
-            console.error("카드 등록 실패:", err);
-            alert("서버에 카드 등록 중 오류가 발생했습니다.");
-        });
     };
 
-    // const handleCardNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
-    //     const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1-");
-    //     setCardNumber(formatted);
-    //     logClick("addcard-card-number", `카드번호 입력: ${formatted}`);
-    // };
-    
-    // const handleCVC = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 3);
-    //     setCvc(digits);
-    //     logClick("addcard-card-cvc", `CVC 입력: ${"*".repeat(digits.length)}`);
-    // };
-    
-    // const handleExpiry = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-    //     setExpiry(digits);
-    //     logClick("addcard-card-period", `유효기간 입력: ${digits}`);
-    // };
-    
-    // const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const digits = e.target.value.replace(/\D/g, "").slice(0, 2);
-    //     setPassword(digits);
-    //     logClick("addcard-card-password", `비밀번호 앞자리 입력: **`);
-    // };
-    
-
+    // [LLM] 이전 버튼 클릭 시 결제 페이지로 되돌아감
     const handleBack = () => {
         logClick("addcard-to-payment", "결제화면으로 돌아가기");
         navigate(-1);
     };
 
+
+    // [LLM] 렌더링: 카드 등록 UI와 입력 필드, 버튼 구성
     return (
         <div>
+            {/* 카드 등록 영역 */}
             <div className={styleb.box}>
                 <div className="add-card-container">
                     <h2 className="page-title">카드 등록</h2>
                     <hr className="page-title-bar" />
 
                     <div className="content-container">
+                        {/* 카드사 선택 버튼 목록 */}
                         <div>카드사 선택</div>
                         <div className="addcard-selected-container">
                             {cardCompanies.map((company) => (
@@ -251,6 +260,7 @@ const AddCard: React.FC = () => {
                             ))}
                         </div>
 
+                        {/* 카드번호 입력 */}
                         <div>
                             <div>카드 번호</div>
                             <input
@@ -268,6 +278,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
+                        {/* CVC 입력 */}
                         <div>
                             <div>CVC</div>
                             <input
@@ -285,6 +296,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
+                        {/* 유효기간 입력 */}
                         <div>
                             <div>유효 기간</div>
                             <input
@@ -302,6 +314,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
+                        {/* 비밀번호 입력 */}
                         <div>
                             <div>카드 비밀번호</div>
                             <input
@@ -322,6 +335,7 @@ const AddCard: React.FC = () => {
                 </div>
             </div>
 
+            {/* 이전/등록 버튼 영역 */}
             <div className="display-button">
                 <button className={`${styles.button} addcard-back`} id="addcard-to-payment" onClick={handleBack}>이전</button>
                 <button className={`${styles.button} addcard-search`} id="addcard-success" onClick={handleSubmit}>등록하기</button>

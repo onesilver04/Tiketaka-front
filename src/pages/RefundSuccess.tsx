@@ -64,7 +64,7 @@ const RefundSuccess = () => {
             const session = JSON.parse(sessionRaw);
             const sessionId = session.sessionId;
 
-            // [LLM] 버튼 클릭 로그 기록
+            // [LLM] 환불 완료 후 버튼 클릭 로그 기록
             addHistoryLog({
                 sessionId,
                 page: "RefundSuccess",
@@ -126,7 +126,7 @@ const RefundSuccess = () => {
     // [LLM] 화면 구성: 환불 완료 안내 + 버튼 제공
     return (
         <div className="refund-success">
-            {/* [LLM] 성공 시 보여주는 시각적 이미지 */}
+            {/* [LLM] 환불 성공 이미지 */}
             <img
                 src="/src/assets/success-button.svg"
                 className="success-image"
@@ -139,7 +139,7 @@ const RefundSuccess = () => {
                 <p>Tiketaka를 이용해주셔서 감사합니다.</p>
             </div>
 
-            {/* [LLM] 메인으로 이동하는 버튼 */}
+            {/* [LLM] 환불 성공 후 메인으로 이동하는 버튼 */}
             <button
                 id="refundSuccess-to-home"
                 className={`${styles.button} go-main`}

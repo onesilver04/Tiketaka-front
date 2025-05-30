@@ -1,6 +1,6 @@
 // [LLM] 기차 예매를 위한 페이지입니다. 출발역, 도착역, 날짜, 인원을 선택할 수 있습니다.
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -290,12 +290,15 @@ const Reservation = () => {
 
     return (
         <div>
+            {/* [LLM] 예약 정보 입력을 위한 전체 박스 컨테이너 */}
             <div className={styleb.box} style={{ position: "relative" }}>
                 <h2 className="page-title">승차권 예매</h2>
                 <hr className="page-title-bar" />
 
                 <div className="content-container">
+                    {/* [LLM] 출발역 및 도착역 선택 UI */}
                     <div className="station-box">
+                        {/* [LLM] 출발역 버튼 */}
                         <div className="station-selection">
                             <div className="depature-station">출발</div>
                             <button
@@ -320,6 +323,7 @@ const Reservation = () => {
 
                         <div className="station-selection-arrow">→</div>
 
+                        {/* [LLM] 도착역 버튼 */}
                         <div className="station-selection">
                             <div className="arrival-station">도착</div>
                             <button
@@ -343,6 +347,7 @@ const Reservation = () => {
                         </div>
                     </div>
 
+                    {/* [LLM] 역 선택 팝업 모달 */}
                     {showStationSelector && (
                         <div
                             ref={dropdownRef}
@@ -370,6 +375,7 @@ const Reservation = () => {
                         </div>
                     )}
 
+                    {/* [LLM] 날짜 선택 UI */}
                     <div>
                         <h4 className="reservation-detail-select">
                             <p className="reservation-detail-select-inform">
@@ -393,7 +399,7 @@ const Reservation = () => {
                                         : null
                                 }
                                 selectRange={false}
-                                minDate={new Date()} // 지나간 날 막기
+                                minDate={new Date()}
                                 tileClassName={({ date: tileDate }) => {
                                     const isSelected =
                                         departureDate &&
@@ -408,6 +414,7 @@ const Reservation = () => {
                         </div>
                     </div>
 
+                    {/* [LLM] 인원 수 선택 UI */}
                     <div>
                         <h4 className="reservation-detail-select">
                             <p className="reservation-detail-select-inform">
@@ -419,6 +426,7 @@ const Reservation = () => {
                             </span>
                         </h4>
                         <div className="select-people-number">
+                            {/* [LLM] 성인 수 조절 */}
                             <div>
                                 <div className="select-people-number-button">
                                     성인<br></br>(만 19세 이상)
@@ -443,6 +451,7 @@ const Reservation = () => {
                                     </button>
                                 </div>
                             </div>
+                            {/* [LLM] 노약자 수 조절 */}
                             <div>
                                 <div className="select-people-number-button">
                                     노약자<br></br>(만 65세 이상)
@@ -467,6 +476,7 @@ const Reservation = () => {
                                     </button>
                                 </div>
                             </div>
+                            {/* [LLM] 청소년 수 조절 */}
                             <div>
                                 <div className="select-people-number-button">
                                     청소년<br></br>(만 13~18세)
@@ -495,6 +505,8 @@ const Reservation = () => {
                     </div>
                 </div>
             </div>
+
+            {/* [LLM] 하단 버튼: 이전/조회 */}
             <div className="display-button">
                 <button
                     className={`${styles.button} reservation-back`}
