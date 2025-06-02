@@ -46,13 +46,21 @@ const TakaBox = ({ onClose, onSendQuestion }: Props) => {
         };
 
         try {
-            // [LLM] 백엔드에 질문 전송
-            await axios.post("http://localhost:3000/llm/ask", {
+            // ✅ 백엔드에 POST 요청 보내기
+            const response = await axios.post("http://localhost:3000/llm/ask", {
                 sessionId: session.sessionId,
                 question: questionText,
             });
 
-            // [LLM] 질문 전송 후 부모 콜백 호출 및 닫기 애니메이션
+            const data = response.data;
+
+            if (data.audio_url) {
+                const audio = new Audio(data.audio_url);
+                audio.play().catch((err) => {
+                    console.error("오디오 재생 오류", err);
+                });
+            }
+            // 요청 후 콜백 실행
             onSendQuestion(payload);
             setIsClosing(true);
         } catch (error) {
