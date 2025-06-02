@@ -106,13 +106,13 @@ const Payment: React.FC = () => {
     // [LLM] location.state로부터 이전 페이지에서 전달된 예약 정보 등 불러오기
     const state = location.state as
         | {
-              reservationData?: ReservationData;
-              trainInfo?: TrainInfo;
-              phoneNumber?: string;
-              phoneConfirmed?: boolean;
-              agree?: boolean;
-              fromAddCard?: boolean;
-          }
+            reservationData?: ReservationData;
+            trainInfo?: TrainInfo;
+            phoneNumber?: string;
+            phoneConfirmed?: boolean;
+            agree?: boolean;
+            fromAddCard?: boolean;
+        }
         | undefined;
 
     const reservationData = state?.reservationData;

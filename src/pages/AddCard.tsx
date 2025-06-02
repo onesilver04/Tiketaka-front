@@ -15,7 +15,7 @@ const AddCard: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // [LLM] 이전 페이지에서 전달받은 결제 관련 정보 추출
+    // [LLM] 이전 페이지(결제 페이지)에서 전달받은 결제 관련 정보 추출
     const { phoneNumber, phoneConfirmed, agree, reservationData, trainInfo, selectedSeats } = location.state || {};
 
     // [LLM] 로컬 스토리지에서 세션 ID 가져오기 (예외 처리 포함)
@@ -87,24 +87,28 @@ const AddCard: React.FC = () => {
     const updateFieldValue = (field: typeof activeField, value: string) => {
         switch (field) {
             case "cardNumber": {
+                // [LLM] 카드번호는 숫자만 추출하고 4자리마다 하이픈 추가 포맷 적용하여 16자리 숫자 받음
                 const formattedCard = value.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1-");
                 setCardNumber(formattedCard);
                 logClick("addcard-card-number", `카드번호 입력: ${formattedCard}`);
                 break;
             }
             case "cvc": {
+                // [LLM] CVC는 3자리 숫자 받음
                 const cvcVal = value.replace(/\D/g, "").slice(0, 3);
                 setCvc(cvcVal);
                 logClick("addcard-card-cvc", `CVC 입력: ${cvcVal}`);
                 break;
             }
             case "expiry": {
+                // [LLM] 유효기간은 MMYY 형식으로 숫자만 최대 4자리 허용
                 const expiryVal = value.replace(/\D/g, "").slice(0, 4);
                 setExpiry(expiryVal);
                 logClick("addcard-card-period", `유효기간 입력: ${expiryVal}`);
                 break;
             }
             case "password": {
+                // [LLM] 카드 비밀번호는 앞의 두 자리만 받음
                 const passVal = value.replace(/\D/g, "").slice(0, 2);
                 setPassword(passVal);
                 logClick("addcard-card-password", `비밀번호 앞자리 입력: ${passVal}`);
@@ -159,25 +163,40 @@ const AddCard: React.FC = () => {
 
     // [LLM] 카드 입력 검증 → 로컬 및 서버에 카드 저장 후 결제 페이지로 이동
     const handleSubmit = () => {
+         // [LLM] 카드사 선택 여부 확인 → 선택하지 않았을 경우 사용자에게 경고 알림
         if (!selectedCompany) return alert("카드사를 선택해주세요.");
+
+        // [LLM] 카드번호 입력 검증: 숫자만 추출 후 길이가 정확히 16자리인지 확인
         if (cardNumber.replace(/\D/g, "").length !== 16)
             return alert("카드 번호 16자리를 정확히 입력해주세요.");
+
+        // [LLM] CVC 입력 검증: 길이가 3자리인지 확인
         if (cvc.length !== 3)
             return alert("CVC 번호 3자리를 정확히 입력해주세요.");
+
+        // [LLM] 유효기간 입력 검증: 숫자 4자리(MMYY)인지 정규식으로 검사
         if (!/^\d{4}$/.test(expiry))
             return alert("유효기간 4자리(MMYY)를 입력해주세요.");
+
+        // [LLM] 카드 비밀번호 입력 검증: 앞 2자리만 입력되어야 함
         if (password.length !== 2)
             return alert("카드 비밀번호 앞 2자리를 입력해주세요.");
 
+        // [LLM] 입력된 카드번호에서 숫자만 추출 (예: 1234-5678-9012-3456 → 1234567890123456)
         const rawCard = cardNumber.replace(/\D/g, "");
+
+         // [LLM] 사용자 화면에 표시될 카드번호 마스킹 처리 (앞 4자리 + 뒤 4자리만 보이게 구성)
         const maskedCardNumber = `${rawCard.slice(
             0,
             4
         )}-****-****-${rawCard.slice(-4)}`;
 
+        // [LLM] 로컬에 저장된 기존 카드 목록 불러오기 (없으면 빈 배열)
         const storedCards = JSON.parse(
             localStorage.getItem("customCards") || "[]"
         );
+
+        // [LLM] 새로 등록할 카드 정보 객체 구성
         const newCard = {
             id: Date.now(),
             cardCompany: selectedCompany,
@@ -194,6 +213,7 @@ const AddCard: React.FC = () => {
             JSON.stringify([...storedCards, newCard])
         );
 
+        // [LLM] 민감 정보를 포함한 카드 등록 요청을 백엔드에 전송
         axios
             .post(
                 `http://localhost:3000/cards/${phoneNumber.replace(/-/g, "")}`,
@@ -206,6 +226,7 @@ const AddCard: React.FC = () => {
                 }
             )
             .then(() => {
+                // [LLM] 서버 등록 완료 시 사용자에게 알림 후 결제 페이지로 이동
                 alert("카드 등록이 완료되었습니다!");
                 navigate("/reservation/payment", {
                     state: {
@@ -220,6 +241,7 @@ const AddCard: React.FC = () => {
                 });
             })
             .catch((err) => {
+                // [LLM] 서버 등록 실패 시 에러 출력 및 사용자 알림
                 console.error("카드 등록 실패:", err);
                 alert("서버에 카드 등록 중 오류가 발생했습니다.");
             });
@@ -235,14 +257,14 @@ const AddCard: React.FC = () => {
     // [LLM] 렌더링: 카드 등록 UI와 입력 필드, 버튼 구성
     return (
         <div>
-            {/* 카드 등록 영역 */}
+            {/* [LLM] 카드 등록 영역 */}
             <div className={styleb.box}>
                 <div className="add-card-container">
                     <h2 className="page-title">카드 등록</h2>
                     <hr className="page-title-bar" />
 
                     <div className="content-container">
-                        {/* 카드사 선택 버튼 목록 */}
+                        {/* [LLM] 카드사 선택 버튼 목록 */}
                         <div>카드사 선택</div>
                         <div className="addcard-selected-container">
                             {cardCompanies.map((company) => (
@@ -260,7 +282,7 @@ const AddCard: React.FC = () => {
                             ))}
                         </div>
 
-                        {/* 카드번호 입력 */}
+                        {/* [LLM] 카드번호 입력 */}
                         <div>
                             <div>카드 번호</div>
                             <input
@@ -278,7 +300,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
-                        {/* CVC 입력 */}
+                        {/* [LLM] CVC 입력 */}
                         <div>
                             <div>CVC</div>
                             <input
@@ -296,7 +318,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
-                        {/* 유효기간 입력 */}
+                        {/* [LLM] 유효기간 입력 */}
                         <div>
                             <div>유효 기간</div>
                             <input
@@ -314,7 +336,7 @@ const AddCard: React.FC = () => {
                             {showKeypad && activeField && renderKeypad()}
                         </div>
 
-                        {/* 비밀번호 입력 */}
+                        {/* [LLM] 비밀번호 입력 */}
                         <div>
                             <div>카드 비밀번호</div>
                             <input
@@ -337,7 +359,9 @@ const AddCard: React.FC = () => {
 
             {/* 이전/등록 버튼 영역 */}
             <div className="display-button">
+                {/* [LLM} 이전 페이지로 돌아가는 버튼 영역 */}
                 <button className={`${styles.button} addcard-back`} id="addcard-to-payment" onClick={handleBack}>이전</button>
+                {/* [LLM} 카드 등록하는 버튼 영역 */}
                 <button className={`${styles.button} addcard-search`} id="addcard-success" onClick={handleSubmit}>등록하기</button>
             </div>
         </div>

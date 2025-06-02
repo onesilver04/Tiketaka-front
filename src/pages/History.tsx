@@ -97,7 +97,7 @@ const History = () => {
         );
     };
 
-    // [LLM] 날짜 객체를 'YYYY-M-D' 형식의 문자열로 변환
+    // [LLM] 날짜 객체를 'YYYY-MM-DD' 형식의 문자열로 변환
     const formatDate = (date: Date | null) => {
         if (!date) return "날짜 없음";
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -391,8 +391,8 @@ const History = () => {
                                             setSelected(
                                                 isChecked
                                                     ? filteredReservations.map(
-                                                          (r) => r.reservationId
-                                                      )
+                                                            (r) => r.reservationId
+                                                        )
                                                     : []
                                             );
                                         }}
